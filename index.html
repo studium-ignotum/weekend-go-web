@@ -49,41 +49,18 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
         <link
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
             rel="stylesheet"
         />
 
-        <!-- TailwindCSS CDN -->
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        fontFamily: {
-                            inter: ["Inter", "system-ui", "sans-serif"],
-                        },
-                        colors: {
-                            primary: {
-                                DEFAULT: "#34C759",
-                                dark: "#22C55E",
-                                light: "#4ADE80",
-                            },
-                            "text-primary": "#1F2937",
-                            "text-secondary": "#374151",
-                            "text-tertiary": "#6B7280",
-                            "bg-secondary": "#F9FAFB",
-                            "border-default": "#E5E7EB",
-                            "footer-bg": "#1F2937",
-                        },
-                        borderRadius: {
-                            button: "999px",
-                            card: "16px",
-                        },
-                    },
-                },
-            };
-        </script>
+        <!-- Compiled TailwindCSS -->
+        <link rel="stylesheet" href="assets/css/styles.css" />
+
+        <!-- LCP Image Preloads -->
+        <link rel="preload" as="image" type="image/webp" href="assets/images/hero-banner-mobile.webp" media="(max-width: 1023px)" />
+        <link rel="preload" as="image" type="image/webp" href="assets/images/hero-banner-desktop.webp" media="(min-width: 1024px)" />
 
         <!-- JSON-LD -->
         <script type="application/ld+json">
@@ -119,30 +96,6 @@
             }
         </script>
 
-        <style>
-            body {
-                font-family: "Inter", system-ui, sans-serif;
-            }
-            .nav-link {
-                position: relative;
-            }
-            .nav-link::after {
-                content: "";
-                position: absolute;
-                bottom: -2px;
-                left: 0;
-                width: 0;
-                height: 2px;
-                background-color: #34c759;
-                transition: width 0.2s ease;
-            }
-            .nav-link:hover::after {
-                width: 100%;
-            }
-            html {
-                scroll-behavior: smooth;
-            }
-        </style>
     </head>
     <body class="bg-white text-text-primary antialiased">
         <!-- Navigation -->
@@ -154,11 +107,16 @@
                 <div class="flex items-center justify-between h-16">
                     <!-- Logo -->
                     <a href="index.html" class="flex items-center gap-2.5">
-                        <img
-                            src="assets/images/app-icon.png"
-                            alt="Cuối Tuần Đi Đâu"
-                            class="w-9 h-9 rounded-xl"
-                        />
+                        <picture>
+                            <source srcset="assets/images/app-icon-72.webp" type="image/webp" />
+                            <img
+                                src="assets/images/app-icon-72.png"
+                                alt="Cuối Tuần Đi Đâu"
+                                width="72"
+                                height="72"
+                                class="w-9 h-9 rounded-xl"
+                            />
+                        </picture>
                         <span class="text-lg font-bold text-text-primary"
                             >Cuối Tuần Đi Đâu?</span
                         >
@@ -259,9 +217,13 @@
                     <!-- Mobile Hero Image (shown above text on mobile) -->
                     <div class="lg:hidden w-full">
                         <picture>
+                            <source srcset="assets/images/hero-banner-mobile.webp" type="image/webp" />
                             <img
                                 src="assets/images/hero-banner-mobile.png"
                                 alt="Cuối Tuần Đi Đâu app"
+                                width="385"
+                                height="481"
+                                fetchpriority="high"
                                 class="w-full max-w-md mx-auto rounded-card"
                             />
                         </picture>
@@ -366,9 +328,13 @@
                     <!-- Desktop Hero Image -->
                     <div class="hidden lg:block flex-1">
                         <picture>
+                            <source srcset="assets/images/hero-banner-desktop.webp" type="image/webp" />
                             <img
                                 src="assets/images/hero-banner-desktop.png"
                                 alt="Cuối Tuần Đi Đâu app"
+                                width="801"
+                                height="480"
+                                fetchpriority="high"
                                 class="w-full max-w-lg rounded-card"
                             />
                         </picture>
@@ -728,12 +694,17 @@
         <!-- Download CTA -->
         <section id="download" class="bg-[#15803d] py-16 lg:py-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <img
-                    src="assets/images/app-icon.png"
-                    alt="Cuối Tuần Đi Đâu"
-                    class="w-20 h-20 rounded-2xl mx-auto mb-6 shadow-lg"
-                    loading="lazy"
-                />
+                <picture>
+                    <source srcset="assets/images/app-icon-160.webp" type="image/webp" />
+                    <img
+                        src="assets/images/app-icon-160.png"
+                        alt="Cuối Tuần Đi Đâu"
+                        width="160"
+                        height="160"
+                        loading="lazy"
+                        class="w-20 h-20 rounded-2xl mx-auto mb-6 shadow-lg"
+                    />
+                </picture>
                 <h2 class="text-3xl lg:text-4xl font-bold text-white">
                     Tải ứng dụng ngay
                 </h2>
@@ -802,12 +773,17 @@
                     <!-- Brand -->
                     <div>
                         <div class="flex items-center gap-2.5 mb-4">
-                            <img
-                                src="assets/images/app-icon.png"
-                                alt="Cuối Tuần Đi Đâu"
-                                class="w-9 h-9 rounded-xl"
-                                loading="lazy"
-                            />
+                            <picture>
+                                <source srcset="assets/images/app-icon-72.webp" type="image/webp" />
+                                <img
+                                    src="assets/images/app-icon-72.png"
+                                    alt="Cuối Tuần Đi Đâu"
+                                    width="72"
+                                    height="72"
+                                    loading="lazy"
+                                    class="w-9 h-9 rounded-xl"
+                                />
+                            </picture>
                             <span class="text-lg font-bold"
                                 >Cuối Tuần Đi Đâu?</span
                             >
