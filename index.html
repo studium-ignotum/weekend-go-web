@@ -20,9 +20,10 @@
         />
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="vi_VN" />
+        <meta property="og:url" content="https://cuoituandidau.vn/" />
         <meta
             property="og:image"
-            content="assets/images/hero-banner-desktop.png"
+            content="https://cuoituandidau.vn/assets/images/hero-banner-desktop.png"
         />
 
         <!-- Twitter Card -->
@@ -37,8 +38,10 @@
         />
         <meta
             name="twitter:image"
-            content="assets/images/hero-banner-desktop.png"
+            content="https://cuoituandidau.vn/assets/images/hero-banner-desktop.png"
         />
+
+        <link rel="canonical" href="https://cuoituandidau.vn/" />
 
         <!-- Favicon -->
         <link rel="icon" type="image/png" href="assets/images/favicon.png" />
@@ -86,17 +89,33 @@
         <script type="application/ld+json">
             {
                 "@context": "https://schema.org",
-                "@type": "MobileApplication",
-                "name": "Cuối Tuần Đi Đâu?",
-                "operatingSystem": "iOS, Android",
-                "applicationCategory": "LifestyleApplication",
-                "description": "Ứng dụng giúp phụ huynh Việt Nam tìm địa điểm cuối tuần phù hợp cho gia đình.",
-                "offers": {
-                    "@type": "Offer",
-                    "price": "0",
-                    "priceCurrency": "VND"
-                },
-                "inLanguage": "vi"
+                "@graph": [
+                    {
+                        "@type": "Organization",
+                        "name": "Cuối Tuần Đi Đâu",
+                        "url": "https://cuoituandidau.vn",
+                        "logo": "https://cuoituandidau.vn/assets/images/app-icon.png",
+                        "contactPoint": {
+                            "@type": "ContactPoint",
+                            "email": "hello@cuoituandidau.vn",
+                            "contactType": "customer service",
+                            "availableLanguage": "Vietnamese"
+                        }
+                    },
+                    {
+                        "@type": "MobileApplication",
+                        "name": "Cuối Tuần Đi Đâu?",
+                        "operatingSystem": "iOS, Android",
+                        "applicationCategory": "LifestyleApplication",
+                        "description": "Ứng dụng giúp phụ huynh Việt Nam tìm địa điểm cuối tuần phù hợp cho gia đình.",
+                        "offers": {
+                            "@type": "Offer",
+                            "price": "0",
+                            "priceCurrency": "VND"
+                        },
+                        "inLanguage": "vi"
+                    }
+                ]
             }
         </script>
 
@@ -178,6 +197,7 @@
                             stroke="currentColor"
                             stroke-width="2"
                             viewBox="0 0 24 24"
+                            aria-hidden="true"
                         >
                             <path
                                 stroke-linecap="round"
@@ -192,6 +212,7 @@
                             stroke="currentColor"
                             stroke-width="2"
                             viewBox="0 0 24 24"
+                            aria-hidden="true"
                         >
                             <path
                                 stroke-linecap="round"
@@ -256,7 +277,7 @@
                         <p
                             class="mt-5 text-lg text-text-tertiary max-w-lg mx-auto lg:mx-0"
                         >
-                            Gợi ý được chọn lọc theo tuổi con — không phải cuộn
+                            Gợi ý được chọn lọc theo tuổi con - không phải lướt
                             cả trăm bài trên Facebook hay hỏi mãi trên group.
                         </p>
 
@@ -268,7 +289,7 @@
                                 href="#"
                                 class="inline-flex items-center gap-3 bg-black text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-colors"
                             >
-                                <svg
+                                <svg aria-hidden="true"
                                     class="w-7 h-7"
                                     viewBox="0 0 24 24"
                                     fill="currentColor"
@@ -294,7 +315,7 @@
                                 href="#"
                                 class="inline-flex items-center gap-3 bg-black text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-colors"
                             >
-                                <svg
+                                <svg aria-hidden="true"
                                     class="w-7 h-7"
                                     viewBox="0 0 24 24"
                                     fill="currentColor"
@@ -322,7 +343,7 @@
                         <div
                             class="mt-6 flex items-center gap-2 justify-center lg:justify-start text-text-tertiary"
                         >
-                            <svg
+                            <svg aria-hidden="true"
                                 class="w-5 h-5 text-primary"
                                 fill="none"
                                 stroke="currentColor"
@@ -364,7 +385,7 @@
                         <div
                             class="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center"
                         >
-                            <svg
+                            <svg aria-hidden="true"
                                 class="w-6 h-6 text-primary"
                                 fill="none"
                                 stroke="currentColor"
@@ -392,7 +413,7 @@
                         <div
                             class="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center"
                         >
-                            <svg
+                            <svg aria-hidden="true"
                                 class="w-6 h-6 text-primary"
                                 fill="none"
                                 stroke="currentColor"
@@ -420,7 +441,7 @@
                         <div
                             class="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center"
                         >
-                            <svg
+                            <svg aria-hidden="true"
                                 class="w-6 h-6 text-primary"
                                 fill="none"
                                 stroke="currentColor"
@@ -477,7 +498,7 @@
                         <div
                             class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10 mb-4"
                         >
-                            <svg
+                            <svg aria-hidden="true"
                                 class="w-6 h-6 text-primary"
                                 fill="none"
                                 stroke="currentColor"
@@ -504,7 +525,7 @@
                         <div
                             class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10 mb-4"
                         >
-                            <svg
+                            <svg aria-hidden="true"
                                 class="w-6 h-6 text-primary"
                                 fill="none"
                                 stroke="currentColor"
@@ -531,7 +552,7 @@
                         <div
                             class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10 mb-4"
                         >
-                            <svg
+                            <svg aria-hidden="true"
                                 class="w-6 h-6 text-primary"
                                 fill="none"
                                 stroke="currentColor"
@@ -559,7 +580,7 @@
                         <div
                             class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10 mb-4"
                         >
-                            <svg
+                            <svg aria-hidden="true"
                                 class="w-6 h-6 text-primary"
                                 fill="none"
                                 stroke="currentColor"
@@ -586,7 +607,7 @@
                         <div
                             class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10 mb-4"
                         >
-                            <svg
+                            <svg aria-hidden="true"
                                 class="w-6 h-6 text-primary"
                                 fill="none"
                                 stroke="currentColor"
@@ -614,7 +635,7 @@
                         <div
                             class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10 mb-4"
                         >
-                            <svg
+                            <svg aria-hidden="true"
                                 class="w-6 h-6 text-primary"
                                 fill="none"
                                 stroke="currentColor"
@@ -710,6 +731,7 @@
                     src="assets/images/app-icon.png"
                     alt="Cuối Tuần Đi Đâu"
                     class="w-20 h-20 rounded-2xl mx-auto mb-6 shadow-lg"
+                    loading="lazy"
                 />
                 <h2 class="text-3xl lg:text-4xl font-bold text-white">
                     Tải ứng dụng ngay
@@ -726,7 +748,7 @@
                         href="#"
                         class="inline-flex items-center gap-3 bg-white text-text-primary px-6 py-3 rounded-xl hover:bg-gray-100 transition-colors"
                     >
-                        <svg
+                        <svg aria-hidden="true"
                             class="w-7 h-7"
                             viewBox="0 0 24 24"
                             fill="currentColor"
@@ -748,7 +770,7 @@
                         href="#"
                         class="inline-flex items-center gap-3 bg-white text-text-primary px-6 py-3 rounded-xl hover:bg-gray-100 transition-colors"
                     >
-                        <svg
+                        <svg aria-hidden="true"
                             class="w-7 h-7"
                             viewBox="0 0 24 24"
                             fill="currentColor"
@@ -781,6 +803,7 @@
                                 src="assets/images/app-icon.png"
                                 alt="Cuối Tuần Đi Đâu"
                                 class="w-9 h-9 rounded-xl"
+                                loading="lazy"
                             />
                             <span class="text-lg font-bold"
                                 >Cuối Tuần Đi Đâu?</span
@@ -830,7 +853,7 @@
                                     href="mailto:hello@cuoituandidau.vn"
                                     class="text-gray-400 hover:text-white transition-colors text-sm flex items-center gap-2"
                                 >
-                                    <svg
+                                    <svg aria-hidden="true"
                                         class="w-4 h-4"
                                         fill="none"
                                         stroke="currentColor"
@@ -854,7 +877,7 @@
                                 class="text-gray-400 hover:text-white transition-colors"
                                 aria-label="Facebook"
                             >
-                                <svg
+                                <svg aria-hidden="true"
                                     class="w-5 h-5"
                                     fill="currentColor"
                                     viewBox="0 0 24 24"
@@ -869,7 +892,7 @@
                                 class="text-gray-400 hover:text-white transition-colors"
                                 aria-label="Instagram"
                             >
-                                <svg
+                                <svg aria-hidden="true"
                                     class="w-5 h-5"
                                     fill="currentColor"
                                     viewBox="0 0 24 24"
