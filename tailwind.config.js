@@ -9,15 +9,19 @@ module.exports = {
       colors: {
         primary: {
           DEFAULT: "#34C759",
-          dark: "#22C55E",
-          light: "#4ADE80",
+          dark: "#15803D",
+          light: "#86efac",
         },
-        "text-primary": "#1F2937",
-        "text-secondary": "#374151",
+        accent: {
+          DEFAULT: "#fb923c",
+          light: "#fed7aa",
+        },
+        "bg-warm": "#F9FAFB",
+        "text-primary": "#111827",
+        "text-secondary": "#4B5563",
         "text-tertiary": "#6B7280",
-        "bg-secondary": "#F9FAFB",
         "border-default": "#E5E7EB",
-        "footer-bg": "#1F2937",
+        "footer-bg": "#292524",
       },
       borderRadius: {
         button: "999px",
