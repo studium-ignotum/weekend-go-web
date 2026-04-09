@@ -1,0 +1,27 @@
+{
+  "name": "weekend-go-web",
+  "version": "1.0.0",
+  "description": "Landing page for **Cuối Tuần Đi Đâu?**, a mobile app helping Vietnamese parents in Hanoi and Ho Chi Minh City discover weekend activities for their families.",
+  "scripts": {
+    "build": "tailwindcss -i ./src/input.css -o ./assets/css/styles.css --minify",
+    "dev": "tailwindcss -i ./src/input.css -o ./assets/css/styles.css --watch"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/studium-ignotum/weekend-go-web.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/studium-ignotum/weekend-go-web/issues"
+  },
+  "homepage": "https://github.com/studium-ignotum/weekend-go-web#readme",
+  "devDependencies": {
+    "tailwindcss": "^3.4.19"
+  }
+}
