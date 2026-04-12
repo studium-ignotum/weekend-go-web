@@ -14,6 +14,7 @@ const ANIMATION_DURATION_MS = 600;
 const AUTOPLAY_INTERVAL_MS = 3000;
 
 const carousel = document.getElementById("phone-carousel");
+if (!carousel) throw new Error("Carousel element #phone-carousel not found");
 const phones = Array.from(carousel.querySelectorAll(".phone-item"));
 const total = phones.length;
 let centerIndex = 0;
@@ -129,11 +130,11 @@ reorderDOM();
 applyPositions(false);
 
 // Next / Prev buttons
-document.getElementById("carousel-next").addEventListener("click", () => {
+document.getElementById("carousel-next")?.addEventListener("click", () => {
   goNext();
   resetAutoPlay();
 });
-document.getElementById("carousel-prev").addEventListener("click", () => {
+document.getElementById("carousel-prev")?.addEventListener("click", () => {
   goPrev();
   resetAutoPlay();
 });
