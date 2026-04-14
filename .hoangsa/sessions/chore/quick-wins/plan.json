@@ -64,7 +64,9 @@
       "complexity": "low",
       "budget_tokens": 6000,
       "namespace": null,
-      "files": [],
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/.hoangsa/sessions/chore/quick-wins/TEST-SPEC.md"
+      ],
       "depends_on": ["T-01", "T-02", "T-03"],
       "context_pointers": [
         "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/.hoangsa/sessions/chore/quick-wins/TEST-SPEC.md"
