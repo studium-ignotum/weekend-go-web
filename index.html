@@ -23,7 +23,7 @@
     <meta property="og:url" content="https://cuoituandidau.vn/" />
     <meta
       property="og:image"
-      content="https://cuoituandidau.vn/assets/images/hero-banner-desktop.webp"
+      content="https://cuoituandidau.vn/assets/images/hero-banner-desktop.png"
     />
 
     <!-- Twitter Card -->
@@ -36,7 +36,7 @@
       name="twitter:description"
       content="Gợi ý được chọn lọc theo tuổi con — không phải lướt Facebook hay hỏi group."
     />
-    <meta name="twitter:image" content="https://cuoituandidau.vn/assets/images/hero-banner-desktop.webp" />
+    <meta name="twitter:image" content="https://cuoituandidau.vn/assets/images/hero-banner-desktop.png" />
 
     <link rel="canonical" href="https://cuoituandidau.vn/" />
     <link rel="icon" type="image/png" href="assets/images/favicon.png" />
@@ -67,11 +67,6 @@
 
     <link rel="stylesheet" href="assets/css/styles.css" />
     <link rel="stylesheet" href="assets/css/carousel.css" />
-    <style>
-      body {
-        font-family: "Inter", system-ui, sans-serif;
-      }
-    </style>
   </head>
   <body class="bg-white text-text-primary antialiased">
     <!-- Header -->
@@ -880,9 +875,11 @@
             <!-- Prev Button -->
             <button
               id="carousel-prev"
+              aria-label="Ảnh trước"
               class="absolute left-0 sm:left-2 lg:left-8 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/80 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-white hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer"
             >
               <svg
+                aria-hidden="true"
                 class="w-5 h-5 sm:w-6 sm:h-6 text-gray-700"
                 fill="none"
                 stroke="currentColor"
@@ -976,9 +973,11 @@
             <!-- Next Button -->
             <button
               id="carousel-next"
+              aria-label="Ảnh tiếp"
               class="absolute right-0 sm:right-2 lg:right-8 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/80 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-white hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer"
             >
               <svg
+                aria-hidden="true"
                 class="w-5 h-5 sm:w-6 sm:h-6 text-gray-700"
                 fill="none"
                 stroke="currentColor"
@@ -1247,7 +1246,7 @@
             </p>
             <!-- Studio credit -->
             <div class="mt-6">
-              <p class="text-xs text-gray-500 mb-2">Một sản phẩm của</p>
+              <p class="text-xs text-gray-400 mb-2">Một sản phẩm của</p>
               <a
                 href="https://unknownstudio.dev"
                 target="_blank"
@@ -1296,7 +1295,7 @@
               </li>
               <li>
                 <a href="https://unknownstudio.dev/team" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors text-sm flex items-center gap-2">
-                  <img src="assets/images/company_logo.jpg" alt="Unknown Studio" class="w-4 h-4 object-cover">
+                  <img src="assets/images/company_logo.jpg" alt="Unknown Studio" class="w-4 h-4 object-cover rounded-sm border border-gray-600">
                   Về chúng tôi
                 </a>
               </li>
