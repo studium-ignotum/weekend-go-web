@@ -1,6 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./*.html"],
+  content: [
+    "./*.html",
+    "./src/**/*.src.html",
+    "./partials/**/*.html",
+    "./partials/**/*.svg",
+  ],
   theme: {
     extend: {
       fontFamily: {
@@ -8,8 +13,8 @@ module.exports = {
       },
       colors: {
         primary: {
-          DEFAULT: "#34C759",
-          dark: "#15803D",
+          DEFAULT: "#22c55e",
+          dark: "#16a34a",
           light: "#86efac",
         },
         accent: {

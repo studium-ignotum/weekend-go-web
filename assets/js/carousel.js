@@ -94,7 +94,7 @@ function goTo(newCenter, direction) {
   // 2. Set starting positions (shifted by direction) without transition
   const items = carousel.querySelectorAll(".phone-item");
   const spread = getSpreadScale();
-  const totalPositions = VISIBLE_POSITIONS.length + (total - VISIBLE_POSITIONS.length);
+  const totalPositions = total;
   const shift = direction === 1 ? 1 : -1;
   items.forEach((phone, domIndex) => {
     // Start from the adjacent position (simulates where items were before the move)
@@ -140,18 +140,42 @@ document.getElementById("carousel-prev")?.addEventListener("click", () => {
   resetAutoPlay();
 });
 
-// Autoplay
+// Autoplay (respect prefers-reduced-motion)
+const reducedMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+let isPaused = reducedMotionMQ.matches;
+
 function startAutoPlay() {
+  if (autoTimer) clearInterval(autoTimer);
+  if (isPaused) return;
   autoTimer = setInterval(goNext, AUTOPLAY_INTERVAL_MS);
 }
 function stopAutoPlay() {
   clearInterval(autoTimer);
+  autoTimer = null;
 }
 function resetAutoPlay() {
   stopAutoPlay();
   startAutoPlay();
 }
 startAutoPlay();
+
+function updateToggleUI() {
+  const btn = document.getElementById('carousel-toggle');
+  if (!btn) return;
+  btn.setAttribute('aria-label', isPaused ? 'Tiếp tục tự động chuyển ảnh' : 'Tạm dừng tự động chuyển ảnh');
+  btn.dataset.state = isPaused ? 'paused' : 'playing';
+}
+function togglePause() {
+  isPaused = !isPaused;
+  if (isPaused) stopAutoPlay();
+  else startAutoPlay();
+  updateToggleUI();
+}
+const toggleBtn = document.getElementById('carousel-toggle');
+if (toggleBtn) {
+  toggleBtn.addEventListener('click', togglePause);
+  updateToggleUI();
+}
 
 // Pause autoplay when tab is not visible
 document.addEventListener("visibilitychange", () => {

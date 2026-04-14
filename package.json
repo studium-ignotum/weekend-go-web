@@ -1,10 +1,14 @@
 {
   "name": "weekend-go-web",
   "version": "1.0.0",
-  "description": "Landing page for **Cuối Tuần Đi Đâu?**, a mobile app helping Vietnamese parents in Hanoi and Ho Chi Minh City discover weekend activities for their families.",
+  "appVersion": "1.0.35",
+  "description": "Landing page for Cuối Tuần Đi Đâu — mobile app helping Vietnamese parents in Hanoi and Ho Chi Minh City discover weekend activities for their families.",
   "scripts": {
-    "build": "tailwindcss -i ./src/input.css -o ./assets/css/styles.css --minify",
-    "dev": "tailwindcss -i ./src/input.css -o ./assets/css/styles.css --watch"
+    "build:css": "tailwindcss -i ./src/input.css -o ./assets/css/styles.css --minify",
+    "build:html": "node scripts/build-html.js",
+    "build": "npm run build:css && npm run build:html",
+    "dev:css": "tailwindcss -i ./src/input.css -o ./assets/css/styles.css --watch",
+    "dev": "npm run build:html && npm run dev:css"
   },
   "engines": {
     "node": ">=18"

@@ -1,0 +1,46 @@
+{
+  "name": "design: Đồng bộ brand color #22c55e + sửa icon Về chúng tôi",
+  "workspace_dir": "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web",
+  "spec_ref": "brand_color_and_company_icon-spec-v1.0",
+  "language": "html-tailwindcss",
+  "budget_tokens": 22000,
+  "tasks": [
+    {
+      "id": "T-01",
+      "name": "Apply brand color + company icon edits to index.html",
+      "complexity": "low",
+      "budget_tokens": 14000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html"
+      ],
+      "depends_on": [],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:120-130",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:1150-1160",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:1295-1305",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tailwind.config.js:1-25",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/.hoangsa/sessions/design/brand-color-and-company-icon/DESIGN-SPEC.md"
+      ],
+      "covers": ["REQ-01", "REQ-02", "REQ-03"],
+      "acceptance": "cd '/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web' && grep -q 'bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark' index.html && grep -q 'id=\"download\" class=\"bg-primary py-16 lg:py-20\"' index.html && grep -q 'src=\"assets/images/company_logo.jpg\" alt=\"Unknown Studio\"' index.html"
+    },
+    {
+      "id": "T-02",
+      "name": "Verify regression: no legacy hex colors and no broken image refs",
+      "complexity": "low",
+      "budget_tokens": 8000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/assets/images/company_logo.jpg"
+      ],
+      "depends_on": ["T-01"],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/.hoangsa/sessions/design/brand-color-and-company-icon/TEST-SPEC.md"
+      ],
+      "covers": ["REQ-04", "REQ-05"],
+      "acceptance": "cd '/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web' && ! grep -E '#(15803d|116b31)' index.html && ! grep 'company-logo.jpeg' index.html && test -f assets/images/company_logo.jpg && file assets/images/company_logo.jpg | grep -q 'JPEG image data'"
+    }
+  ]
+}
