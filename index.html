@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self';" />
     <title>Cuối Tuần Đi Đâu? - Gợi ý cuối tuần cho gia đình</title>
     <meta
       name="description"
@@ -24,7 +24,7 @@
     <meta property="og:url" content="https://cuoituandidau.vn/" />
     <meta
       property="og:image"
-      content="https://cuoituandidau.vn/assets/images/hero-banner-desktop.png"
+      content="https://cuoituandidau.vn/assets/images/og-cover.jpg"
     />
 
     <!-- Twitter Card -->
@@ -37,7 +37,7 @@
       name="twitter:description"
       content="Gợi ý được chọn lọc theo tuổi con — không phải lướt Facebook hay hỏi group."
     />
-    <meta name="twitter:image" content="https://cuoituandidau.vn/assets/images/hero-banner-desktop.png" />
+    <meta name="twitter:image" content="https://cuoituandidau.vn/assets/images/og-cover.jpg" />
 
     <link rel="canonical" href="https://cuoituandidau.vn/" />
     <link rel="icon" type="image/png" href="assets/images/favicon.png" />
@@ -58,13 +58,9 @@
       media="(min-width: 1024px)"
     />
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Fonts (self-hosted Inter) -->
+    <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-latin.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-vietnamese.woff2" crossorigin />
 
     <link rel="stylesheet" href="assets/css/styles.css" />
     <link rel="stylesheet" href="assets/css/carousel.css" />
@@ -1319,16 +1315,16 @@
                 </a>
               </li>
               <li>
-                <a href="https://www.linkedin.com/in/khang-truong-p-5b0978b8/" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors text-sm flex items-center gap-2">
-                  <img src="assets/images/team-khang-truong.webp" alt="Khang Trương" width="20" height="20" loading="lazy" class="w-5 h-5 object-cover rounded-full border border-gray-600">
-                  Khang Trương
-                </a>
-              </li>
-              <li>
-                <a href="https://www.linkedin.com/in/van-than-22173719b/" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors text-sm flex items-center gap-2">
-                  <img src="assets/images/team-van-than.webp" alt="Văn Thân" width="20" height="20" loading="lazy" class="w-5 h-5 object-cover rounded-full border border-gray-600">
-                  Văn Thân
-                </a>
+                <div class="flex items-center gap-3">
+                  <a href="https://www.linkedin.com/in/khang-truong-p-5b0978b8/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Khang Trương" class="group inline-flex items-center gap-2 opacity-30 hover:opacity-100 transition-opacity">
+                    <img src="assets/images/team-khang-truong.webp" alt="" width="32" height="32" loading="lazy" class="w-8 h-8 object-cover rounded-full border border-gray-600">
+                    <span class="text-gray-400 text-sm hidden group-hover:inline">Khang Trương</span>
+                  </a>
+                  <a href="https://www.linkedin.com/in/van-than-22173719b/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Văn Thân" class="group inline-flex items-center gap-2 opacity-30 hover:opacity-100 transition-opacity">
+                    <img src="assets/images/team-van-than.webp" alt="" width="32" height="32" loading="lazy" class="w-8 h-8 object-cover rounded-full border border-gray-600">
+                    <span class="text-gray-400 text-sm hidden group-hover:inline">Văn Thân</span>
+                  </a>
+                </div>
               </li>
               <li role="separator" class="border-t border-gray-700 my-1"></li>
               <li>
