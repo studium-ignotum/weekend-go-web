@@ -24,15 +24,15 @@ let autoTimer;
 // CoverFlow position configs (5 visible + hidden for any extras)
 const VISIBLE_POSITIONS = [
   // DOM index 0: far-left (-2)
-  { scale: 0.3,  rotateY: 45,  translateX: -420, opacity: 0.4, zIndex: 2  },
+  { scale: 0.45, rotateY: 45,  translateX: -420, opacity: 0.4, zIndex: 2  },
   // DOM index 1: left (-1)
-  { scale: 0.4,  rotateY: 40,  translateX: -230, opacity: 0.7, zIndex: 5  },
+  { scale: 0.6,  rotateY: 40,  translateX: -230, opacity: 0.7, zIndex: 5  },
   // DOM index 2: center
-  { scale: 0.5,  rotateY: 0,   translateX: 0,    opacity: 1.0, zIndex: 10 },
+  { scale: 0.8,  rotateY: 0,   translateX: 0,    opacity: 1.0, zIndex: 10 },
   // DOM index 3: right (+1)
-  { scale: 0.4,  rotateY: -40, translateX: 230,  opacity: 0.7, zIndex: 5  },
+  { scale: 0.6,  rotateY: -40, translateX: 230,  opacity: 0.7, zIndex: 5  },
   // DOM index 4: far-right (+2)
-  { scale: 0.3,  rotateY: -45, translateX: 420,  opacity: 0.4, zIndex: 2  },
+  { scale: 0.45, rotateY: -45, translateX: 420,  opacity: 0.4, zIndex: 2  },
 ];
 const HIDDEN_POSITION = { scale: 0.5, rotateY: 0, translateX: 0, opacity: 0, zIndex: 0 };
 

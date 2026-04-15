@@ -27,7 +27,10 @@ function render(html, file) {
       throw new Error(`${file}: ${err.message}`);
     }
   });
-  return out.replace(/\{\{APK_VERSION\}\}/g, APK_VERSION);
+  return out
+    .replace(/\{\{APK_VERSION\}\}/g, APK_VERSION)
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/^\s*[\r\n]/gm, '');
 }
 
 function build() {
