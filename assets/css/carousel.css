@@ -1,13 +1,13 @@
 #phone-carousel {
-  perspective: 1200px;
+  perspective: 3000px;
   transform-style: preserve-3d;
-  height: 520px;
+  height: 440px;
 }
 @media (min-width: 640px) {
-  #phone-carousel { height: 580px; }
+  #phone-carousel { height: 500px; }
 }
 @media (min-width: 1024px) {
-  #phone-carousel { height: 680px; }
+  #phone-carousel { height: 580px; }
 }
 .phone-item {
   position: absolute;
@@ -16,11 +16,26 @@
   transform-origin: center center;
   will-change: transform, opacity;
 }
+.phone-item img {
+  border: 4px solid #1d1d1f;
+  border-radius: 1.75rem;
+  background: #000;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+@media (min-width: 640px) {
+  .phone-item img {
+    border-width: 5px;
+    border-radius: 2.25rem;
+  }
+}
+@media (min-width: 1024px) {
+  .phone-item img {
+    border-width: 7px;
+    border-radius: 2.75rem;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .phone-item {
     transition: none !important;
   }
 }
-#carousel-toggle .carousel-toggle-play { display: none; }
-#carousel-toggle[data-state="paused"] .carousel-toggle-pause { display: none; }
-#carousel-toggle[data-state="paused"] .carousel-toggle-play { display: inline-block; }

@@ -24,15 +24,15 @@ let autoTimer;
 // CoverFlow position configs (5 visible + hidden for any extras)
 const VISIBLE_POSITIONS = [
   // DOM index 0: far-left (-2)
-  { scale: 0.55, rotateY: 55,  translateX: -420, opacity: 0.4, zIndex: 2  },
+  { scale: 0.3,  rotateY: 45,  translateX: -420, opacity: 0.4, zIndex: 2  },
   // DOM index 1: left (-1)
-  { scale: 0.75, rotateY: 40,  translateX: -230, opacity: 0.7, zIndex: 5  },
+  { scale: 0.4,  rotateY: 40,  translateX: -230, opacity: 0.7, zIndex: 5  },
   // DOM index 2: center
-  { scale: 1.0,  rotateY: 0,   translateX: 0,    opacity: 1.0, zIndex: 10 },
+  { scale: 0.5,  rotateY: 0,   translateX: 0,    opacity: 1.0, zIndex: 10 },
   // DOM index 3: right (+1)
-  { scale: 0.75, rotateY: -40, translateX: 230,  opacity: 0.7, zIndex: 5  },
+  { scale: 0.4,  rotateY: -40, translateX: 230,  opacity: 0.7, zIndex: 5  },
   // DOM index 4: far-right (+2)
-  { scale: 0.55, rotateY: -55, translateX: 420,  opacity: 0.4, zIndex: 2  },
+  { scale: 0.3,  rotateY: -45, translateX: 420,  opacity: 0.4, zIndex: 2  },
 ];
 const HIDDEN_POSITION = { scale: 0.5, rotateY: 0, translateX: 0, opacity: 0, zIndex: 0 };
 
@@ -158,24 +158,6 @@ function resetAutoPlay() {
   startAutoPlay();
 }
 startAutoPlay();
-
-function updateToggleUI() {
-  const btn = document.getElementById('carousel-toggle');
-  if (!btn) return;
-  btn.setAttribute('aria-label', isPaused ? 'Tiếp tục tự động chuyển ảnh' : 'Tạm dừng tự động chuyển ảnh');
-  btn.dataset.state = isPaused ? 'paused' : 'playing';
-}
-function togglePause() {
-  isPaused = !isPaused;
-  if (isPaused) stopAutoPlay();
-  else startAutoPlay();
-  updateToggleUI();
-}
-const toggleBtn = document.getElementById('carousel-toggle');
-if (toggleBtn) {
-  toggleBtn.addEventListener('click', togglePause);
-  updateToggleUI();
-}
 
 // Pause autoplay when tab is not visible
 document.addEventListener("visibilitychange", () => {
