@@ -1,17 +1,47 @@
 // Breakpoints (aligned with Tailwind)
 const BREAKPOINT_XS = 480;
 const BREAKPOINT_SM = 640;
+const BREAKPOINT_MD = 768;
 const BREAKPOINT_LG = 1024;
-
-// Spread scale factors per breakpoint
-const SPREAD_XS = 0.38;
-const SPREAD_SM = 0.5;
-const SPREAD_LG = 0.7;
-const SPREAD_DEFAULT = 1.0;
 
 // CoverFlow Carousel
 const ANIMATION_DURATION_MS = 600;
 const AUTOPLAY_INTERVAL_MS = 3000;
+
+// Swipe tuning
+const SWIPE_DISTANCE_MIN_PX = 25;
+const SWIPE_DISTANCE_RATIO  = 0.15;   // 15% of carousel width
+const SWIPE_VELOCITY_FLICK  = 0.3;    // px/ms
+const SWIPE_DEADZONE_PX     = 10;
+const SWIPE_LOCK_RATIO      = 1.2;    // |dx|/|dy| threshold for horizontal lock
+
+// Hidden slot config
+const HIDDEN = { scale: 0.5, rotateY: 0, translateX: 0, opacity: 0, zIndex: 0 };
+
+// POSITIONS arrays — indexed by DOM slot 0..4 = positions -2, -1, 0, +1, +2
+const POSITIONS_DESKTOP = [
+  { scale: 0.45, rotateY: 45,  translateX: -420, opacity: 0.4, zIndex: 2  },
+  { scale: 0.6,  rotateY: 40,  translateX: -230, opacity: 0.7, zIndex: 5  },
+  { scale: 0.8,  rotateY: 0,   translateX: 0,    opacity: 1.0, zIndex: 10 },
+  { scale: 0.6,  rotateY: -40, translateX: 230,  opacity: 0.7, zIndex: 5  },
+  { scale: 0.45, rotateY: -45, translateX: 420,  opacity: 0.4, zIndex: 2  },
+];
+
+const POSITIONS_TABLET = [
+  HIDDEN,
+  { scale: 0.88, rotateY: 15,  translateX: -180, opacity: 0.7, zIndex: 5  },
+  { scale: 1.0,  rotateY: 0,   translateX: 0,    opacity: 1.0, zIndex: 10 },
+  { scale: 0.88, rotateY: -15, translateX: 180,  opacity: 0.7, zIndex: 5  },
+  HIDDEN,
+];
+
+const POSITIONS_MOBILE = [
+  HIDDEN,
+  { scale: 0.82, rotateY: 0,   translateX: -170, opacity: 0.55, zIndex: 5  },
+  { scale: 1.0,  rotateY: 0,   translateX: 0,    opacity: 1.0,  zIndex: 10 },
+  { scale: 0.82, rotateY: 0,   translateX: 170,  opacity: 0.55, zIndex: 5  },
+  HIDDEN,
+];
 
 const carousel = document.getElementById("phone-carousel");
 if (!carousel) throw new Error("Carousel element #phone-carousel not found");
@@ -20,21 +50,6 @@ const total = phones.length;
 let centerIndex = 0;
 let animating = false;
 let autoTimer;
-
-// CoverFlow position configs (5 visible + hidden for any extras)
-const VISIBLE_POSITIONS = [
-  // DOM index 0: far-left (-2)
-  { scale: 0.45, rotateY: 45,  translateX: -420, opacity: 0.4, zIndex: 2  },
-  // DOM index 1: left (-1)
-  { scale: 0.6,  rotateY: 40,  translateX: -230, opacity: 0.7, zIndex: 5  },
-  // DOM index 2: center
-  { scale: 0.8,  rotateY: 0,   translateX: 0,    opacity: 1.0, zIndex: 10 },
-  // DOM index 3: right (+1)
-  { scale: 0.6,  rotateY: -40, translateX: 230,  opacity: 0.7, zIndex: 5  },
-  // DOM index 4: far-right (+2)
-  { scale: 0.45, rotateY: -45, translateX: 420,  opacity: 0.4, zIndex: 2  },
-];
-const HIDDEN_POSITION = { scale: 0.5, rotateY: 0, translateX: 0, opacity: 0, zIndex: 0 };
 
 function getPosition(domIndex) {
   return domIndex < VISIBLE_POSITIONS.length ? VISIBLE_POSITIONS[domIndex] : HIDDEN_POSITION;
