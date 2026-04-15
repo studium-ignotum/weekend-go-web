@@ -1,0 +1,152 @@
+[
+  {
+    "id": "SMELL-001",
+    "severity": "HIGH",
+    "title": "Trùng lặp lớn: <head> + nav + JSON-LD giữa 3 trang pháp lý",
+    "file": "src/privacy.src.html:1-84, src/terms.src.html:1-84, src/community-standards.src.html:1-84",
+    "evidence": "3 file privacy/terms/community-standards lặp nguyên khối: CSP meta, OG/Twitter tags, preload fonts, link stylesheet, JSON-LD BreadcrumbList, và toàn bộ <nav> header (dòng 62-84). Chỉ khác title/description/url.",
+    "impact": "Shotgun surgery — mỗi lần đổi CSP, sửa logo, thêm font, update nav phải sửa 3 chỗ. Nguy cơ drift cao (ví dụ CSP index dùng 'unsafe-inline' còn các trang con thì không — xem SMELL-007).",
+    "suggestion": "Tách partials/head-common.html (CSP, OG skeleton, preload, stylesheet) và partials/nav-back.html (nav quay về trang chủ). Dùng cơ chế @include sẵn có trong scripts/build-html.js + placeholder {{PAGE_TITLE}}, {{PAGE_URL}}, {{PAGE_DESC}} (mở rộng INCLUDE_RE thành biến).",
+    "effort": "M"
+  },
+  {
+    "id": "SMELL-002",
+    "severity": "HIGH",
+    "title": "Header + mobile menu của index.src.html chưa được tách partial",
+    "file": "src/index.src.html:70-163",
+    "evidence": "Khối <header> + <nav> desktop + mobile menu (94 dòng) nằm inline trong index.src.html. Trong khi 3 trang pháp lý đã dùng một phiên bản nav khác (đơn giản hơn). Không có partials/header.html.",
+    "impact": "Thêm link nav (vd: Blog) phải sửa cả 4 file HTML nguồn. Hiện tại đã có footer partial (dùng tốt), chứng tỏ pattern có sẵn nhưng chưa áp dụng cho header.",
+    "suggestion": "Tách partials/header.html (full nav cho landing) và giữ nav đơn giản cho legal pages, include qua <!-- @include partials/header.html -->.",
+    "effort": "S"
+  },
+  {
+    "id": "SMELL-003",
+    "severity": "HIGH",
+    "title": "Inline SVG star lặp 15 lần trong testimonials",
+    "file": "src/index.src.html:650-828",
+    "evidence": "Cùng một path SVG ngôi sao (d=\"M9.049 2.927c.3-.921...\") lặp 15 lần (5 sao × 3 testimonial). Tương tự icon chevron-down FAQ lặp 5 lần (dòng 1025-1147) và chevron-left/right lặp 9 lần khắp index.",
+    "impact": "Mỗi path SVG ~250 ký tự → ~3.7 KB HTML dư thừa. Sửa màu/kích thước ngôi sao phải đổi 15 chỗ. Đã có partials/icons.svg nhưng chưa dùng <use href> pattern.",
+    "suggestion": "Inline <svg><symbol id=\"icon-star\">...</symbol>...</svg> ở partials/icons.svg, include 1 lần đầu <body>, rồi dùng <svg><use href=\"#icon-star\"/></svg> ở mọi chỗ. Hoặc tạo partials/testimonial-stars.html với 5 sao sẵn.",
+    "effort": "S"
+  },
+  {
+    "id": "SMELL-004",
+    "severity": "HIGH",
+    "title": "Magic numbers rải khắp carousel.js mà không có tên",
+    "file": "assets/js/carousel.js:25-37",
+    "evidence": "VISIBLE_POSITIONS hardcode scale/rotateY/translateX/opacity/zIndex cho từng vị trí (rotateY 55°, translateX 420px, opacity 0.4...). getPosition(domIndex) giả định ngầm domIndex 0..4 ↔ (-2,-1,0,+1,+2). Magic shift=1/-1 trong goTo (dòng 98).",
+    "impact": "Ai sửa visual style (vd: làm cover flow phẳng hơn) phải dò từng số. domIndex mapping ngầm dễ lỗi khi đổi số phone visible (hiện cứng = 5).",
+    "suggestion": "Khai báo VISIBLE_COUNT=5, HALF_VISIBLE=2, OFFSETS=[-2,-1,0,1,2] và build VISIBLE_POSITIONS có key là offset (vd: POSITIONS[-2]={scale:.55,...}). Tách block config ra đầu file hoặc file riêng carousel.config.js.",
+    "effort": "M"
+  },
+  {
+    "id": "SMELL-005",
+    "severity": "MEDIUM",
+    "title": "Timer/animation race: setTimeout thay vì transitionend",
+    "file": "assets/js/carousel.js:116-118",
+    "evidence": "setTimeout(() => { animating = false; }, ANIMATION_DURATION_MS);  // 600ms cứng",
+    "impact": "Nếu user bấm next/prev liên tục đúng vào lúc timer sắp hết, flag animating = false có thể về trước khi transition thật kết thúc, gây giật hoặc double-enqueue. Reduced-motion user: transition bị tắt (qua media query CSS) nhưng code vẫn chờ 600ms.",
+    "suggestion": "Lắng nghe transitionend của item trung tâm với fallback setTimeout dài hơn (safety net). Hoặc kiểm tra matchMedia('(prefers-reduced-motion: reduce)') rồi set animating=false ngay.",
+    "effort": "S"
+  },
+  {
+    "id": "SMELL-006",
+    "severity": "MEDIUM",
+    "title": "Coupling chặt giữa carousel.js và DOM IDs/classes",
+    "file": "assets/js/carousel.js:16-18, 134-141, 163-174",
+    "evidence": "Hardcode 5+ selector cứng: #phone-carousel, .phone-item, #carousel-next, #carousel-prev, #carousel-toggle, .carousel-toggle-pause, .carousel-toggle-play, data-state. Script chạy global scope, throw ngay nếu #phone-carousel không tồn tại (dòng 17) — ngắt load trên mọi trang legal.",
+    "impact": "carousel.js được include defer trên privacy/terms/community-standards? Hiện chỉ include ở index, nhưng throw Error('Carousel element #phone-carousel not found') khiến script không thể tái sử dụng. Đổi tên class trong HTML = JS vỡ im lặng với các selector còn lại.",
+    "suggestion": "Wrap trong IIFE function initCarousel(root){...}, early-return (không throw) nếu không thấy root. Truyền selector qua data-attribute hoặc options. Chuyển string literal thành const SELECTORS = {...}.",
+    "effort": "M"
+  },
+  {
+    "id": "SMELL-007",
+    "severity": "MEDIUM",
+    "title": "CSP drift giữa index và các trang legal (style-src)",
+    "file": "src/index.src.html:6 vs src/privacy.src.html:6",
+    "evidence": "index: \"style-src 'self' 'unsafe-inline';\"  — privacy/terms/community-standards: \"style-src 'self';\" (không có unsafe-inline).",
+    "impact": "Cho thấy hậu quả của duplication (SMELL-001): policy bảo mật không đồng nhất. Nếu legal pages có style inline nào đó (hoặc sau này thêm) sẽ bị chặn. Ngược lại, việc index cần 'unsafe-inline' có thể đã bị quên kéo sang legal, hoặc là 'unsafe-inline' của index là không cần thiết.",
+    "suggestion": "Kiểm tra xem index thật sự cần 'unsafe-inline' không (có thể do style=\"...\" sinh ra bởi carousel.js qua JS, không phải <style> inline → không cần unsafe-inline). Tập trung CSP vào 1 partial duy nhất.",
+    "effort": "S"
+  },
+  {
+    "id": "SMELL-008",
+    "severity": "MEDIUM",
+    "title": "Hardcoded URL + email + version rải rác 4 file",
+    "file": "src/index.src.html:24,27,42,222,245,1184,1207",
+    "evidence": "https://cuoituandidau.vn lặp 62 lần trên toàn repo. hello@cuoituandidau.vn lặp ở 6 chỗ. testflight URL https://testflight.apple.com/join/abfrzXm7 lặp 2 lần trong index. APK URL github.com/studium-ignotum/weekend-go-android-distribution/releases/.../v{{APK_VERSION}}/release.apk lặp 2 lần.",
+    "impact": "Đổi domain (vd: sang .com) hoặc đổi email → sửa 60+ chỗ. Đổi TestFlight code → nhớ sửa cả hero CTA và download section trong index. Shotgun surgery điển hình.",
+    "suggestion": "Mở rộng build-html.js để hỗ trợ placeholders {{SITE_URL}}, {{SUPPORT_EMAIL}}, {{APP_STORE_URL}}, {{GOOGLE_PLAY_URL}} — đọc từ package.json hoặc src/config.json. Đã có {{APK_VERSION}} pattern sẵn, chỉ cần generalise.",
+    "effort": "M"
+  },
+  {
+    "id": "SMELL-009",
+    "severity": "MEDIUM",
+    "title": "App Store / Google Play CTA block bị copy-paste 2 lần trong index",
+    "file": "src/index.src.html:218-267 và 1182-1229",
+    "evidence": "Hai khối CTA \"Tải về trên App Store / Google Play\" giống hệt: cùng SVG path Apple (dòng 232 ≡ 1194), SVG path Play (dòng 255 ≡ 1217), cùng href, cùng layout. Khác duy nhất màu nền (bg-black vs bg-white) và opacity của 'Tải về trên'.",
+    "impact": "Cập nhật link App Store hoặc sửa icon = nhớ sửa 2 nơi trong cùng 1 file. Tăng file size (~1.5 KB).",
+    "suggestion": "Tách partials/download-buttons.html nhận variant (dark/light) qua data-attribute CSS, hoặc 2 partial nhỏ. Include ở hero và ở section download.",
+    "effort": "S"
+  },
+  {
+    "id": "SMELL-010",
+    "severity": "MEDIUM",
+    "title": "FAQ <details> block lặp 5 lần với cùng chevron SVG",
+    "file": "src/index.src.html:1018-1153",
+    "evidence": "5 thẻ <details class=\"bg-white rounded-2xl border border-gray-200 group\"> có cùng cấu trúc summary + chevron SVG 5 dòng + content div. Chỉ khác question và answer text.",
+    "impact": "Thêm/bớt câu hỏi FAQ tốn công. Sửa style chevron phải đổi 5 chỗ. ~1 KB HTML dư.",
+    "suggestion": "Tạo partials/faq-item.html không thể tham số hoá bằng build-html.js hiện tại — nên chuyển FAQ sang data-driven: đọc src/data/faq.json trong build-html.js, render HTML từ template. Hoặc đơn giản hoá: 1 partial chevron, include 5 lần.",
+    "effort": "M"
+  },
+  {
+    "id": "SMELL-011",
+    "severity": "MEDIUM",
+    "title": "CSS breakpoints trùng giữa carousel.css và carousel.js",
+    "file": "assets/css/carousel.css:6-11 vs assets/js/carousel.js:2-4",
+    "evidence": "CSS: @media (min-width: 640px) { height:580px } @media (min-width: 1024px) { height:680px }. JS: BREAKPOINT_SM=640, BREAKPOINT_LG=1024, BREAKPOINT_XS=480 (JS có thêm 480 mà CSS không có).",
+    "impact": "Magic breakpoints bị duplicate ở 2 ngôn ngữ; nếu Tailwind config đổi sm/lg hoặc thêm xs thì phải đồng bộ 3 nơi (tailwind.config.js + carousel.css + carousel.js). Comment trong carousel.js nói \"aligned with Tailwind\" nhưng không có cơ chế đảm bảo.",
+    "suggestion": "Expose breakpoints qua CSS custom properties (:root { --bp-sm: 640px }) hoặc truyền qua data-attributes ở #phone-carousel. Tailwind config cũng có thể được đọc bởi build step để sinh constants.",
+    "effort": "M"
+  },
+  {
+    "id": "SMELL-012",
+    "severity": "LOW",
+    "title": "Global mutable state + side effects top-level trong carousel.js",
+    "file": "assets/js/carousel.js:20-22, 129-131, 160",
+    "evidence": "let centerIndex = 0; let animating = false; let autoTimer; + gọi reorderDOM(), applyPositions(false), startAutoPlay() ở top level. Không có DOMContentLoaded/IIFE guard.",
+    "impact": "Khó test, khó có >1 carousel trên cùng trang. defer trong <script> (dòng 1237) giúp DOM ready nhưng vẫn ô nhiễm global scope.",
+    "suggestion": "Wrap toàn bộ trong (function initCarousel() { ... })() hoặc dùng 'use strict' + IIFE. State đóng gói qua closure hoặc class Carousel.",
+    "effort": "S"
+  },
+  {
+    "id": "SMELL-013",
+    "severity": "LOW",
+    "title": "Vietnamese strings a11y hardcoded — không tách i18n",
+    "file": "assets/js/carousel.js:165, 124 (HTML), 124 (HTML)",
+    "evidence": "btn.setAttribute('aria-label', isPaused ? 'Tiếp tục tự động chuyển ảnh' : 'Tạm dừng tự động chuyển ảnh'); + nhiều aria-label và alt text Vietnamese khác khắp HTML (\"Ảnh trước\", \"Ảnh tiếp\", \"Bỏ qua đến nội dung\"…).",
+    "impact": "Hiện chỉ hỗ trợ tiếng Việt, OK cho MVP. Nhưng nếu sau này muốn thêm tiếng Anh, phải bôi khắp JS+HTML. JS chứa string UI là anti-pattern (separation of concerns).",
+    "suggestion": "Với MVP: chấp nhận. Khi scale: đọc labels từ data-attributes trên element (btn.dataset.labelPlay, labelPause) — JS chỉ đọc, không literal. Hoặc tách src/i18n/vi.json.",
+    "effort": "S"
+  },
+  {
+    "id": "SMELL-014",
+    "severity": "LOW",
+    "title": "Function goTo: state machine ẩn + 4 bước tuần tự cần tách",
+    "file": "assets/js/carousel.js:86-119",
+    "evidence": "goTo có 4 giai đoạn comment rõ (1. reorder, 2. set starting pos, 3. force reflow, 4. animate) + 2 vòng forEach + force-reflow trick void carousel.offsetHeight (dòng 111). 33 LOC, độ phức tạp trung bình nhưng logic dồn dày.",
+    "impact": "Khó reason về correctness. Force reflow là magic trick không self-documenting. domIndex + shift clamp (dòng 101) với Math.max(0, Math.min(totalPositions-1, ...)) có edge case nghi vấn khi total < 5.",
+    "suggestion": "Tách thành prepareStartPositions(direction), snapWithoutTransition(), forceReflow(), applyWithTransition(). Thêm early-return nếu total < VISIBLE_COUNT. Đặt tên hằng FORCE_REFLOW = () => void carousel.offsetHeight.",
+    "effort": "S"
+  },
+  {
+    "id": "SMELL-015",
+    "severity": "LOW",
+    "title": "Script include pattern trùng lặp ở 4 file + thiếu JSON-LD ở index",
+    "file": "src/index.src.html:1236-1237 vs src/privacy.src.html:196",
+    "evidence": "Mỗi trang có <script src=\"assets/js/menu.js\" defer></script> — 4 lần. Index thêm carousel.js. Đồng thời privacy/terms/community có JSON-LD (BreadcrumbList) nhưng index không có JSON-LD (Organization/WebSite) → bất đối xứng SEO.",
+    "impact": "Thêm script mới (vd: analytics) = sửa 4 chỗ. Thiếu JSON-LD ở index làm giảm chất lượng SEO rich results của trang quan trọng nhất.",
+    "suggestion": "Tách partials/scripts-common.html (menu.js), include cuối <body> ở 4 trang. Thêm partials/scripts-index.html (carousel.js). Thêm JSON-LD Organization/MobileApplication vào index.",
+    "effort": "S"
+  }
+]

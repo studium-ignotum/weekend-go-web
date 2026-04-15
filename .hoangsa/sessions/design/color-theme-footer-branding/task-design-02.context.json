@@ -1,0 +1,25 @@
+{
+  "acceptance": [
+    "grep -q '22c55e' \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/input.css\" && ! grep -q '34C759' \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/input.css\" && echo PASS"
+  ],
+  "conventions_subset": {
+    "async_pattern": "async/await",
+    "error_handling": "try-catch + { error } return",
+    "naming": "camelCase functions, snake_case JSON",
+    "test_framework": "node:test"
+  },
+  "dependency_signatures": [],
+  "description": "Update hardcoded primary color in src/input.css",
+  "estimated_tokens": 383,
+  "file_segments": [
+    {
+      "action": "MODIFY",
+      "end_line": 34,
+      "lines": "@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\nbody {\n    font-family: \"Inter\", system-ui, sans-serif;\n}\n\nhtml {\n    scroll-behavior: smooth;\n}\n\n.nav-link {\n    position: relative;\n}\n\n.nav-link::after {\n    content: \"\";\n    position: absolute;\n    bottom: -2px;\n    left: 0;\n    width: 0;\n    height: 2px;\n    background-color: #34C759;\n    transition: width 0.2s ease;\n}\n\n.nav-link:hover::after {\n    width: 100%;\n}\n\n.phone-transition {\n  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);\n}\n",
+      "path": "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/input.css",
+      "start_line": 1
+    }
+  ],
+  "task_id": "design-02",
+  "task_name": "Update hardcoded primary color in src/input.css"
+}

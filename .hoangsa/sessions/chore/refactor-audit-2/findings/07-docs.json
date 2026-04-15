@@ -1,0 +1,102 @@
+[
+  {
+    "id": "DOC-001",
+    "severity": "HIGH",
+    "title": "README mâu thuẫn với thực tế: khẳng định 'No build step' nhưng dự án đã có build pipeline",
+    "file": "README.md",
+    "evidence": "README.md dòng 16 viết 'No build step — static files only' và dòng 20–24 chỉ hướng dẫn 'Open index.html in a browser, or serve with any static server: npx serve .'. Tuy nhiên package.json đã có các script 'build:css' (tailwindcss compile), 'build:html' (scripts/build-html.js), 'build', 'dev:css', 'dev'. Nguồn HTML thực tế nằm ở src/*.src.html và phải chạy 'npm run build' để tạo ra index.html, privacy.html, terms.html, community-standards.html ở root.",
+    "impact": "Người mới tham gia sẽ chỉnh sửa trực tiếp các file HTML ở root và bị ghi đè khi chạy build, hoặc không biết phải chạy 'npm run dev'/'npm run build' trước khi xem thay đổi CSS/placeholder. Đây là rào cản onboarding nghiêm trọng và có thể gây mất việc.",
+    "suggestion": "Viết lại hoàn toàn phần 'Local Development' trong README: (1) liệt kê prerequisites (Node >=18, npm), (2) 'npm install', (3) 'npm run dev' để watch CSS và build HTML, (4) 'npm run build' cho production, (5) cảnh báo rõ ràng: KHÔNG chỉnh sửa *.html ở root — hãy sửa src/*.src.html. Bỏ câu 'No build step'.",
+    "effort": "S"
+  },
+  {
+    "id": "DOC-002",
+    "severity": "HIGH",
+    "title": "README không đề cập đến hệ thống partial tự xây (<!-- @include ... --> và {{APK_VERSION}})",
+    "file": "README.md",
+    "evidence": "scripts/build-html.js triển khai cơ chế include qua regex '<!--\\s*@include\\s+(\\S+)\\s*-->' và thay thế placeholder '{{APK_VERSION}}' lấy từ package.json.appVersion. Các src/*.src.html dùng '<!-- @include partials/footer.html -->' và '{{APK_VERSION}}' (index.src.html dòng 245, 1207). README và AGENTS.md không nhắc một từ nào về cơ chế này.",
+    "impact": "Một contributor muốn thêm partial mới, đổi footer, hoặc cập nhật app version không biết tìm ở đâu. Cơ chế là custom (không phải chuẩn công nghiệp) nên phải có docs — không thể tự suy luận.",
+    "suggestion": "Thêm section 'Architecture' vào README mô tả: (1) src/*.src.html là nguồn, root *.html là output, (2) cú pháp include '<!-- @include partials/xxx.html -->', (3) placeholder {{APK_VERSION}} đồng bộ từ package.json.appVersion, (4) cách bump appVersion khi release APK mới. Liên kết tới scripts/build-html.js.",
+    "effort": "S"
+  },
+  {
+    "id": "DOC-003",
+    "severity": "MEDIUM",
+    "title": "README kể sai tech stack: 'Tailwind via CDN' và 'Google Fonts' không còn đúng",
+    "file": "README.md",
+    "evidence": "README dòng 14–15 viết 'HTML with Tailwind CSS (CDN)' và 'Inter font via Google Fonts'. Thực tế commit 1e036e4 'self-host Inter font' và package.json có 'build:css' compile Tailwind từ src/input.css ra assets/css/styles.css (tailwindcss ^3.4.19 là devDependency, KHÔNG phải CDN). CSP đã được siết không cho phép CDN.",
+    "impact": "Nhầm lẫn về kiến trúc tài sản tĩnh; contributor có thể thêm CDN link rồi bị CSP chặn, hoặc cố sửa CSS trực tiếp trong assets/css/styles.css (file generated) thay vì src/input.css.",
+    "suggestion": "Cập nhật tech stack: 'Tailwind CSS 3.4 (compiled locally via tailwindcss CLI)', 'Inter font (self-hosted WOFF2 trong assets/fonts/)'. Ghi rõ assets/css/styles.css là build artifact — sửa src/input.css.",
+    "effort": "S"
+  },
+  {
+    "id": "DOC-004",
+    "severity": "MEDIUM",
+    "title": "AGENTS.md và CLAUDE.md trùng lặp 100%, chỉ chứa GitNexus boilerplate, thiếu hướng dẫn dự án cụ thể",
+    "file": "AGENTS.md",
+    "evidence": "AGENTS.md (5508 bytes) và CLAUDE.md (5508 bytes) có kích thước giống hệt — nội dung là template GitNexus generic. Không có mô tả: cấu trúc thư mục (src/, partials/, scripts/, assets/), quy ước 'không sửa root *.html', danh sách script npm, cách thêm page mới, deployment target. Số liệu trong header (68 symbols / 108 relationships) còn lệch với CLAUDE.md lồng nhau ở ../CLAUDE.md (55/90/6) — index stale giữa các file.",
+    "impact": "Agent (Claude, Copilot, v.v.) không có context dự án khi làm việc, dẫn tới sửa sai file (ví dụ sửa index.html thay vì src/index.src.html), vi phạm quy ước build, gây conflict.",
+    "suggestion": "Viết lại AGENTS.md với: (1) project overview (landing tĩnh, Tailwind, partial system), (2) quy tắc vàng ('chỉnh sửa src/*.src.html, chạy npm run build'), (3) danh sách npm scripts và khi nào dùng, (4) deployment (static host / Vercel / GitHub Pages?), (5) giữ section GitNexus như phụ lục. Symlink CLAUDE.md -> AGENTS.md để không phải maintain 2 file.",
+    "effort": "M"
+  },
+  {
+    "id": "DOC-005",
+    "severity": "MEDIUM",
+    "title": "Không có tài liệu deployment / release",
+    "file": "README.md",
+    "evidence": "Không có file DEPLOY.md, RELEASE.md, hay section deployment trong README. Không có hướng dẫn: host ở đâu (Vercel? Netlify? GitHub Pages?), quy trình release, cách bump appVersion khi APK mới ra, cách verify CSP sau deploy, cách cập nhật sitemap.xml/robots.txt.",
+    "impact": "Người duy nhất biết deploy là tác giả hiện tại; không ai khác release được. Rủi ro bus-factor = 1.",
+    "suggestion": "Thêm section 'Deployment' vào README hoặc tạo DEPLOY.md với: host target, lệnh build production, cách kiểm tra OG image & CSP, checklist trước release (bump appVersion, chạy npm run build, kiểm tra HTML output, commit). Nếu dùng Vercel thì tài liệu hoá vercel.json / cấu hình project.",
+    "effort": "M"
+  },
+  {
+    "id": "DOC-006",
+    "severity": "MEDIUM",
+    "title": "scripts/build-html.js thiếu JSDoc và README cho public API",
+    "file": "scripts/build-html.js",
+    "evidence": "File có đúng 2 dòng comment ở đầu ('Builds root *.html from src/*.src.html by inlining partials and placeholders. Idempotent — running build on output does not re-include.'). Các hàm resolvePartial, render, build không có JSDoc. Không giải thích: regex INCLUDE_RE, cách chặn path traversal (startsWith check), hành vi khi partial thiếu, idempotency nghĩa là gì trong trường hợp nào.",
+    "impact": "Người sửa build script (thêm placeholder mới, thêm pass preprocess, thêm loại partial) không có context về design intent và contract. Dễ phá tính idempotent hoặc security check.",
+    "suggestion": "Thêm JSDoc cho mỗi hàm (tham số, return, throws), thêm comment giải thích INCLUDE_RE syntax, tại sao check abs.startsWith(ROOT), và liệt kê placeholder hỗ trợ ({{APK_VERSION}}). Cân nhắc thêm ARCHITECTURE.md mô tả toàn bộ pipeline.",
+    "effort": "S"
+  },
+  {
+    "id": "DOC-007",
+    "severity": "MEDIUM",
+    "title": "assets/js/carousel.js thiếu file-level docblock và public contract",
+    "file": "assets/js/carousel.js",
+    "evidence": "File 187 dòng, bắt đầu ngay bằng const BREAKPOINT_XS = 480. Không có file-level comment mô tả: module này làm gì, hợp đồng DOM (yêu cầu #phone-carousel + .phone-item, số lượng tối thiểu), API public (nếu có), cách tắt autoplay (aria/prefers-reduced-motion), nút pause toggle commit 27788f0 đã thêm. Không có JSDoc cho getPosition, reorderDOM và các hàm sau.",
+    "impact": "Muốn tái sử dụng carousel ở page khác, hay debug khi số ảnh < 5, phải đọc toàn bộ file. Tác giả duy nhất biết hợp đồng DOM.",
+    "suggestion": "Thêm file header: mô tả, DOM requirements, các biến config (BREAKPOINT_*, SPREAD_*, ANIMATION_DURATION_MS, AUTOPLAY_INTERVAL_MS), behavior với reduced-motion, cách dừng autoplay. JSDoc cho getPosition, reorderDOM, và hàm animate (nếu có).",
+    "effort": "S"
+  },
+  {
+    "id": "DOC-008",
+    "severity": "LOW",
+    "title": "Không có CONTRIBUTING guide",
+    "file": "README.md",
+    "evidence": "Repo không có CONTRIBUTING.md và README cũng không có section hướng dẫn đóng góp: quy ước commit (các commit gần đây dùng conventional 'chore(...)', 'refactor(...)', 'fix(...)', 'style(...)' — cần ghi lại), branch naming ('refactor/split-js-css-carousel', 'fix/a11y-deep' — cần ghi lại), quy trình PR, quy trình chạy 'npx gitnexus analyze' sau khi merge.",
+    "impact": "Contributor mới commit tự do không theo convention, gây rối lịch sử; index GitNexus stale.",
+    "suggestion": "Thêm CONTRIBUTING.md: conventional commits, branch pattern, bắt buộc chạy 'npm run build' trước commit (hoặc thêm pre-commit hook), khi nào chạy 'npx gitnexus analyze --embeddings'.",
+    "effort": "S"
+  },
+  {
+    "id": "DOC-009",
+    "severity": "LOW",
+    "title": "Không có tài liệu biến môi trường / cấu hình runtime",
+    "file": "README.md",
+    "evidence": ".gitignore loại '.env' và '.env.*' ngụ ý có thể có env vars, nhưng README/AGENTS.md không liệt kê biến nào (ví dụ analytics ID, Sentry DSN). appVersion nằm trong package.json (không phải env). Không có .env.example.",
+    "impact": "Nếu tương lai thêm biến (analytics, API key để preview APK URL), developer không biết cần set gì để dev local.",
+    "suggestion": "Nếu hiện tại chưa có env var thực sự: ghi rõ trong README 'dự án không dùng biến môi trường runtime'. Nếu có (hoặc sẽ có): tạo .env.example và section 'Environment Variables' trong README.",
+    "effort": "S"
+  },
+  {
+    "id": "DOC-010",
+    "severity": "LOW",
+    "title": ".gitignore ignore CLAUDE.md nhưng file vẫn tồn tại và được check-in — stale rule",
+    "file": ".gitignore",
+    "evidence": ".gitignore dòng 1: 'CLAUDE.md'. Tuy nhiên CLAUDE.md (5508 bytes) có mặt trong working tree và nội dung trùng AGENTS.md. Git status đầu session không liệt kê CLAUDE.md là untracked, nghĩa là nó đã được track trước khi rule được thêm — rule bây giờ vô hiệu và gây nhầm lẫn.",
+    "impact": "Developer tưởng CLAUDE.md là file local-only và sửa tuỳ ý, nhưng thay đổi sẽ không bị ignore (vẫn track). Hoặc ngược lại, nghĩ rule đang hiệu lực nên không commit cập nhật.",
+    "suggestion": "Quyết định: (a) nếu muốn track CLAUDE.md (hợp lý vì là docs agent) — xoá dòng khỏi .gitignore. (b) nếu muốn local-only — chạy 'git rm --cached CLAUDE.md' và document cách regenerate. Đồng thời align với AGENTS.md (đang track).",
+    "effort": "S"
+  }
+]

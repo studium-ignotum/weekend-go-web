@@ -1,0 +1,102 @@
+[
+  {
+    "id": "TEST-001",
+    "severity": "HIGH",
+    "title": "Hoàn toàn không có bài kiểm thử tự động cho toàn bộ dự án",
+    "file": "package.json:6",
+    "evidence": "package.json không có script test, không có devDependency test runner (jest/vitest/playwright/cypress). Glob tìm **/*.test.*, **/*.spec.*, **/tests/**, **/__tests__/** trả về 0 kết quả.",
+    "impact": "Mọi thay đổi đều phải kiểm thử thủ công. Regression ở carousel, menu, navigation links, CTA có thể lọt lên production mà không phát hiện được. Refactor (như branch hiện tại refactor/split-js-css) không có lưới an toàn.",
+    "suggestion": "Thêm Playwright (khuyến nghị cho static site): `npm i -D @playwright/test`, tạo `playwright.config.js`, viết vài smoke test cho index.html: (1) page load, (2) carousel tự xoay sau N giây, (3) menu mobile mở/đóng, (4) các link footer không 404.",
+    "effort": "M"
+  },
+  {
+    "id": "TEST-002",
+    "severity": "HIGH",
+    "title": "Carousel có logic phức tạp nhưng không có bài kiểm thử hành vi",
+    "file": "assets/js/carousel.js:1",
+    "evidence": "carousel.js có ~5792 byte với các nhánh logic: auto-rotate, pause on hover, prefers-reduced-motion, document.visibilityState, nút pause/play. Không có unit test hay E2E test nào cover các nhánh này.",
+    "impact": "Đây là thành phần tương tác chính của trang. Bug gần đây (task-T-03 a11y reduced-motion, fix/carousel-size-bug trong history) cho thấy carousel dễ hỏng. Không có test → mỗi refactor JS/CSS tách file (branch refactor/split-js-css) đều có rủi ro regression cao.",
+    "suggestion": "Viết Playwright test cho các scenario: (a) auto-rotate đổi slide sau interval, (b) hover pause auto-rotate, (c) click nút pause thì dừng, (d) khi document.hidden thì dừng, (e) emulate `prefers-reduced-motion: reduce` thì không auto-rotate. Có thể bổ sung unit test cho logic thuần (nếu tách hàm ra) bằng vitest.",
+    "effort": "M"
+  },
+  {
+    "id": "TEST-003",
+    "severity": "MEDIUM",
+    "title": "Menu mobile toggle không có kiểm thử — dễ vỡ khi chỉnh markup/aria",
+    "file": "assets/js/menu.js:1",
+    "evidence": "menu.js (570 byte) xử lý toggle hamburger — tương tác quan trọng trên mobile. Không có test.",
+    "impact": "Nếu ID, class, hoặc aria-expanded bị đổi trong refactor HTML partial (partials/…), menu có thể đứng yên mà không ai phát hiện cho đến khi user mobile phàn nàn.",
+    "suggestion": "Thêm Playwright test ở viewport mobile: click hamburger → menu hiện, aria-expanded=true; click lại → đóng, aria-expanded=false; Esc để đóng (nếu có).",
+    "effort": "S"
+  },
+  {
+    "id": "TEST-004",
+    "severity": "MEDIUM",
+    "title": "Không có CI/CD — mọi kiểm tra đều thủ công trên máy dev",
+    "file": ".github/workflows/:0",
+    "evidence": "Thư mục .github/workflows/ không tồn tại; không có .gitlab-ci.yml, azure-pipelines.yml, bitbucket-pipelines.yml.",
+    "impact": "Không có cổng chất lượng trước khi merge. Build CSS/HTML có thể fail trên máy khác mà PR vẫn được merge. Khi thêm test sau này cũng không có nơi chạy tự động.",
+    "suggestion": "Tạo `.github/workflows/ci.yml` chạy trên pull_request: `npm ci` → `npm run build` → (sau này) `npx playwright test` + HTML validator (html-validate) + link checker (lychee).",
+    "effort": "S"
+  },
+  {
+    "id": "TEST-005",
+    "severity": "MEDIUM",
+    "title": "Không có bài kiểm thử accessibility tự động mặc dù vừa làm deep a11y fix",
+    "file": "assets/js/carousel.js:1",
+    "evidence": "History có 7 task trong fix/a11y-deep (skip-link, carousel reduced-motion, dead social spans, v.v.). Không có axe-core/pa11y/Lighthouse CI để đảm bảo các fix này không bị hồi quy.",
+    "impact": "A11y rất dễ thoái hoá khi refactor HTML/CSS. Không có test a11y → nỗ lực fix/a11y-deep có thể bị mất trong vài PR tới mà không ai biết.",
+    "suggestion": "Tích hợp axe-core vào Playwright test (`@axe-core/playwright`) chạy trên cả 4 trang: index, privacy, terms, community-standards. Hoặc dùng Lighthouse CI với budget a11y ≥ 95.",
+    "effort": "S"
+  },
+  {
+    "id": "TEST-006",
+    "severity": "MEDIUM",
+    "title": "Không có link checker — nguy cơ 404 cho navigation, anchor, asset",
+    "file": "index.html:0",
+    "evidence": "4 trang HTML (index, privacy, terms, community-standards) có nhiều internal link và asset paths. Không có công cụ kiểm tra tự động link dead.",
+    "impact": "Rename asset (ví dụ đã có team-khang-truong.webp, team-van-than.webp vừa thêm) hoặc đổi anchor có thể làm hỏng link mà không ai thấy cho đến khi user click.",
+    "suggestion": "Thêm `lychee` hoặc `html-proofer` vào CI: `lychee --offline index.html privacy.html terms.html community-standards.html`. Chạy 5-10 giây, bắt mọi link/asset sai.",
+    "effort": "S"
+  },
+  {
+    "id": "TEST-007",
+    "severity": "MEDIUM",
+    "title": "Không có HTML validation — markup lỗi có thể lọt production",
+    "file": "src/index.src.html:0",
+    "evidence": "index.html đã build có 61KB — markup lớn, khả năng có tag không đóng, thuộc tính aria sai, v.v. Không có html-validate / W3C validator chạy tự động.",
+    "impact": "Browser forgive HTML lỗi, nhưng screen reader và SEO crawler thì không. Bug markup im lặng ảnh hưởng a11y và SEO.",
+    "suggestion": "Thêm `html-validate` với config chuẩn: `npm i -D html-validate`, script `validate:html: html-validate *.html`. Chạy trong CI.",
+    "effort": "S"
+  },
+  {
+    "id": "TEST-008",
+    "severity": "MEDIUM",
+    "title": "build-html.js — script build tùy chỉnh không có test",
+    "file": "scripts/build-html.js:1",
+    "evidence": "scripts/build-html.js xử lý placeholder {{APK_VERSION}} và footer partial. Nếu script này hỏng im lặng (sai replace, missing partial), HTML production sẽ có placeholder chưa thay hoặc thiếu footer.",
+    "impact": "Regex/string replace dễ lỗi edge case (ví dụ APK_VERSION chứa ký tự đặc biệt, partial path thay đổi). Không có test → lỗi chỉ thấy khi vô tình load production.",
+    "suggestion": "Viết snapshot test nhỏ với vitest: chạy build-html.js trên fixture, so sánh output không còn `{{APK_VERSION}}` và chứa nội dung footer partial. <20 dòng test.",
+    "effort": "S"
+  },
+  {
+    "id": "TEST-009",
+    "severity": "LOW",
+    "title": "Không có visual regression test — thay đổi CSS có thể làm vỡ layout không được phát hiện",
+    "file": "src/input.css:1",
+    "evidence": "Refactor CSS đang diễn ra (branch refactor/split-js-css-carousel). Không có Playwright screenshot comparison, Percy, Chromatic, hay Loki.",
+    "impact": "Tailwind purge có thể drop class đang dùng runtime; đổi tokens (brand color recent) có thể lệch layout mobile. Không có snapshot → chỉ thấy khi deploy và nhìn bằng mắt.",
+    "suggestion": "Playwright có sẵn `await expect(page).toHaveScreenshot()`. Thêm ~5 snapshot (desktop + mobile viewport cho index + community-standards) chạy trong CI. Update snapshot qua `--update-snapshots` khi có thay đổi có chủ ý.",
+    "effort": "M"
+  },
+  {
+    "id": "TEST-010",
+    "severity": "LOW",
+    "title": "Không có budget test cho performance (LCP, bundle size CSS/JS)",
+    "file": "package.json:7",
+    "evidence": "Tailwind minify output đi vào assets/css/styles.css. Không có threshold file size; không có Lighthouse CI budget cho LCP, CLS, total weight.",
+    "impact": "CSS có thể phình dần sau mỗi feature, hoặc hình ảnh không tối ưu đẩy LCP lên. Không có budget → không có cảnh báo sớm.",
+    "suggestion": "Thêm Lighthouse CI (`lhci autorun`) với `budget.json`: performance ≥ 90, LCP ≤ 2.5s, CSS ≤ 50KB, JS ≤ 30KB. Chạy trong CI trên preview build.",
+    "effort": "M"
+  }
+]

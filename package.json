@@ -8,7 +8,9 @@
     "build:html": "node scripts/build-html.js",
     "build": "npm run build:css && npm run build:html",
     "dev:css": "tailwindcss -i ./src/input.css -o ./assets/css/styles.css --watch",
-    "dev": "npm run build:html && npm run dev:css"
+    "dev": "npm run build:html && npm run dev:css",
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots"
   },
   "engines": {
     "node": ">=18"
@@ -26,6 +28,8 @@
   },
   "homepage": "https://github.com/studium-ignotum/weekend-go-web#readme",
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "serve": "^14.2.6",
     "tailwindcss": "^3.4.19"
   }
 }

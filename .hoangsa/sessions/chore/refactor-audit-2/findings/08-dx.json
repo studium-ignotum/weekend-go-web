@@ -1,0 +1,122 @@
+[
+  {
+    "id": "DX-001",
+    "severity": "HIGH",
+    "title": "Thiếu dev server với hot reload — feedback loop chậm",
+    "file": "package.json",
+    "evidence": "Script `dev` chỉ chạy `build:html` một lần rồi `tailwindcss --watch`. Không có HTTP server, không có live-reload/browser-sync. Dev phải tự mở file:// hoặc chạy `npx serve` tay; khi sửa HTML partial hoặc .src.html phải `Cmd+R` + chạy lại `npm run build:html`.",
+    "impact": "Vòng lặp sửa—xem chậm: mỗi thay đổi partial/HTML cần chạy build thủ công rồi reload trình duyệt. Cản trở iteration tốc độ cao, dễ quên rebuild → xem nhầm bản cũ.",
+    "suggestion": "Thêm `browser-sync` hoặc `live-server` + `chokidar-cli` watch `src/**/*.src.html` và `partials/**` để auto-rebuild + auto-reload. Ví dụ: `\"dev\": \"npm-run-all -p dev:css dev:html dev:serve\"`, với `dev:html` = `chokidar 'src/**' 'partials/**' -c 'npm run build:html'`, `dev:serve` = `browser-sync start --server --files '*.html,assets/**'`.",
+    "effort": "S"
+  },
+  {
+    "id": "DX-002",
+    "severity": "HIGH",
+    "title": "Không có script `serve`/`preview` để xem site đã build",
+    "file": "package.json",
+    "evidence": "package.json scripts chỉ có build:css, build:html, build, dev:css, dev. README hướng dẫn `npx serve .` nhưng không có `npm run serve`/`preview` tương ứng.",
+    "impact": "Dev mới vào repo không biết serve sao cho đúng; mỗi người một cách (file://, python -m http.server, npx serve). Dễ gặp lỗi liên quan đường dẫn tuyệt đối (font `/assets/fonts/...`) khi mở qua file://.",
+    "suggestion": "Thêm `\"serve\": \"npx serve .\"` (hoặc `http-server`) và `\"preview\": \"npm run build && npm run serve\"` vào package.json để chuẩn hoá flow preview sau build.",
+    "effort": "S"
+  },
+  {
+    "id": "DX-003",
+    "severity": "HIGH",
+    "title": "Không có linter/formatter — code style phụ thuộc ý thức",
+    "file": "package.json",
+    "evidence": "devDependencies chỉ chứa `tailwindcss`. Không có ESLint, Prettier, stylelint, htmlhint. Không có .prettierrc, .eslintrc, .stylelintrc. `.editorconfig` có nhưng chỉ định 2-space + LF.",
+    "impact": "Code style drift giữa các commit/contributor: dấu ngoặc kép, trailing comma, thứ tự class Tailwind, indent HTML không nhất quán. Review tốn thời gian về format thay vì logic.",
+    "suggestion": "Thêm Prettier + `prettier-plugin-tailwindcss` (tự sort class Tailwind), htmlhint/stylelint tối thiểu. Script: `\"format\": \"prettier --write .\"`, `\"lint\": \"prettier --check . && htmlhint '**/*.html'\"`. Chạy `lint` trong CI.",
+    "effort": "M"
+  },
+  {
+    "id": "DX-004",
+    "severity": "HIGH",
+    "title": "Không có CI/CD — không tự validate build/commit",
+    "file": ".github/workflows",
+    "evidence": "Thư mục `.github/` không tồn tại (`ls .github` báo No such file or directory). Không có workflow chạy `npm run build` trên PR, không có deployment automation.",
+    "impact": "PR có thể merge với build:html fail, CSS out-of-sync, missing partial. Deploy phải làm tay — dễ quên rebuild trước khi push → production phục vụ HTML cũ.",
+    "suggestion": "Thêm `.github/workflows/build.yml` chạy `npm ci && npm run build` trên mọi PR/push main. Nếu deploy trên Vercel/Netlify, cấu hình build command = `npm run build`, publish dir = root. Fail build nếu `index.html` khác với output từ `src/index.src.html` (chạy build rồi `git diff --exit-code`).",
+    "effort": "M"
+  },
+  {
+    "id": "DX-005",
+    "severity": "HIGH",
+    "title": "Không có pre-commit hook — drift build output khỏi source",
+    "file": "package.json",
+    "evidence": "Không có husky, lint-staged, pre-commit. Build output (`*.html` ở root) commit cùng source (`src/*.src.html`) nhưng không có guard đảm bảo hai bên đồng bộ.",
+    "impact": "Dev có thể sửa `src/index.src.html` nhưng quên chạy `npm run build:html` → commit HTML root bị stale. Ngược lại, sửa tay `index.html` (không sửa src) → build lần sau ghi đè mất thay đổi.",
+    "suggestion": "Cài husky + lint-staged: pre-commit chạy `npm run build` rồi `git add *.html assets/css/styles.css`. Hoặc thêm check trong CI: `npm run build && git diff --exit-code` (fail nếu output khác).",
+    "effort": "M"
+  },
+  {
+    "id": "DX-006",
+    "severity": "MEDIUM",
+    "title": "README lỗi thời — nói 'No build step' nhưng thực tế có",
+    "file": "README.md",
+    "evidence": "README.md:14-16 ghi 'HTML with Tailwind CSS (CDN) / Inter font via Google Fonts / No build step — static files only'. Thực tế: Tailwind đã self-host qua `build:css`, font tự host, và có `scripts/build-html.js` với partials + `{{APK_VERSION}}` placeholder.",
+    "impact": "Dev mới mở repo theo README sẽ không biết phải chạy `npm install && npm run build`. Có thể sửa trực tiếp `index.html` (output) thay vì `src/index.src.html` (source), commit dẫn đến drift.",
+    "suggestion": "Rewrite README: document `npm install`, `npm run dev` (watch), `npm run build` (production), cấu trúc `src/*.src.html` → root `*.html`, partials, `{{APK_VERSION}}` flow, và cách đổi version (sửa `appVersion` trong package.json).",
+    "effort": "S"
+  },
+  {
+    "id": "DX-007",
+    "severity": "MEDIUM",
+    "title": "Không có htmlhint/a11y check tự động",
+    "file": "package.json",
+    "evidence": "index.html ~61KB, 4 trang HTML (index, privacy, terms, community-standards) không có công cụ lint HTML hay kiểm tra accessibility (axe, pa11y, lighthouse-ci). Các sessions `.hoangsa/sessions/fix/a11y-deep/` cho thấy a11y regression đã xảy ra nhiều lần.",
+    "impact": "A11y/HTML validity regression âm thầm: thiếu alt, heading skip, aria sai, duplicate id... chỉ phát hiện khi audit tay. Tốn effort chạy audit lặp lại.",
+    "suggestion": "Thêm `htmlhint` + `pa11y-ci` (hoặc `lighthouse-ci`) vào CI, chạy trên output HTML sau build. Script: `\"a11y\": \"pa11y-ci index.html privacy.html terms.html community-standards.html\"`. Fail build nếu có violation mức error.",
+    "effort": "M"
+  },
+  {
+    "id": "DX-008",
+    "severity": "MEDIUM",
+    "title": "Nhầm lẫn giữa `version` và `appVersion` trong package.json",
+    "file": "package.json",
+    "evidence": "package.json có cả `\"version\": \"1.0.0\"` (phiên bản npm package) và `\"appVersion\": \"1.0.35\"` (phiên bản APK Android). build-html.js đọc `appVersion` để inject vào `{{APK_VERSION}}`.",
+    "impact": "Dev dễ nhầm bump `version` thay vì `appVersion` khi phát hành APK mới → link download trỏ sai phiên bản. Không có comment giải thích sự khác biệt.",
+    "suggestion": "Đổi tên `appVersion` thành `apkVersion` cho rõ nghĩa, hoặc thêm comment trong README/CONTRIBUTING giải thích. Cân nhắc: đọc version từ một file riêng `version.json` hoặc `.apk-version` để tách concern khỏi npm package metadata.",
+    "effort": "S"
+  },
+  {
+    "id": "DX-009",
+    "severity": "MEDIUM",
+    "title": "File `.DS_Store` lọt vào repo và subdirs",
+    "file": ".DS_Store",
+    "evidence": "Tồn tại `.DS_Store` ở root (6148 bytes, tracked?) và `src/.DS_Store`, `assets/.DS_Store`. `.gitignore` có `*.DS_Store` nhưng file đã bị add trước đó có thể vẫn tracked.",
+    "impact": "Noise trong PR diff, tăng clone size, làm lộ cấu trúc folder macOS tới reviewer dùng Windows/Linux.",
+    "suggestion": "`git rm --cached -r '**/.DS_Store' 2>/dev/null; find . -name .DS_Store -not -path './node_modules/*' -delete`. Đảm bảo `.gitignore` có pattern `**/.DS_Store` (hiện `*.DS_Store` không match ở subdir với một số git config).",
+    "effort": "S"
+  },
+  {
+    "id": "DX-010",
+    "severity": "LOW",
+    "title": "Tailwind v3.4 — bản cũ, nên cân nhắc lên v4 hoặc pin chính xác",
+    "file": "package.json",
+    "evidence": "`devDependencies: { tailwindcss: \"^3.4.19\" }`. Tailwind v4 đã ra (config-in-CSS, Oxide engine nhanh hơn). Dùng caret `^` với duy nhất một dep cũng có thể gây drift giữa máy dev.",
+    "impact": "Install time/bundle size không tối ưu; dev có thể nhận minor upgrade bất ngờ. Khi lên v4 cần migrate `tailwind.config.js` sang `@theme` block — effort không nhỏ nên cần lên kế hoạch.",
+    "suggestion": "Ngắn hạn: pin exact version `\"tailwindcss\": \"3.4.19\"` + commit `package-lock.json` để reproducible. Dài hạn: lên roadmap migrate Tailwind v4 (hoặc accept staying on v3 LTS).",
+    "effort": "S"
+  },
+  {
+    "id": "DX-011",
+    "severity": "LOW",
+    "title": "CLAUDE.md và AGENTS.md trùng nội dung — duplication",
+    "file": "CLAUDE.md",
+    "evidence": "CLAUDE.md (5508 bytes) và AGENTS.md (5508 bytes) cùng size, cùng ngày sửa — gần như chắc chắn là nội dung identical (cùng GitNexus guide). Không có mechanism nhắc giữ đồng bộ.",
+    "impact": "Sửa một file → quên sửa file kia → drift. Contributor mới không biết đâu là source of truth.",
+    "suggestion": "Giữ một file (ví dụ `AGENTS.md`) và `CLAUDE.md` là symlink, hoặc prepend CLAUDE.md bằng `> See AGENTS.md`. Alternative: generate cả hai từ một template qua script.",
+    "effort": "S"
+  },
+  {
+    "id": "DX-012",
+    "severity": "LOW",
+    "title": "Thiếu CONTRIBUTING.md / docs cấu trúc thư mục",
+    "file": "CONTRIBUTING.md",
+    "evidence": "Không có CONTRIBUTING.md, không có doc giải thích: khi nào sửa `src/*.src.html` vs `*.html` ở root, cách thêm partial mới, placeholder syntax `{{APK_VERSION}}`, cách bump APK version, cách thêm trang mới.",
+    "impact": "Onboarding dev/contributor mới tốn thời gian đọc source + git history để hiểu convention. Dễ sửa nhầm output thay vì source.",
+    "suggestion": "Tạo CONTRIBUTING.md ngắn gọn (~1 page) cover: project structure (src/, partials/, assets/, scripts/), build flow, version bump, cách thêm trang mới, coding conventions. Link từ README.",
+    "effort": "S"
+  }
+]

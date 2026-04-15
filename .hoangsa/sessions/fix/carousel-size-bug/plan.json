@@ -1,0 +1,25 @@
+{
+  "name": "fix: Sửa bug carousel không giữ đúng scale sau auto-rotate",
+  "workspace_dir": "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web",
+  "spec_ref": "carousel_size_fix-spec-v1.0",
+  "language": "HTML, CSS, JavaScript",
+  "budget_tokens": 15000,
+  "tasks": [
+    {
+      "id": "FIX-1",
+      "name": "Fix carousel setInterval callback: disable transition → reorder DOM → force reflow → apply sizes → re-enable transition",
+      "complexity": "low",
+      "budget_tokens": 15000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index2.html"
+      ],
+      "depends_on": [],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index2.html:613-657"
+      ],
+      "covers": ["REQ-01", "REQ-02", "REQ-03", "REQ-04"],
+      "acceptance": "open index2.html in browser → wait 15s (3 rotations) → DevTools Console: document.querySelectorAll('#phone-carousel .phone-item').forEach((p,i) => { const img=p.querySelector('img'); console.log(`Phone ${i}: transform=${img.style.transform}, opacity=${img.style.opacity}`) }) → Phone 0: scale(0.85), 0.7 | Phone 1: scale(1.2), 1 | Phone 2: scale(0.85), 0.7"
+    }
+  ]
+}

@@ -1,0 +1,167 @@
+[
+  {
+    "id": "SIMPL-001",
+    "severity": "HIGH",
+    "title": "partials/icons.svg đã có 11 biểu tượng nhưng không file HTML nào dùng <use href>",
+    "file": "partials/icons.svg:1-38, src/index.src.html (20+ SVG inline), partials/footer.html:61-83",
+    "evidence": "icons.svg định nghĩa đủ icon-star, icon-faq-chevron, icon-app-store, icon-google-play, icon-mail-fill, icon-facebook, icon-linkedin, icon-carousel-{prev,next,pause,play} nhưng Grep trên toàn bộ *.html trả về 0 match cho `<use` hoặc `icons.svg`. Các path SVG vẫn được inline lặp lại nguyên văn ở mỗi chỗ dùng (riêng icon-star lặp 10 lần, chevron FAQ 10 lần trong index).",
+    "impact": "Hàng trăm dòng HTML trùng lặp, tăng kích thước trang, rủi ro lệch nội dung giữa các bản sao (xem SIMPL-002). Đây là cơ hội đơn giản hoá lớn nhất của dự án.",
+    "suggestion": "Thêm `<!-- @include partials/icons.svg -->` ngay sau <body> trong 4 file src, sau đó thay từng <svg>…</svg> lặp lại bằng `<svg class=\"…\"><use href=\"#icon-star\"/></svg>`. Bắt đầu bằng icon-star và icon-faq-chevron (xuất hiện nhiều nhất).",
+    "effort": "M",
+    "criterion": "clarity"
+  },
+  {
+    "id": "SIMPL-002",
+    "severity": "HIGH",
+    "title": "Path icon Google Play inline trong index.src.html lệch với partials/icons.svg",
+    "file": "src/index.src.html:255 vs partials/icons.svg:13",
+    "evidence": "icons.svg:13 dùng path `M3.609 1.814L13.792 12 3.61 22.186 … m10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626 …`. index.src.html:255 dùng path khác: `… zm3.199-1.4l2.533 1.467 a1 1 0 010 1.733l-2.197 1.272-2.543-2.543 2.207-1.929 …`. Hai bản đã tách khỏi nhau — dấu hiệu của duplication drift.",
+    "impact": "Nguồn sự thật không rõ ràng. Khi cập nhật icon sẽ dễ quên một bên. Chính là rủi ro 'mutation through duplicated references' mà tiêu chí PRESERVE cảnh báo.",
+    "suggestion": "Chọn 1 path chuẩn (bản trong icons.svg), xoá inline và thay bằng `<use href=\"#icon-google-play\"/>`. Sau khi hợp nhất, đặt partials/icons.svg là nguồn duy nhất.",
+    "effort": "S",
+    "criterion": "preserve"
+  },
+  {
+    "id": "SIMPL-003",
+    "severity": "MEDIUM",
+    "title": "Biến module JS toàn cục gây phụ thuộc ngầm vào thứ tự <script defer>",
+    "file": "assets/js/carousel.js:16-22, assets/js/menu.js:2-18",
+    "evidence": "Cả hai file khai báo `const carousel = …`, `const menuToggle = …` ở top-level module (không IIFE, không module ES). Nếu ai đó thêm `<script>` khác có biến trùng tên (`total`, `phones`, `yearEl`) sẽ gây SyntaxError global vì tất cả chia chung top-level scope của trình duyệt kinh điển.",
+    "impact": "Khó thêm script mới, ô nhiễm namespace toàn cục, bất lợi khi refactor thành nhiều component. Mẫu định nghĩa hàm (function declaration + const top-level) không có ranh giới module rõ.",
+    "suggestion": "Chuyển sang `<script type=\"module\" src=\"…\">` hoặc bọc IIFE: `(() => { … })();`. Bản module cũng cho phép tái sử dụng hằng số BREAKPOINT_* giữa các file.",
+    "effort": "S",
+    "criterion": "standards"
+  },
+  {
+    "id": "SIMPL-004",
+    "severity": "MEDIUM",
+    "title": "carousel.js `throw` top-level sẽ làm crash bundle dùng chung cho trang không có carousel",
+    "file": "assets/js/carousel.js:16-17",
+    "evidence": "`const carousel = document.getElementById(\"phone-carousel\"); if (!carousel) throw new Error(\"Carousel element #phone-carousel not found\");` Hiện tại carousel.js chỉ được load ở index.src.html, nhưng bất kỳ ai thêm nó vào terms/privacy/community-standards (hoặc khi gộp bundle) sẽ gặp exception chặn cả menu.js bên dưới nếu bị gộp.",
+    "impact": "Hidden side effect và fragile loading order. Đây đúng là pattern 'implicit ordering dependencies' mà tiêu chí PRESERVE cần loại bỏ.",
+    "suggestion": "Đổi sang early-return im lặng khi không có element: `if (!carousel) return;` bên trong một IIFE/module; hoặc `if (!carousel) { return; }` sau khi chuyển sang module.",
+    "effort": "S",
+    "criterion": "preserve"
+  },
+  {
+    "id": "SIMPL-005",
+    "severity": "MEDIUM",
+    "title": "getSpreadScale so sánh string-switch kiểu ladder — nên dùng bảng lookup",
+    "file": "assets/js/carousel.js:61-67",
+    "evidence": "```\nif (w < BREAKPOINT_XS) return SPREAD_XS;\nif (w < BREAKPOINT_SM) return SPREAD_SM;\nif (w < BREAKPOINT_LG) return SPREAD_LG;\nreturn SPREAD_DEFAULT;\n```",
+    "impact": "Khi thêm breakpoint mới phải sửa ở 2 nơi (hằng số + nhánh if). Đây là 'switch chain could be lookup' theo tiêu chí clarity.",
+    "suggestion": "Khai báo `const SPREAD_BREAKPOINTS = [[480,0.38],[640,0.5],[1024,0.7]]` và dùng `SPREAD_BREAKPOINTS.find(([bp]) => w < bp)?.[1] ?? 1.0`. Giúp thêm breakpoint chỉ cần sửa 1 mảng.",
+    "effort": "S",
+    "criterion": "clarity"
+  },
+  {
+    "id": "SIMPL-006",
+    "severity": "MEDIUM",
+    "title": "reorderDOM phụ thuộc ngầm vào thứ tự DOM cha — mutation dễ vỡ",
+    "file": "assets/js/carousel.js:43-58",
+    "evidence": "Hàm dùng `carousel.appendChild(phones[idx])` trong forEach. Vì `phones` là NodeList captured lúc khởi tạo (`Array.from(...querySelectorAll(…))` dòng 18) còn `carousel.appendChild` sẽ dời node, gây side effect: lần chạy kế tiếp `carousel.querySelectorAll(\".phone-item\")` (dòng 70, 95) trả về thứ tự mới — nhưng `phones[idx]` vẫn tham chiếu tới node cũ bằng index ban đầu.",
+    "impact": "Nếu sau này ai thêm/bớt .phone-item runtime thì `phones` và `total` out of sync, dễ tạo bug khó lần. Đây là 'mutation through references' tiêu chí PRESERVE cảnh báo.",
+    "suggestion": "Tách vai trò: lưu `phones` như nguồn ổn định, nhưng tách `applyPositions` để luôn dùng lại `phones` thay vì re-query `carousel.querySelectorAll`. Hoặc ghi rõ invariant ở đầu file: 'Tổng số phone-item là bất biến sau init'.",
+    "effort": "M",
+    "criterion": "preserve"
+  },
+  {
+    "id": "SIMPL-007",
+    "severity": "MEDIUM",
+    "title": "`goTo` quá nén — 1 hàm làm 4 việc: guard, reorder, set start, force reflow, animate",
+    "file": "assets/js/carousel.js:86-119",
+    "evidence": "34 dòng, 4 bước đánh số comment `// 1.`…`// 4.`, tính toán tx, style, transition + `void carousel.offsetHeight` (reflow hack) + setTimeout cờ animating.",
+    "impact": "Khó test từng bước, khó thay animation engine. Đây là 'over-compressed function doing too much' tiêu chí balance.",
+    "suggestion": "Tách thành `setStartPositions(direction)`, `forceReflow()`, `animateToFinal()`, và `releaseAnimatingLock()`. `goTo` chỉ orchestrate: `reorderDOM(); setStartPositions(dir); forceReflow(); applyPositions(true); releaseLock();`.",
+    "effort": "M",
+    "criterion": "balance"
+  },
+  {
+    "id": "SIMPL-008",
+    "severity": "LOW",
+    "title": "applyPositions inline chuỗi transition dài khó đọc và trùng lặp cubic-bezier",
+    "file": "assets/js/carousel.js:76",
+    "evidence": "`phone.style.transition = \\`transform ${ANIMATION_DURATION_MS}ms cubic-bezier(0.4, 0, 0.2, 1), opacity ${ANIMATION_DURATION_MS}ms cubic-bezier(0.4, 0, 0.2, 1)\\`;`",
+    "impact": "Dense one-liner, lặp cubic-bezier. Nếu đổi easing phải sửa 2 chỗ trong cùng 1 template literal.",
+    "suggestion": "Khai báo `const EASE = 'cubic-bezier(0.4, 0, 0.2, 1)';` rồi `transition = \\`transform ${DUR}ms ${EASE}, opacity ${DUR}ms ${EASE}\\`;`. Hoặc tốt hơn: đưa transition vào carousel.css dưới class `.phone-item.animating` và chỉ toggle class.",
+    "effort": "S",
+    "criterion": "clarity"
+  },
+  {
+    "id": "SIMPL-009",
+    "severity": "MEDIUM",
+    "title": "footer.html vẫn inline SVG mail/facebook/linkedin thay vì dùng `<use>`",
+    "file": "partials/footer.html:61-83",
+    "evidence": "Footer inline 3 SVG (mail fill 2 path, facebook, linkedin) dài 22 dòng trong khi icons.svg có #icon-mail-fill, #icon-facebook, #icon-linkedin giống hệt.",
+    "impact": "Lặp code, và khi chuyển sang `<use>` toàn cục sẽ bắt buộc sửa footer. Tốt hơn là fix luôn một lượt với SIMPL-001.",
+    "suggestion": "Sau khi include icons.svg sprite ở <body>, thay 3 block SVG bằng `<svg class=\"w-4 h-4\" aria-hidden=\"true\"><use href=\"#icon-mail-fill\"/></svg>` …",
+    "effort": "S",
+    "criterion": "clarity"
+  },
+  {
+    "id": "SIMPL-010",
+    "severity": "LOW",
+    "title": "Khai báo SVG carousel pause/play song song với CSS hiển thị — logic tách làm 2 nơi",
+    "file": "src/index.src.html:994-996 + assets/css/carousel.css:24-26",
+    "evidence": "HTML render cả 2 SVG pause/play, CSS dùng selector `#carousel-toggle[data-state=\"paused\"] .carousel-toggle-pause { display:none }` để chọn icon. JS (carousel.js:166) set `btn.dataset.state`. Hệ thống trạng thái chia 3 nơi: HTML (class), CSS (selector), JS (dataset).",
+    "impact": "Logic 'đang dừng/đang chạy' rải ra 3 file. Khi thêm trạng thái mới (ví dụ 'buffering') phải sửa cả 3.",
+    "suggestion": "Hoặc: (a) render 1 SVG duy nhất, JS toggle attribute `href` của `<use>` giữa #icon-carousel-pause và #icon-carousel-play; hoặc (b) dùng `aria-pressed` thay cho data-state để có ngữ nghĩa A11y chuẩn.",
+    "effort": "S",
+    "criterion": "clarity"
+  },
+  {
+    "id": "SIMPL-011",
+    "severity": "LOW",
+    "title": "Tên hằng số shift bằng so sánh `=== 1` thay vì tận dụng trực tiếp tham số direction",
+    "file": "assets/js/carousel.js:98",
+    "evidence": "`const shift = direction === 1 ? 1 : -1;` — trong khi `direction` đã được callers truyền vào là 1 hoặc -1 (goNext/goPrev chỉ truyền 1 và -1).",
+    "impact": "Ternary thừa, 'fragile equality comparison' theo tiêu chí preserve.",
+    "suggestion": "Bỏ biến `shift`, dùng thẳng `direction`. Thêm JSDoc `@param {1|-1} direction` để chặt literal type.",
+    "effort": "S",
+    "criterion": "preserve"
+  },
+  {
+    "id": "SIMPL-012",
+    "severity": "LOW",
+    "title": "fromIdx clamp bằng Math.max/Math.min thay vì 1 helper clamp rõ nghĩa",
+    "file": "assets/js/carousel.js:101",
+    "evidence": "`const fromIdx = Math.max(0, Math.min(totalPositions - 1, domIndex + shift));` — ngoài ra `totalPositions` = `total` (dòng 97 gán `const totalPositions = total;`) là biến alias thừa.",
+    "impact": "Double-wrap Math khó đọc + alias vô nghĩa (`totalPositions` = `total`). Đây là redundant assignment.",
+    "suggestion": "Xoá alias: `const fromIdx = clamp(domIndex + direction, 0, total - 1);` với helper `const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);`.",
+    "effort": "S",
+    "criterion": "clarity"
+  },
+  {
+    "id": "SIMPL-013",
+    "severity": "LOW",
+    "title": "startAutoPlay + resetAutoPlay chồng clearInterval — trùng trách nhiệm",
+    "file": "assets/js/carousel.js:147-159",
+    "evidence": "startAutoPlay gọi `if (autoTimer) clearInterval(autoTimer);` rồi đặt lại; resetAutoPlay gọi stopAutoPlay (clearInterval + null) rồi gọi startAutoPlay (clearInterval lần nữa).",
+    "impact": "Logic clearInterval lặp 2 lần, nếu ai chỉ sửa stopAutoPlay (ví dụ thêm log) thì startAutoPlay giữ lại hành vi cũ.",
+    "suggestion": "Cho startAutoPlay gọi stopAutoPlay() ở đầu, hoặc biến resetAutoPlay thành alias của startAutoPlay (vì startAutoPlay đã tự clear). Giảm một hàm.",
+    "effort": "S",
+    "criterion": "clarity"
+  },
+  {
+    "id": "SIMPL-014",
+    "severity": "LOW",
+    "title": "Mẫu 'transition-colors + text-gray-400 hover:text-white text-sm' lặp 5 lần trong footer",
+    "file": "partials/footer.html:44,47,50,60,69,77,98",
+    "evidence": "7 anchor liên tiếp dùng cùng chuỗi `class=\"text-gray-400 hover:text-white transition-colors text-sm\"` (có thêm `flex items-center gap-2` cho biến thể có icon). Tương tự `border-t border-gray-700` lặp 2 lần, pattern này tiếp tục xuất hiện ở 4 file HTML sinh ra.",
+    "impact": "Missing abstraction — đáp ứng tiêu chí balance 'same 3-5 line pattern repeated 4+ times'. Khi thay brand color gray-400→gray-300 phải đổi nhiều chỗ.",
+    "suggestion": "Tạo component class trong src/input.css: `.footer-link { @apply text-gray-400 hover:text-white transition-colors text-sm; }` và `.footer-link--icon { @apply footer-link flex items-center gap-2; }`. Hoặc tối thiểu: utilities Tailwind group dưới `@layer components`.",
+    "effort": "S",
+    "criterion": "balance"
+  },
+  {
+    "id": "SIMPL-015",
+    "severity": "LOW",
+    "title": "menu.js side-effect khởi tạo copyright-year nằm trong cùng file đóng/mở menu",
+    "file": "assets/js/menu.js:17-19",
+    "evidence": "File tên menu.js nhưng dòng 17-19 làm việc khác: `const yearEl = document.getElementById('copyright-year'); if (yearEl) yearEl.textContent = new Date().getFullYear();`",
+    "impact": "Naming sai/scattered logic — người tìm 'mobile menu' sẽ không nghĩ tới năm copyright. Mở rộng menu sau này dễ xoá nhầm đoạn year.",
+    "suggestion": "Hoặc: (a) đổi tên file thành layout.js / ui.js; (b) tách file copyright-year.js riêng; (c) tối thiểu thêm comment phân đoạn rõ ràng. Khuyến nghị (a) vì menu.js sẽ còn nhận thêm trạng thái (aria-expanded, focus trap …).",
+    "effort": "S",
+    "criterion": "standards"
+  }
+]
