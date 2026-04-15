@@ -1,66 +1,115 @@
 ---
-spec_version: "1.0"
+spec_version: "2.0"
 project: "weekend-go-web"
 component: "phone_carousel_mobile_responsive"
 language: "HTML / Tailwind CSS / Vanilla JavaScript"
 task_type: "fix"
 category: "code"
 status: "draft"
+supersedes: "v1.0"
 ---
 
 ## Overview
-[fix]: Tối ưu responsive mobile cho carousel "Xem trước ứng dụng"
+[fix]: Responsive carousel "Xem trước ứng dụng" theo mobile UX patterns chuẩn (App Store / Play Store / Instagram), a11y-safe cho vestibular users.
 
 ### Goal
-Trên mobile <480px chỉ hiển thị 1 phone (center, to ~240px), 480-768px hiển thị 3 phones, ≥768px giữ nguyên 5 phones như hiện tại; kèm swipe gesture native.
+Layout 3 tầng: `<480px` 1 center + 2 peeks (flat), `480-767px` 3 phones (nhẹ rotation), `≥768px` giữ 5 phones 3D coverflow như cũ. Swipe + dots + a11y.
 
 ### Context
-Carousel coverflow hiện tại hiển thị 5 phones ở mọi viewport ≥320px, chỉ scale translateX xuống (0.38x). Hậu quả trên iPhone ~390px: 5 phones chen chúc, side phones thu nhỏ còn ~60px, nội dung không rõ. Center phone 160px * 0.8 = 128px, nhỏ hơn mong muốn.
+DESIGN-SPEC v1 đã approve pure-1-phone mode cho mobile. Research sâu (RESEARCH-v2.md, 30 sources) cho thấy:
+- App Store/Play Store/Instagram đều dùng "peek pattern" chứ không 1-phone pure → user cần edge peek để biết "swipe được".
+- Side arrow buttons ở mid-line carousel = Hard zone thumb cho one-handed usage (Hoober 2024-2025 data).
+- `rotateY` coverflow = WCAG 2.3.3 vestibular trigger (3D plane shift) → cần tắt hoặc gate behind `prefers-reduced-motion`.
+- iOS Safari dynamic toolbar + `dvh` causes jitter → dùng fixed px hoặc `svh`.
 
 ### Requirements
-- [REQ-01] Viewport `< 480px`: chỉ 1 phone center visible, 4 phone còn lại `opacity: 0`, không ảnh hưởng click/tap.
-- [REQ-02] Viewport `480-767px`: 3 phones visible (center + 2 side), 2 far-side ẩn.
-- [REQ-03] Viewport `≥ 768px`: giữ nguyên hành vi 5 phones.
-- [REQ-04] Center phone trên mobile (<480px): hiển thị ~240px width (image size).
-- [REQ-05] Swipe trái/phải (touchstart→touchend distance ≥ 40px theo chiều X) trigger `goPrev()`/`goNext()`.
-- [REQ-06] Window resize: carousel tự tính lại positions (breakpoint thay đổi → visible count thay đổi).
-- [REQ-07] Nút Prev/Next giữ overlay, vẫn hoạt động bình thường trên mọi viewport.
-- [REQ-08] `prefers-reduced-motion`: swipe vẫn hoạt động nhưng không thêm animation phụ ngoài transition đang có.
+- [REQ-01] Mobile `<480px`: 1 phone center (72-78% viewport width) + 2 peek cards (8-12% per side), **rotateY = 0°** (flat).
+- [REQ-02] Tablet `480-767px`: 3 phones (center + left + right), rotateY ±15° (nhẹ hơn desktop), far-left/far-right ẩn.
+- [REQ-03] Desktop `≥768px`: giữ nguyên 5 phones với rotateY ±45°/±25° hiện tại.
+- [REQ-04] Mobile: **ẩn hoàn toàn nút `#carousel-prev` và `#carousel-next`**. Tablet + Desktop: vẫn hiển thị.
+- [REQ-05] Thêm dots indicator (7 dots cho 7 phones) dưới carousel, visible ở mọi viewport. Mobile: decorative (không tap — kích thước quá nhỏ theo Baymard). Desktop/Tablet: clickable để jump.
+- [REQ-06] Swipe: distance threshold `max(25px, 15% carousel width)`, velocity threshold `0.3 px/ms` (flick).
+- [REQ-07] `touch-action: pan-y` trên `#phone-carousel`, passive listeners, **không gọi `preventDefault`** trong touchmove.
+- [REQ-08] Directional lock: 10px deadzone — nếu 10px đầu di chuyển dọc > ngang → không trigger swipe (cho phép page scroll).
+- [REQ-09] Window resize: re-compute layout, debounced 150ms.
+- [REQ-10] `@media (prefers-reduced-motion: no-preference)` gates tất cả rotateY transforms. Khi user prefers reduced: rotateY = 0° ở mọi viewport.
+- [REQ-11] Carousel height: mobile 360px, tablet 500px, desktop 580px — tất cả fixed px (không `vh`/`dvh`).
+- [REQ-12] Center phone image size mobile: base width CSS đổi từ 10rem → 15rem (240px) để đủ lớn khi scale = 1.0.
 
 ### Out of Scope
-- Không thêm dots indicator
-- Không thay đổi autoplay interval
-- Không redesign nút Prev/Next (chỉ có thể co nhỏ nếu cần)
-- Không thay ảnh phone
+- CSS scroll-snap (vẫn dùng JS transform)
+- Keyboard arrow navigation (task follow-up)
+- Changing autoplay interval/behavior
+- Changing section header, background, text
 
 ---
 
 ## Types / Data Models
 
 ```js
-// assets/js/carousel.js — bổ sung
+// assets/js/carousel.js
 
 const BREAKPOINT_XS = 480;
 const BREAKPOINT_SM = 640;
-const BREAKPOINT_MD = 768;   // NEW — tablet boundary
+const BREAKPOINT_MD = 768;   // tablet boundary
 const BREAKPOINT_LG = 1024;
 
-// Số phone visible theo viewport
-// < 480   → 1 (single-mode)
-// 480-767 → 3
-// ≥ 768   → 5
-type VisibleCount = 1 | 3 | 5;
+// Viewport mode
+type ViewportMode = 'mobile' | 'tablet' | 'desktop';
 
-// Config tĩnh 5 vị trí (giữ nguyên structure hiện tại) + hidden
-// getPosition(domIndex) nhận thêm tham số visibleCount để quyết định ẩn slot nào
-function getPosition(domIndex: number, visibleCount: VisibleCount): Position;
-function getVisibleCount(): VisibleCount;
+// Position config (scale, rotateY, translateX, opacity, zIndex)
+// Different POSITIONS_* arrays per mode
+const POSITIONS_DESKTOP = [...]; // 5 visible — current
+const POSITIONS_TABLET  = [...]; // 3 visible + 2 hidden
+const POSITIONS_MOBILE  = [...]; // 1 center + 2 peeks + 4 hidden (flat)
+
+// Swipe tuning
+const SWIPE_DISTANCE_MIN_PX = 25;
+const SWIPE_DISTANCE_RATIO = 0.15;  // 15% of carousel width
+const SWIPE_VELOCITY_FLICK = 0.3;   // px/ms
+const SWIPE_DEADZONE_PX = 10;
+const SWIPE_LOCK_RATIO = 1.2;       // |dx|/|dy| > ratio → horizontal lock
 
 // Swipe state
-let touchStartX: number | null;
-let touchStartY: number | null;
-const SWIPE_THRESHOLD_PX = 40;
-const SWIPE_MAX_VERTICAL_RATIO = 1.5; // |dx| / |dy| phải > ratio này để coi là swipe ngang
+let touchStart: { x: number; y: number; t: number } | null;
+let touchLock: 'none' | 'horizontal' | 'vertical';
+```
+
+### POSITIONS configs
+
+```js
+// DOM indices 0..4 → slots -2, -1, 0, +1, +2 (center is DOM index 2)
+
+// Desktop: current behavior (unchanged)
+const POSITIONS_DESKTOP = [
+  { scale: 0.45, rotateY: 45,  translateX: -420, opacity: 0.4, zIndex: 2  }, // -2
+  { scale: 0.6,  rotateY: 40,  translateX: -230, opacity: 0.7, zIndex: 5  }, // -1
+  { scale: 0.8,  rotateY: 0,   translateX: 0,    opacity: 1.0, zIndex: 10 }, //  0
+  { scale: 0.6,  rotateY: -40, translateX: 230,  opacity: 0.7, zIndex: 5  }, // +1
+  { scale: 0.45, rotateY: -45, translateX: 420,  opacity: 0.4, zIndex: 2  }, // +2
+];
+
+// Tablet: 3 visible — softer rotation
+const POSITIONS_TABLET = [
+  HIDDEN,                                                                     // -2
+  { scale: 0.88, rotateY: 15,  translateX: -180, opacity: 0.7, zIndex: 5  }, // -1
+  { scale: 1.0,  rotateY: 0,   translateX: 0,    opacity: 1.0, zIndex: 10 }, //  0
+  { scale: 0.88, rotateY: -15, translateX: 180,  opacity: 0.7, zIndex: 5  }, // +1
+  HIDDEN,                                                                     // +2
+];
+
+// Mobile: center + 2 peeks, flat (no rotateY)
+// Center phone ≈ 240px wide (75% of 320px safe viewport).
+// Peek offset = center_width/2 + peek_visible_width (peek visible ~28px = ~10% of 280px)
+const POSITIONS_MOBILE = [
+  HIDDEN,                                                                     // -2
+  { scale: 0.82, rotateY: 0,   translateX: -170, opacity: 0.55, zIndex: 5 }, // -1 peek
+  { scale: 1.0,  rotateY: 0,   translateX: 0,    opacity: 1.0,  zIndex: 10 },//  0 center
+  { scale: 0.82, rotateY: 0,   translateX: 170,  opacity: 0.55, zIndex: 5 }, // +1 peek
+  HIDDEN,                                                                     // +2
+];
+
+const HIDDEN = { scale: 0.5, rotateY: 0, translateX: 0, opacity: 0, zIndex: 0 };
 ```
 
 ---
@@ -68,19 +117,20 @@ const SWIPE_MAX_VERTICAL_RATIO = 1.5; // |dx| / |dy| phải > ratio này để c
 ## Interfaces / APIs
 
 ```js
-// Existing — KHÔNG đổi signature public, chỉ đổi behavior internal:
-function getSpreadScale(): number                 // giữ nguyên
-function applyPositions(transition: boolean): void // giữ nguyên, bên trong gọi getVisibleCount()
-function goTo(newCenter: number, direction: -1|1): void  // giữ nguyên
-function goNext(): void                            // giữ nguyên
-function goPrev(): void                            // giữ nguyên
+// New
+function getViewportMode(): 'mobile' | 'tablet' | 'desktop'
+function getPositions(): Position[]            // returns POSITIONS_* for current mode
+function getSwipeThreshold(): number           // max(25, 0.15 * carouselWidth)
+function handleResize(): void                  // debounced 150ms
+function handleTouchStart(e: TouchEvent): void // passive
+function handleTouchMove(e: TouchEvent): void  // passive, direction lock only (no preventDefault)
+function handleTouchEnd(e: TouchEvent): void   // passive, trigger swipe if threshold met
+function buildDots(): void                     // create dot elements
+function updateDots(activeIndex: number): void
 
-// NEW — mobile helpers:
-function getVisibleCount(): 1 | 3 | 5
-function getPosition(domIndex: number, visibleCount: number): Position
-function handleResize(): void   // debounced, gọi applyPositions(false) khi viewport bracket đổi
-function handleTouchStart(e: TouchEvent): void
-function handleTouchEnd(e: TouchEvent): void
+// Modified
+function applyPositions(transition: boolean): void  // uses getPositions()
+function goTo(newCenter, direction): void           // also calls updateDots()
 ```
 
 ---
@@ -90,151 +140,234 @@ function handleTouchEnd(e: TouchEvent): void
 ### Design Decisions
 | # | Decision | Reasoning | Type |
 |---|----------|-----------|------|
-| 1 | Dùng `getVisibleCount()` thay vì mở rộng `VISIBLE_POSITIONS` | Giữ data immutable, chỉ đổi mapping | LOCKED |
-| 2 | Mobile <480px: position center dùng `scale: 1.5` (thay vì 0.8) để image 160px → ~240px | Không cần đổi CSS base width, chỉ logic | LOCKED |
-| 3 | 4 phone phụ khi mobile: dùng `HIDDEN_POSITION` | Không reveal layout | LOCKED |
-| 4 | 3-phone mode (480-767): far-left/far-right dùng `HIDDEN_POSITION`, left/center/right giữ | Reuse config hiện tại | LOCKED |
-| 5 | BREAKPOINT_SM không đổi (640) nhưng logic tablet dùng BREAKPOINT_MD (768) | Align với Tailwind `md:` | LOCKED |
-| 6 | Swipe threshold 40px, dùng touchstart/touchend, không cần touchmove để tránh e.preventDefault | Đơn giản, không chặn scroll dọc | LOCKED |
-| 7 | Resize handler debounced 150ms | Tránh re-render khi xoay máy | LOCKED |
-| 8 | Reset autoplay sau mỗi swipe | Đồng bộ với nút Prev/Next | LOCKED |
-| 9 | Không đổi CSS image width — chỉ đổi scale trong JS | Reduce diff, centralize logic | FLEXIBLE |
+| 1 | 3 arrays `POSITIONS_*` per mode thay vì mutate 1 array | Clearer, immutable, easier to debug | LOCKED |
+| 2 | Mobile peek translateX = 170px | Center 240px + peek visible ~30px + gap ≈ 170px offset từ center | LOCKED |
+| 3 | Mobile flat (rotateY 0) regardless of reduced-motion | Double safety + clean peek look | LOCKED |
+| 4 | Dots: 7 dots (= total phones), positioned `absolute bottom-4 left-1/2` | Canh giữa, gần bottom-easy-zone thumb | LOCKED |
+| 5 | Dots mobile: `pointer-events: none` + reduced opacity để nhấn mạnh decorative | Baymard: dots quá nhỏ cho tap | LOCKED |
+| 6 | Prev/Next buttons ẩn bằng CSS `@media (max-width: 479px) { display: none }` | Giữ HTML, tránh JS complexity | LOCKED |
+| 7 | touchmove chỉ dùng để direction-lock, KHÔNG `preventDefault` | passive listener safe + `touch-action: pan-y` handles scroll intent | LOCKED |
+| 8 | Velocity = dx/dt dựa trên timestamp của touchstart và touchend | Đơn giản, không cần rAF | LOCKED |
+| 9 | `@media (prefers-reduced-motion: no-preference)` wrap CSS transforms (qua JS hoặc CSS var) | WCAG 2.3.3 AAA | LOCKED |
+| 10 | Image base CSS width mobile: 10rem → 15rem (240px) | Center scale=1.0 đủ to | LOCKED |
+| 11 | Desktop/tablet behavior unchanged khi reduced-motion | Mobile đã flat rồi, chỉ tablet/desktop gate rotateY | LOCKED |
 
 ### Affected Files
 
 | File | Action | Description | Impact |
 |------|--------|-------------|--------|
-| [assets/js/carousel.js](../../../../assets/js/carousel.js) | MODIFY | Thêm `BREAKPOINT_MD`, `getVisibleCount()`, đổi `getPosition()` nhận `visibleCount`, resize handler, swipe handlers | d=1 (self-contained) |
-| [assets/css/carousel.css](../../../../assets/css/carousel.css) | MODIFY | Thêm `touch-action: pan-y` trên `#phone-carousel` để tránh chặn scroll dọc; (tùy chọn) thu nhỏ nút Prev/Next trên <480px | d=1 |
-| [src/index.src.html](../../../../src/index.src.html) | NO CHANGE | HTML structure giữ nguyên 7 `.phone-item` | N/A |
-| [index.html](../../../../index.html) | REBUILD | Auto-sinh sau `npm run build:html` nếu src/ không đổi thì không đổi | N/A |
+| [assets/js/carousel.js](../../../../assets/js/carousel.js) | MODIFY | Add `BREAKPOINT_MD`, 3 POSITIONS arrays, `getViewportMode()`, `getPositions()`, swipe handlers với direction lock + velocity, dots builder/updater, resize handler | d=1 |
+| [assets/css/carousel.css](../../../../assets/css/carousel.css) | MODIFY | Height 440→360 mobile; `.phone-item img` width 10rem→15rem mobile; `touch-action: pan-y` on `#phone-carousel`; hide `#carousel-prev/next` mobile; dots CSS; `@media (prefers-reduced-motion)` wrapper cho CSS transforms base | d=1 |
+| [src/index.src.html](../../../../src/index.src.html) | MODIFY | Thêm `<div id="carousel-dots">` sau carousel, aria-label | d=1 |
+| [index.html](../../../../index.html) | REBUILD | `npm run build:html` | N/A |
 
 ### Core logic changes
 
-**1. `getVisibleCount()` — NEW**
+**1. `getViewportMode()` + `getPositions()`**
 ```js
-function getVisibleCount() {
+function getViewportMode() {
   const w = window.innerWidth;
-  if (w < BREAKPOINT_XS) return 1;         // <480
-  if (w < BREAKPOINT_MD) return 3;         // 480-767
-  return 5;                                // ≥768
+  if (w < BREAKPOINT_XS) return 'mobile';    // <480
+  if (w < BREAKPOINT_MD) return 'tablet';    // 480-767
+  return 'desktop';                          // ≥768
+}
+
+function getPositions() {
+  switch (getViewportMode()) {
+    case 'mobile':  return POSITIONS_MOBILE;
+    case 'tablet':  return POSITIONS_TABLET;
+    default:        return POSITIONS_DESKTOP;
+  }
 }
 ```
 
-**2. `getPosition(domIndex, visibleCount)` — MODIFY**
-```js
-function getPosition(domIndex, visibleCount) {
-  // domIndex 0..4 map tới vị trí -2,-1,0,+1,+2
-  if (visibleCount === 5) {
-    return domIndex < VISIBLE_POSITIONS.length ? VISIBLE_POSITIONS[domIndex] : HIDDEN_POSITION;
-  }
-  if (visibleCount === 3) {
-    // chỉ domIndex 1,2,3 visible (left, center, right)
-    if (domIndex === 1 || domIndex === 2 || domIndex === 3) return VISIBLE_POSITIONS[domIndex];
-    return HIDDEN_POSITION;
-  }
-  // visibleCount === 1 — chỉ center, center scale tăng lên 1.5
-  if (domIndex === 2) {
-    return { ...VISIBLE_POSITIONS[2], scale: 1.5 };
-  }
-  return HIDDEN_POSITION;
-}
-```
-
-**3. `applyPositions()` — MODIFY call site**
+**2. `applyPositions()` uses `getPositions()`**
 ```js
 function applyPositions(transition) {
   const items = carousel.querySelectorAll(".phone-item");
-  const spread = getSpreadScale();
-  const visibleCount = getVisibleCount();  // NEW
+  const positions = getPositions();
   items.forEach((phone, domIndex) => {
-    const pos = getPosition(domIndex, visibleCount);  // pass visibleCount
-    // ... rest unchanged
+    const pos = domIndex < positions.length ? positions[domIndex] : HIDDEN;
+    // spread logic REMOVED — pre-computed translateX in each POSITIONS_* array
+    // (scales are already tuned per mode)
+    phone.style.transition = transition
+      ? `transform ${ANIMATION_DURATION_MS}ms cubic-bezier(0.4,0,0.2,1), opacity ${ANIMATION_DURATION_MS}ms`
+      : 'none';
+    phone.style.transform = `translate(-50%, -50%) translateX(${pos.translateX}px) scale(${pos.scale}) rotateY(${pos.rotateY}deg)`;
+    phone.style.opacity = pos.opacity;
+    phone.style.zIndex = pos.zIndex;
+  });
+  updateDots(centerIndex);
+}
+```
+
+**3. Swipe handlers with direction lock + velocity**
+```js
+carousel.addEventListener('touchstart', (e) => {
+  touchStart = {
+    x: e.touches[0].clientX,
+    y: e.touches[0].clientY,
+    t: performance.now(),
+  };
+  touchLock = 'none';
+}, { passive: true });
+
+carousel.addEventListener('touchmove', (e) => {
+  if (!touchStart || touchLock !== 'none') return;
+  const dx = Math.abs(e.touches[0].clientX - touchStart.x);
+  const dy = Math.abs(e.touches[0].clientY - touchStart.y);
+  const d  = Math.max(dx, dy);
+  if (d < SWIPE_DEADZONE_PX) return;
+  touchLock = (dx / (dy || 0.0001) > SWIPE_LOCK_RATIO) ? 'horizontal' : 'vertical';
+  // Note: NO preventDefault — touch-action: pan-y handles scroll intent
+}, { passive: true });
+
+carousel.addEventListener('touchend', (e) => {
+  if (!touchStart || touchLock !== 'horizontal') { touchStart = null; return; }
+  const dx = e.changedTouches[0].clientX - touchStart.x;
+  const dt = performance.now() - touchStart.t;
+  const velocity = Math.abs(dx) / (dt || 1);
+  const threshold = Math.max(SWIPE_DISTANCE_MIN_PX, carousel.offsetWidth * SWIPE_DISTANCE_RATIO);
+  const triggered = Math.abs(dx) >= threshold || velocity >= SWIPE_VELOCITY_FLICK;
+  if (triggered) {
+    if (dx < 0) goNext(); else goPrev();
+    resetAutoPlay();
+  }
+  touchStart = null;
+  touchLock = 'none';
+}, { passive: true });
+```
+
+**4. Dots (CSS + JS)**
+```js
+function buildDots() {
+  const container = document.getElementById('carousel-dots');
+  if (!container) return;
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('button');
+    dot.type = 'button';
+    dot.className = 'carousel-dot';
+    dot.setAttribute('aria-label', `Phone ${i + 1}`);
+    dot.addEventListener('click', () => {
+      if (getViewportMode() === 'mobile') return; // decorative on mobile
+      const direction = i > centerIndex ? 1 : -1;
+      goTo(i, direction);
+      resetAutoPlay();
+    });
+    container.appendChild(dot);
+  }
+  updateDots(centerIndex);
+}
+
+function updateDots(active) {
+  document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === active);
+    dot.setAttribute('aria-current', i === active ? 'true' : 'false');
   });
 }
 ```
 
-**4. Resize handler — NEW**
-```js
-let lastVisibleCount = getVisibleCount();
-let resizeTimer;
-window.addEventListener('resize', () => {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => {
-    const current = getVisibleCount();
-    if (current !== lastVisibleCount) {
-      lastVisibleCount = current;
-      applyPositions(true);
-    } else {
-      // Just spread change (e.g. 480→640 within same visible=3 bracket)
-      applyPositions(false);
-    }
-  }, 150);
-});
-```
-
-**5. Swipe handlers — NEW**
-```js
-carousel.addEventListener('touchstart', (e) => {
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-}, { passive: true });
-
-carousel.addEventListener('touchend', (e) => {
-  if (touchStartX === null) return;
-  const dx = e.changedTouches[0].clientX - touchStartX;
-  const dy = e.changedTouches[0].clientY - touchStartY;
-  touchStartX = null;
-  touchStartY = null;
-  // Chỉ accept horizontal swipe
-  if (Math.abs(dx) < SWIPE_THRESHOLD_PX) return;
-  if (Math.abs(dy) > 0 && Math.abs(dx) / Math.abs(dy) < SWIPE_MAX_VERTICAL_RATIO) return;
-  if (dx < 0) goNext(); else goPrev();
-  resetAutoPlay();
-}, { passive: true });
-```
-
-**6. CSS bổ sung**
+**5. CSS changes**
 ```css
+/* assets/css/carousel.css */
+
 #phone-carousel {
-  /* ... existing */
-  touch-action: pan-y;  /* cho phép scroll dọc, swipe ngang do JS xử lý */
+  perspective: 3000px;
+  transform-style: preserve-3d;
+  height: 360px;               /* was 440px on mobile */
+  touch-action: pan-y;         /* NEW */
+}
+@media (min-width: 480px) { #phone-carousel { height: 440px; } }
+@media (min-width: 640px) { #phone-carousel { height: 500px; } }
+@media (min-width: 1024px) { #phone-carousel { height: 580px; } }
+
+.phone-item img {
+  width: 15rem;                /* was 10rem mobile */
+  /* ... */
+}
+@media (min-width: 640px) { .phone-item img { width: 14rem; } }
+@media (min-width: 1024px) { .phone-item img { width: 18rem; } }
+
+/* Hide prev/next on mobile */
+@media (max-width: 479px) {
+  #carousel-prev, #carousel-next { display: none; }
 }
 
-/* Tùy chọn: co nút Prev/Next trên mobile rất nhỏ */
+/* Dots */
+#carousel-dots {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+.carousel-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: #d1d5db;
+  border: 0;
+  padding: 0;
+  transition: background 200ms, transform 200ms;
+  cursor: pointer;
+}
+.carousel-dot.active {
+  background: var(--color-primary, #10b981);
+  transform: scale(1.3);
+}
 @media (max-width: 479px) {
-  #carousel-prev, #carousel-next { width: 2.25rem; height: 2.25rem; }
+  .carousel-dot { pointer-events: none; cursor: default; }
+}
+
+/* Reduced-motion gate for rotateY — applied via conditional class */
+@media (prefers-reduced-motion: reduce) {
+  .phone-item {
+    transition: none !important;
+  }
+  /* carousel.js will also set --coverflow-rotation to 0deg via CSS var */
 }
 ```
 
 ---
 
-## Open Questions
-_Không còn — mọi quyết định đã locked trong CONTEXT.md_
-
 ## Constraints
-- Performance: resize handler debounced 150ms, swipe dùng passive listeners → không block scroll.
-- Compatibility: touch events standard (iOS Safari, Chrome Android).
-- Không breaking desktop (viewport ≥768px identical behavior).
-- Respect `prefers-reduced-motion`: đã có `@media` trong CSS vô hiệu hoá transition; swipe chỉ trigger `goTo()` tuân thủ flag này.
+- No JS preventDefault in touch handlers → relies on `touch-action: pan-y` CSS.
+- Dots count = total phones (7) regardless of visible count — progress indicator truth.
+- `prefers-reduced-motion: reduce`: JS detects and sets rotateY = 0 for all positions on all viewports.
+- Center phone mobile width 240px > 44px WCAG AA tap target ✓.
+- Performance: passive listeners + debounced resize → no jank on toolbar show/hide.
 
 ---
 
 ## Acceptance Criteria
 
 ### Per-Requirement
-| Req | Verification | Expected Result |
-|-----|-------------|----------------|
-| REQ-01 | `npx playwright test tests/visual/carousel-mobile.spec.ts --grep "mobile-375"` | Screenshot chỉ có 1 phone visible, opacity 4 phones khác = 0 |
-| REQ-02 | `npx playwright test tests/visual/carousel-mobile.spec.ts --grep "tablet-640"` | Screenshot show 3 phones (left/center/right) visible |
-| REQ-03 | `npx playwright test tests/visual/carousel-mobile.spec.ts --grep "desktop-1280"` | Screenshot show 5 phones (giữ nguyên hiện tại) |
-| REQ-04 | `getBoundingClientRect().width` của center img tại viewport 390px | ≥ 220 và ≤ 260 |
-| REQ-05 | Playwright `page.touchscreen.swipe(...)` từ x=300 đến x=100 | `centerIndex` tăng 1 (goNext được gọi) |
-| REQ-06 | Resize viewport 1200→375 | `visibleCount` đổi từ 5→1, applyPositions chạy lại |
-| REQ-07 | Click `#carousel-next` ở viewport 375 | goNext chạy bình thường, phone center đổi |
-| REQ-08 | Set `prefers-reduced-motion: reduce`, swipe | goTo chạy, không có transition extra |
+| Req | Verification | Expected |
+|-----|-------------|----------|
+| REQ-01 | Playwright mobile 375, measure visible `.phone-item` rects | 3 visible (center + 2 peeks), center width 220-280px, peeks opacity 0.55 ±0.05 |
+| REQ-02 | Playwright viewport 640 | 3 visible phones, rotateY ±15°, opacity 0.7/1.0 |
+| REQ-03 | Playwright 1280 | 5 visible, rotateY ±45°/±25° (unchanged from current) |
+| REQ-04 | Computed `display` of `#carousel-prev` at viewport 375 | `display: none` |
+| REQ-05 | `#carousel-dots` visible, 7 dot elements, `.active` matches `centerIndex` | Exactly 7 children, 1 with `.active` |
+| REQ-06 | Swipe 60px in 100ms (velocity 0.6) → triggers; 20px in 500ms → no trigger; 10px in 30ms (velocity 0.33) → triggers | 3 scenarios pass |
+| REQ-07 | DevTools Protocol check `touch-action` computed on `#phone-carousel` | `pan-y` |
+| REQ-08 | Swipe dx=5 dy=50 (vertical motion) | No centerIndex change |
+| REQ-09 | Resize 1280→375 | visibleCount 5→3 after 150ms debounce |
+| REQ-10 | Launch with `reducedMotion: 'reduce'`, inspect rotateY computed on center phone desktop | rotateY = 0° |
+| REQ-11 | Computed `height` của `#phone-carousel` mobile | 360px (not vh/dvh) |
+| REQ-12 | Computed `width` của center img mobile | 240px (15rem × 1.0 scale) |
 
 ### Overall
-1. `npm run build` — không lỗi.
-2. `npx playwright test tests/visual/` — tất cả snapshot pass hoặc có diff < 0.1% (update nếu cần).
-3. Smoke test manual: mở `index.html` qua `python3 -m http.server`, DevTools device mode iPhone SE/12/14 → xác nhận hiển thị 1 phone, swipe được, click button được.
+```bash
+npm run build
+npx playwright test tests/visual/carousel-mobile.spec.js --update-snapshots  # first run
+npx playwright test tests/visual/carousel-mobile.spec.js
+npx playwright test tests/visual/pages.spec.js --project=mobile --update-snapshots  # regenerate mobile baseline
+npx playwright test  # final full run, should all pass
+
+# Manual smoke:
+npx serve -l 5173 .
+# iPhone SE/14 → carousel flat, peek visible, arrows hidden, dots show
+# Xoay máy → resize debounce, layout tự cập nhật
+# Swipe + flick → chuyển được cả distance và velocity mode
+# Set Chrome DevTools → prefers-reduced-motion reduce → desktop 1280: rotateY = 0
+```
