@@ -60,13 +60,9 @@
     scroll-snap-align: center;
     z-index: auto !important;
     will-change: auto;
-    transform: scale(0.85) !important;
-    opacity: 0.5 !important;
+    transform: scale(0.85);
+    opacity: 0.5;
     transition: transform 300ms ease-in-out, opacity 300ms ease-in-out;
-  }
-  .phone-item.is-center {
-    transform: scale(1) !important;
-    opacity: 1 !important;
   }
 
   .phone-item img {
