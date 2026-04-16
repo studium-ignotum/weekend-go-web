@@ -50,6 +50,9 @@ const total = phones.length;
 let centerIndex = 0;
 let animating = false;
 let autoTimer;
+let isScrollMode = false;
+let cloneFirst = null;
+let cloneLast = null;
 
 function getViewportMode() {
   const w = window.innerWidth;
@@ -100,6 +103,98 @@ function updateDots(active) {
   });
 }
 
+function initScrollMode() {
+  if (isScrollMode) return;
+  isScrollMode = true;
+
+  phones.forEach(phone => { phone.style.cssText = ''; });
+
+  cloneLast = phones[phones.length - 1].cloneNode(true);
+  cloneFirst = phones[0].cloneNode(true);
+  cloneLast.classList.add('clone');
+  cloneFirst.classList.add('clone');
+  cloneLast.setAttribute('aria-hidden', 'true');
+  cloneFirst.setAttribute('aria-hidden', 'true');
+  cloneLast.tabIndex = -1;
+  cloneFirst.tabIndex = -1;
+  carousel.prepend(cloneLast);
+  carousel.append(cloneFirst);
+
+  requestAnimationFrame(() => {
+    scrollToIndex(centerIndex, 'instant');
+  });
+
+  if ('onscrollend' in carousel) {
+    carousel.addEventListener('scrollend', handleScrollEnd);
+  } else {
+    carousel.addEventListener('scroll', debounceScrollEnd, { passive: true });
+  }
+}
+
+function destroyScrollMode() {
+  if (!isScrollMode) return;
+  isScrollMode = false;
+
+  if (cloneLast?.parentNode) cloneLast.remove();
+  if (cloneFirst?.parentNode) cloneFirst.remove();
+  cloneLast = null;
+  cloneFirst = null;
+
+  carousel.removeEventListener('scrollend', handleScrollEnd);
+  carousel.removeEventListener('scroll', debounceScrollEnd);
+
+  reorderDOM();
+  applyPositions(false);
+}
+
+function scrollToIndex(idx, behavior) {
+  const items = Array.from(carousel.children);
+  // offset by 1 because clone-of-last is prepended at index 0
+  const targetDomIdx = idx + 1;
+  const target = items[targetDomIdx];
+  if (!target) return;
+  const containerWidth = carousel.offsetWidth;
+  const scrollTarget = target.offsetLeft - (containerWidth - target.offsetWidth) / 2;
+  carousel.scrollTo({ left: scrollTarget, behavior: behavior || 'smooth' });
+}
+
+function handleScrollEnd() {
+  const scrollLeft = carousel.scrollLeft;
+  const containerWidth = carousel.offsetWidth;
+  const items = Array.from(carousel.children);
+
+  let closestIdx = 0;
+  let closestDist = Infinity;
+  items.forEach((item, i) => {
+    const itemCenter = item.offsetLeft + item.offsetWidth / 2;
+    const dist = Math.abs(itemCenter - (scrollLeft + containerWidth / 2));
+    if (dist < closestDist) { closestDist = dist; closestIdx = i; }
+  });
+
+  const item = items[closestIdx];
+
+  if (item.classList.contains('clone')) {
+    if (item === cloneLast) {
+      centerIndex = phones.length - 1;
+    } else {
+      centerIndex = 0;
+    }
+    scrollToIndex(centerIndex, 'instant');
+  } else {
+    centerIndex = phones.indexOf(item);
+    if (centerIndex === -1) centerIndex = 0;
+  }
+
+  updateDots(centerIndex);
+  carousel.dataset.centerIndex = String(centerIndex);
+}
+
+let scrollEndTimer = null;
+function debounceScrollEnd() {
+  clearTimeout(scrollEndTimer);
+  scrollEndTimer = setTimeout(handleScrollEnd, 100);
+}
+
 function reorderDOM() {
   // Place 5 visible items (center ± 2) + remaining hidden
   const order = [];
@@ -118,6 +213,12 @@ function reorderDOM() {
 }
 
 function applyPositions(transition) {
+  if (isScrollMode) {
+    updateDots(centerIndex);
+    carousel.dataset.centerIndex = String(centerIndex);
+    carousel.dataset.viewportMode = getViewportMode();
+    return;
+  }
   const items = carousel.querySelectorAll(".phone-item");
   items.forEach((phone, domIndex) => {
     const pos = getPosition(domIndex);
@@ -135,6 +236,13 @@ function applyPositions(transition) {
 }
 
 function goTo(newCenter, direction) {
+  if (isScrollMode) {
+    centerIndex = ((newCenter % total) + total) % total;
+    scrollToIndex(centerIndex, 'smooth');
+    updateDots(centerIndex);
+    carousel.dataset.centerIndex = String(centerIndex);
+    return;
+  }
   if (animating || newCenter === centerIndex) return;
   animating = true;
   centerIndex = newCenter;
@@ -175,6 +283,10 @@ applyPositions(false);
 buildDots();
 updateDots(centerIndex);
 
+if (getViewportMode() !== 'desktop') {
+  initScrollMode();
+}
+
 // Next / Prev buttons
 document.getElementById("carousel-next")?.addEventListener("click", () => {
   goNext();
@@ -190,6 +302,7 @@ let touchStart = null;
 let touchLock = 'none';
 
 function handleTouchStart(e) {
+  if (isScrollMode) return;
   touchStart = {
     x: e.touches[0].clientX,
     y: e.touches[0].clientY,
@@ -199,6 +312,7 @@ function handleTouchStart(e) {
 }
 
 function handleTouchMove(e) {
+  if (isScrollMode) return;
   if (!touchStart || touchLock !== 'none') return;
   const dx = Math.abs(e.touches[0].clientX - touchStart.x);
   const dy = Math.abs(e.touches[0].clientY - touchStart.y);
@@ -209,6 +323,7 @@ function handleTouchMove(e) {
 }
 
 function handleTouchEnd(e) {
+  if (isScrollMode) return;
   if (!touchStart) return;
   if (touchLock !== 'horizontal') {
     touchStart = null;
@@ -241,9 +356,11 @@ function handleResize() {
     const current = getViewportMode();
     if (current !== lastViewportMode) {
       lastViewportMode = current;
-      applyPositions(true);
-    } else {
-      applyPositions(false);
+      if (current === 'desktop') {
+        destroyScrollMode();
+      } else {
+        initScrollMode();
+      }
     }
   }, 150);
 }
