@@ -8,6 +8,12 @@ const BREAKPOINT_LG = 1024;
 const ANIMATION_DURATION_MS = 600;
 const AUTOPLAY_INTERVAL_MS = 3000;
 
+// Mobile interpolation config
+const MOBILE_SCALE_CENTER = 1.0;
+const MOBILE_SCALE_SIDE = 0.85;
+const MOBILE_OPACITY_CENTER = 1.0;
+const MOBILE_OPACITY_SIDE = 0.5;
+
 // Swipe tuning
 const SWIPE_DISTANCE_MIN_PX = 25;
 const SWIPE_DISTANCE_RATIO  = 0.15;   // 15% of carousel width
@@ -53,6 +59,7 @@ let autoTimer;
 let isScrollMode = false;
 let cloneFirst = null;
 let cloneLast = null;
+let rafId = null;
 
 function getViewportMode() {
   const w = window.innerWidth;
@@ -103,6 +110,33 @@ function updateDots(active) {
   });
 }
 
+function interpolateItems() {
+  if (!isScrollMode) return;
+  const containerCenter = carousel.scrollLeft + carousel.offsetWidth / 2;
+  const items = Array.from(carousel.children);
+
+  items.forEach(item => {
+    const itemCenter = item.offsetLeft + item.offsetWidth / 2;
+    const distance = Math.abs(itemCenter - containerCenter);
+    const itemWidth = item.offsetWidth;
+
+    // ratio: 0 = at center, 1 = one item width away or more
+    const ratio = Math.min(distance / itemWidth, 1);
+
+    // Linear interpolation
+    const scale = MOBILE_SCALE_CENTER - ratio * (MOBILE_SCALE_CENTER - MOBILE_SCALE_SIDE);
+    const opacity = MOBILE_OPACITY_CENTER - ratio * (MOBILE_OPACITY_CENTER - MOBILE_OPACITY_SIDE);
+
+    item.style.transform = `scale(${scale})`;
+    item.style.opacity = opacity;
+  });
+}
+
+function handleScrollInterpolation() {
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(interpolateItems);
+}
+
 function initScrollMode() {
   if (isScrollMode) return;
   isScrollMode = true;
@@ -122,8 +156,10 @@ function initScrollMode() {
 
   requestAnimationFrame(() => {
     scrollToIndex(centerIndex, 'instant');
-    updateCenterClass();
+    interpolateItems();
   });
+
+  carousel.addEventListener('scroll', handleScrollInterpolation, { passive: true });
 
   if ('onscrollend' in carousel) {
     carousel.addEventListener('scrollend', handleScrollEnd);
@@ -136,6 +172,9 @@ function destroyScrollMode() {
   if (!isScrollMode) return;
   isScrollMode = false;
 
+  carousel.removeEventListener('scroll', handleScrollInterpolation);
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+
   if (cloneLast?.parentNode) cloneLast.remove();
   if (cloneFirst?.parentNode) cloneFirst.remove();
   cloneLast = null;
@@ -143,6 +182,12 @@ function destroyScrollMode() {
 
   carousel.removeEventListener('scrollend', handleScrollEnd);
   carousel.removeEventListener('scroll', debounceScrollEnd);
+
+  // Reset inline styles set by interpolation on all items
+  Array.from(carousel.children).forEach(item => {
+    item.style.transform = '';
+    item.style.opacity = '';
+  });
 
   reorderDOM();
   applyPositions(false);
@@ -188,7 +233,6 @@ function handleScrollEnd() {
 
   updateDots(centerIndex);
   carousel.dataset.centerIndex = String(centerIndex);
-  updateCenterClass();
 }
 
 function updateCenterClass() {
@@ -249,7 +293,7 @@ function goTo(newCenter, direction) {
     centerIndex = ((newCenter % total) + total) % total;
     scrollToIndex(centerIndex, 'smooth');
     updateDots(centerIndex);
-    updateCenterClass();
+    interpolateItems();
     carousel.dataset.centerIndex = String(centerIndex);
     return;
   }
