@@ -22,30 +22,31 @@ const SWIPE_DEADZONE_PX     = 10;
 const SWIPE_LOCK_RATIO      = 1.2;    // |dx|/|dy| threshold for horizontal lock
 
 // Hidden slot config
-const HIDDEN = { scale: 0.5, rotateY: 0, translateX: 0, opacity: 0, zIndex: 0 };
+const HIDDEN = { scale: 0.5, rotateY: 0, txRatio: 0, opacity: 0, zIndex: 0 };
 
 // POSITIONS arrays — indexed by DOM slot 0..4 = positions -2, -1, 0, +1, +2
+// txRatio = translateX as fraction of carousel.offsetWidth (responsive)
 const POSITIONS_DESKTOP = [
-  { scale: 0.55, rotateY: 55,  translateX: -420, opacity: 0.4, zIndex: 2  },
-  { scale: 0.75, rotateY: 40,  translateX: -230, opacity: 0.7, zIndex: 5  },
-  { scale: 1.0,  rotateY: 0,   translateX: 0,    opacity: 1.0, zIndex: 10 },
-  { scale: 0.75, rotateY: -40, translateX: 230,  opacity: 0.7, zIndex: 5  },
-  { scale: 0.55, rotateY: -55, translateX: 420,  opacity: 0.4, zIndex: 2  },
+  { scale: 0.55, rotateY: 55,  txRatio: -0.37, opacity: 0.4, zIndex: 2  },
+  { scale: 0.75, rotateY: 40,  txRatio: -0.20, opacity: 0.7, zIndex: 5  },
+  { scale: 1.0,  rotateY: 0,   txRatio: 0,     opacity: 1.0, zIndex: 10 },
+  { scale: 0.75, rotateY: -40, txRatio: 0.20,  opacity: 0.7, zIndex: 5  },
+  { scale: 0.55, rotateY: -55, txRatio: 0.37,  opacity: 0.4, zIndex: 2  },
 ];
 
 const POSITIONS_TABLET = [
   HIDDEN,
-  { scale: 0.88, rotateY: 15,  translateX: -180, opacity: 0.7, zIndex: 5  },
-  { scale: 1.0,  rotateY: 0,   translateX: 0,    opacity: 1.0, zIndex: 10 },
-  { scale: 0.88, rotateY: -15, translateX: 180,  opacity: 0.7, zIndex: 5  },
+  { scale: 0.88, rotateY: 15,  txRatio: -0.25, opacity: 0.7, zIndex: 5  },
+  { scale: 1.0,  rotateY: 0,   txRatio: 0,     opacity: 1.0, zIndex: 10 },
+  { scale: 0.88, rotateY: -15, txRatio: 0.25,  opacity: 0.7, zIndex: 5  },
   HIDDEN,
 ];
 
 const POSITIONS_MOBILE = [
   HIDDEN,
-  { scale: 0.82, rotateY: 0,   translateX: -170, opacity: 0.55, zIndex: 5  },
-  { scale: 1.0,  rotateY: 0,   translateX: 0,    opacity: 1.0,  zIndex: 10 },
-  { scale: 0.82, rotateY: 0,   translateX: 170,  opacity: 0.55, zIndex: 5  },
+  { scale: 0.82, rotateY: 0,   txRatio: -0.30, opacity: 0.55, zIndex: 5  },
+  { scale: 1.0,  rotateY: 0,   txRatio: 0,     opacity: 1.0,  zIndex: 10 },
+  { scale: 0.82, rotateY: 0,   txRatio: 0.30,  opacity: 0.55, zIndex: 5  },
   HIDDEN,
 ];
 
@@ -278,7 +279,8 @@ function applyPositions(transition) {
     phone.style.transition = transition
       ? `transform ${ANIMATION_DURATION_MS}ms cubic-bezier(0.4, 0, 0.2, 1), opacity ${ANIMATION_DURATION_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`
       : 'none';
-    phone.style.transform = `translate(-50%, -50%) translateX(${pos.translateX}px) scale(${pos.scale}) rotateY(${pos.rotateY}deg)`;
+    const tx = Math.round(pos.txRatio * carousel.offsetWidth);
+    phone.style.transform = `translate(-50%, -50%) translateX(${tx}px) scale(${pos.scale}) rotateY(${pos.rotateY}deg)`;
     phone.style.opacity = pos.opacity;
     phone.style.zIndex = pos.zIndex;
   });
@@ -309,7 +311,8 @@ function goTo(newCenter, direction) {
     const fromIdx = Math.max(0, Math.min(items.length - 1, domIndex + shift));
     const fromPos = getPosition(fromIdx);
     phone.style.transition = 'none';
-    phone.style.transform = `translate(-50%, -50%) translateX(${fromPos.translateX}px) scale(${fromPos.scale}) rotateY(${fromPos.rotateY}deg)`;
+    const tx = Math.round(fromPos.txRatio * carousel.offsetWidth);
+    phone.style.transform = `translate(-50%, -50%) translateX(${tx}px) scale(${fromPos.scale}) rotateY(${fromPos.rotateY}deg)`;
     phone.style.opacity = fromPos.opacity;
     phone.style.zIndex = getPosition(domIndex).zIndex;
   });
