@@ -1,0 +1,25 @@
+{
+  "acceptance": [
+    "cd '/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web' && grep -A3 'prefers-reduced-motion: reduce' assets/css/carousel.css | grep -q 'transition: none'"
+  ],
+  "conventions_subset": {
+    "async_pattern": "async/await",
+    "error_handling": "try-catch + { error } return",
+    "naming": "camelCase functions, snake_case JSON",
+    "test_framework": "node:test"
+  },
+  "dependency_signatures": [],
+  "description": "carousel.css: @media (prefers-reduced-motion: reduce) disable .phone-item transition",
+  "estimated_tokens": 333,
+  "file_segments": [
+    {
+      "action": "MODIFY",
+      "end_line": 18,
+      "lines": "#phone-carousel {\n  perspective: 1200px;\n  transform-style: preserve-3d;\n  height: 520px;\n}\n@media (min-width: 640px) {\n  #phone-carousel { height: 580px; }\n}\n@media (min-width: 1024px) {\n  #phone-carousel { height: 680px; }\n}\n.phone-item {\n  position: absolute;\n  left: 50%;\n  top: 50%;\n  transform-origin: center center;\n  will-change: transform, opacity;\n}\n",
+      "path": "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/assets/css/carousel.css",
+      "start_line": 1
+    }
+  ],
+  "task_id": "T-02",
+  "task_name": "carousel.css: @media (prefers-reduced-motion: reduce) disable .phone-item transition"
+}

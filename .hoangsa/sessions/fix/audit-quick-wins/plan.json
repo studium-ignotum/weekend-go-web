@@ -1,0 +1,130 @@
+{
+  "name": "fix: Audit quick wins (22 issues)",
+  "workspace_dir": "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web",
+  "spec_ref": "audit_quick_wins-spec-v1.0",
+  "language": "HTML, CSS, JavaScript",
+  "budget_tokens": 90000,
+  "tasks": [
+    {
+      "id": "FIX-1",
+      "name": "Fix tailwind.config.js: primary color #34C759, xóa duplicate tokens",
+      "complexity": "low",
+      "budget_tokens": 10000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tailwind.config.js"
+      ],
+      "depends_on": [],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tailwind.config.js:1-35"
+      ],
+      "covers": ["REQ-03", "REQ-12"],
+      "acceptance": "grep -c '#22c55e' tailwind.config.js | grep '^0$' && grep -c '#34C759' tailwind.config.js | grep -v '^0$'"
+    },
+    {
+      "id": "FIX-2",
+      "name": "Fix src/input.css: đồng bộ color + thêm .phone-transition class",
+      "complexity": "low",
+      "budget_tokens": 8000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/input.css"
+      ],
+      "depends_on": ["FIX-1"],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/input.css:1-50"
+      ],
+      "covers": ["REQ-03", "REQ-11"],
+      "acceptance": "grep -c 'phone-transition' src/input.css | grep -v '^0$'"
+    },
+    {
+      "id": "FIX-3",
+      "name": "Fix package.json: build/dev scripts, xóa main, thêm engines",
+      "complexity": "low",
+      "budget_tokens": 8000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/package.json"
+      ],
+      "depends_on": [],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/package.json:1-30"
+      ],
+      "covers": ["REQ-05", "REQ-14"],
+      "acceptance": "grep -c '\"build\"' package.json | grep -v '^0$' && grep -c '\"main\"' package.json | grep '^0$'"
+    },
+    {
+      "id": "FIX-4",
+      "name": "Create .editorconfig",
+      "complexity": "low",
+      "budget_tokens": 5000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/.editorconfig"
+      ],
+      "depends_on": [],
+      "context_pointers": [],
+      "covers": ["REQ-13"],
+      "acceptance": "test -f .editorconfig && echo 'exists'"
+    },
+    {
+      "id": "FIX-5",
+      "name": "Compile CSS sau khi config đã sửa",
+      "complexity": "low",
+      "budget_tokens": 8000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/assets/css/styles.css"
+      ],
+      "depends_on": ["FIX-1", "FIX-2", "FIX-3"],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/input.css:1-50"
+      ],
+      "covers": ["REQ-02"],
+      "acceptance": "npx tailwindcss -i ./src/input.css -o ./assets/css/styles.css --minify && test -f assets/css/styles.css"
+    },
+    {
+      "id": "FIX-6",
+      "name": "Move carousel webp files to assets/images/",
+      "complexity": "low",
+      "budget_tokens": 8000,
+      "namespace": null,
+      "files": ["/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/assets/images/venue-detail.webp"],
+      "depends_on": [],
+      "context_pointers": [],
+      "covers": ["REQ-07"],
+      "acceptance": "test -f assets/images/venue-detail.webp && test -f assets/images/newfeed.webp && test -f assets/images/user-profile.webp"
+    },
+    {
+      "id": "FIX-7",
+      "name": "Delete dead assets: root PNGs, screenshots/, testimonials/, app-icon.png",
+      "complexity": "low",
+      "budget_tokens": 8000,
+      "namespace": null,
+      "files": ["/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/newfeed.png"],
+      "depends_on": [],
+      "context_pointers": [],
+      "covers": ["REQ-08", "REQ-17"],
+      "acceptance": "test $(ls *.png 2>/dev/null | wc -l) -eq 0 && test ! -d assets/images/screenshots && test ! -d assets/images/testimonials"
+    },
+    {
+      "id": "FIX-8",
+      "name": "Fix index.html: logo link, CDN→CSS, APK links, carousel attrs, colors, JS constants, OG image, TestFlight label, social links",
+      "complexity": "medium",
+      "budget_tokens": 35000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html"
+      ],
+      "depends_on": ["FIX-5", "FIX-6"],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:1-100",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:400-440",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:510-600",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:620-730"
+      ],
+      "covers": ["REQ-01", "REQ-02", "REQ-04", "REQ-06", "REQ-07", "REQ-09", "REQ-10", "REQ-11", "REQ-15", "REQ-16", "REQ-18"],
+      "acceptance": "grep -c 'index2.html' index.html | grep '^0$' && grep -c 'cdn.tailwindcss' index.html | grep '^0$' && grep -c 'releases/latest/download' index.html | grep -v '^0$' && grep -c 'loading=\"lazy\"' index.html | grep -v '^0$' && grep -c 'AUTOPLAY_INTERVAL' index.html | grep -v '^0$'"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "name": "design: color-theme-footer-branding",
+  "workspace_dir": "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web",
+  "spec_ref": "color_theme_footer_branding-spec-v1.0",
+  "language": "HTML / TailwindCSS 3.x",
+  "budget_tokens": 62000,
+  "tasks": [
+    {
+      "id": "design-01",
+      "name": "Update primary color token in tailwind.config.js",
+      "complexity": "low",
+      "budget_tokens": 8000,
+      "namespace": "weekend-go-web",
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tailwind.config.js"
+      ],
+      "depends_on": [],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tailwind.config.js:1-33"
+      ],
+      "covers": ["REQ-01"],
+      "acceptance": "grep -q '22c55e' \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tailwind.config.js\" && grep -q '16a34a' \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tailwind.config.js\" && ! grep -q '34C759' \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tailwind.config.js\" && echo PASS"
+    },
+    {
+      "id": "design-02",
+      "name": "Update hardcoded primary color in src/input.css",
+      "complexity": "low",
+      "budget_tokens": 8000,
+      "namespace": "weekend-go-web",
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/input.css"
+      ],
+      "depends_on": [],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/input.css:1-35"
+      ],
+      "covers": ["REQ-02"],
+      "acceptance": "grep -q '22c55e' \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/input.css\" && ! grep -q '34C759' \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/input.css\" && echo PASS"
+    },
+    {
+      "id": "design-03",
+      "name": "Rebuild TailwindCSS (npm run build)",
+      "complexity": "low",
+      "budget_tokens": 6000,
+      "namespace": "weekend-go-web",
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/assets/css/styles.css"
+      ],
+      "depends_on": ["design-01", "design-02"],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/package.json:1-28"
+      ],
+      "covers": ["REQ-03"],
+      "acceptance": "cd \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web\" && npm run build 2>&1 | tail -3 && echo PASS"
+    },
+    {
+      "id": "design-04",
+      "name": "Add Unknownstudio.dev studio credit in footer brand column",
+      "complexity": "medium",
+      "budget_tokens": 20000,
+      "namespace": "weekend-go-web",
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html"
+      ],
+      "depends_on": [],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:1194-1230"
+      ],
+      "covers": ["REQ-04"],
+      "acceptance": "grep -q 'unknownstudio-logo.svg' \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html\" && grep -q 'unknownstudio.dev' \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html\" && grep -q 'noopener noreferrer' \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html\" && echo PASS"
+    },
+    {
+      "id": "design-05",
+      "name": "Add 4th footer column 'Về chúng tôi' and update grid layout",
+      "complexity": "medium",
+      "budget_tokens": 20000,
+      "namespace": "weekend-go-web",
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html"
+      ],
+      "depends_on": ["design-04"],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:1194-1322"
+      ],
+      "covers": ["REQ-05", "REQ-06"],
+      "acceptance": "grep -q 'lg:grid-cols-4' \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html\" && grep -q 'Về chúng tôi' \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html\" && echo PASS"
+    }
+  ]
+}

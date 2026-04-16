@@ -1,0 +1,16 @@
+{
+  "created_at": "2026-04-09T07:51:16.934Z",
+  "current_command": null,
+  "language": "en",
+  "preferences": {
+    "auto_plate": null,
+    "auto_serve": null,
+    "auto_taste": null
+  },
+  "session_id": "fix/audit-quick-wins",
+  "stack": "",
+  "status": "design",
+  "task_type": "feat",
+  "tasks": [],
+  "updated_at": "2026-04-09T07:58:14.156Z"
+}

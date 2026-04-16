@@ -1,0 +1,57 @@
+{
+  "name": "fix: Footer spacing — 4 breathing-room bugs",
+  "workspace_dir": "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web",
+  "spec_ref": "footer_spacing-spec-v1.0",
+  "language": "HTML5 + Tailwind CSS",
+  "budget_tokens": 24000,
+  "tasks": [
+    {
+      "id": "T-01",
+      "name": "Apply brand col spacing fixes (REQ-01 + REQ-02)",
+      "complexity": "low",
+      "budget_tokens": 8000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html"
+      ],
+      "depends_on": [],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:1193-1240"
+      ],
+      "covers": ["REQ-01", "REQ-02"],
+      "acceptance": "cd '/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web' && grep -q '<div class=\"space-y-6\">' index.html && grep -q '<div class=\"pt-2\">' index.html && grep -q 'mb-3\">Sản phẩm của' index.html && ! grep -q '<div class=\"space-y-5\">' index.html && ! grep -q 'mb-2\">Sản phẩm của' index.html && echo 'T-01 PASS'"
+    },
+    {
+      "id": "T-02",
+      "name": "Apply 'Về chúng tôi' divider balance (REQ-03)",
+      "complexity": "low",
+      "budget_tokens": 8000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html"
+      ],
+      "depends_on": [],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:1295-1320"
+      ],
+      "covers": ["REQ-03"],
+      "acceptance": "cd '/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web' && grep -q 'pt-5 border-t border-white/10' index.html && ! grep -q 'pt-1 border-t border-white/10' index.html && ! sed -n '/<!-- About us -->/,/<\\/div>/p' index.html | grep -q 'mt-4' && echo 'T-02 PASS'"
+    },
+    {
+      "id": "T-03",
+      "name": "Apply copyright bottom bar breathing room (REQ-04)",
+      "complexity": "low",
+      "budget_tokens": 8000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html"
+      ],
+      "depends_on": [],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:1315-1330"
+      ],
+      "covers": ["REQ-04"],
+      "acceptance": "cd '/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web' && grep -q 'border-t border-white/10 mt-16 pt-8 text-center' index.html && ! grep -q 'mt-12 pt-6 text-center' index.html && echo 'T-03 PASS'"
+    }
+  ]
+}

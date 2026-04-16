@@ -1,0 +1,153 @@
+[
+  {
+    "id": "PERF-001",
+    "severity": "HIGH",
+    "title": "Ảnh PNG fallback của hero bandesktop quá nặng (~532KB) và mobile (~296KB)",
+    "file": "assets/images/hero-banner-desktop.png, assets/images/hero-banner-mobile.png",
+    "evidence": "532K hero-banner-desktop.png + 296K hero-banner-mobile.png; WebP tương ứng chỉ 30KB/17KB. Ở Việt Nam nhiều thiết bị Android cũ/mạng 3G vẫn có thể nhận PNG nếu WebP fail/blocked.",
+    "impact": "Nếu trình duyệt không hỗ trợ WebP (hoặc cache WebP bị lỗi), người dùng tải ~500KB chỉ cho 1 ảnh hero — ảnh hưởng LCP và tiêu hao dữ liệu di động đáng kể ở thị trường VN.",
+    "suggestion": "Tối ưu lại PNG fallback (pngquant/oxipng) xuống <100KB, hoặc chuyển sang AVIF + WebP và bỏ PNG fallback (WebP hỗ trợ >96% trình duyệt toàn cầu). Có thể thêm <source type=\"image/avif\"> trước WebP.",
+    "effort": "S"
+  },
+  {
+    "id": "PERF-002",
+    "severity": "HIGH",
+    "title": "Ảnh hero không có srcset/sizes theo mật độ điểm ảnh (DPR)",
+    "file": "src/index.src.html:172-185, 295-308",
+    "evidence": "<source srcset=\"assets/images/hero-banner-mobile.webp\" type=\"image/webp\" /> — chỉ 1 file duy nhất, không có srcset 1x/2x/3x hay sizes cho viewport khác nhau. Kích thước intrinsic 385x481 (mobile), 801x480 (desktop) nhưng render full width trên rất nhiều kích cỡ màn hình.",
+    "impact": "Thiết bị mobile DPR thấp vẫn tải ảnh giống iPhone Pro Max; thiết bị tablet tải ảnh mobile bị vỡ pixel. Lãng phí băng thông hoặc chất lượng kém trên các cấu hình trung gian.",
+    "suggestion": "Thêm srcset với các biến thể width (360w, 720w, 1080w) và thuộc tính sizes=\"(max-width: 1023px) 100vw, 50vw\" để trình duyệt tự chọn ảnh tối ưu.",
+    "effort": "M"
+  },
+  {
+    "id": "PERF-003",
+    "severity": "HIGH",
+    "title": "Carousel dùng setTimeout thay vì transitionend — animating flag có thể bị kẹt",
+    "file": "assets/js/carousel.js:116-118",
+    "evidence": "setTimeout(() => { animating = false; }, ANIMATION_DURATION_MS); — nếu tab bị throttle (background, chuyển tab nhanh), timer có thể bị delay hoặc drift, hoặc animation kết thúc sớm hơn, khiến click liên tiếp bị chặn mất một khoảng.",
+    "impact": "Trải nghiệm không đồng bộ với animation thực tế; debounce thủ công không chính xác, có thể gây lag cảm nhận trên thiết bị yếu.",
+    "suggestion": "Thay thế bằng phone.addEventListener('transitionend', onEnd, { once: true }) trên phần tử center, hoặc dùng Promise.all + Element.getAnimations().finished để chờ đúng thời điểm animation kết thúc.",
+    "effort": "S"
+  },
+  {
+    "id": "PERF-004",
+    "severity": "HIGH",
+    "title": "Carousel không lắng nghe resize — spread scale không cập nhật khi xoay thiết bị",
+    "file": "assets/js/carousel.js:61-67, 69-84",
+    "evidence": "getSpreadScale() đọc window.innerWidth mỗi lần applyPositions, nhưng applyPositions chỉ chạy khi navigate/autoplay. Xoay thiết bị (portrait↔landscape) giữa các autoplay tick sẽ khiến phone-item nằm sai vị trí cho tới khi autoplay tiếp theo.",
+    "impact": "Layout lệch trên mobile khi xoay thiết bị; người dùng thấy ảnh bị lệch khỏi khung — ảnh hưởng CLS cảm nhận.",
+    "suggestion": "Thêm window.addEventListener('resize', debouncedApply, { passive: true }) với debounce 150ms gọi applyPositions(false); hoặc dùng ResizeObserver trên carousel container.",
+    "effort": "S"
+  },
+  {
+    "id": "PERF-005",
+    "severity": "MEDIUM",
+    "title": "querySelectorAll gọi lặp lại mỗi lần goTo/applyPositions",
+    "file": "assets/js/carousel.js:70, 95",
+    "evidence": "const items = carousel.querySelectorAll('.phone-item'); được gọi trong applyPositions và lại trong goTo (2 lần mỗi điều hướng). Mảng phones đã được cache ở đầu file (line 18).",
+    "impact": "Gọi DOM query dư thừa trong critical path của animation; mỗi autoplay tick tạo NodeList mới — GC pressure nhỏ nhưng không cần thiết.",
+    "suggestion": "Dùng biến phones đã cache ở đầu file, hoặc gọi Array.from(carousel.children) một lần rồi reuse. Có thể gộp chung logic set style vào helper function.",
+    "effort": "S"
+  },
+  {
+    "id": "PERF-006",
+    "severity": "MEDIUM",
+    "title": "Forced reflow cố ý trong goTo mỗi lần chuyển slide",
+    "file": "assets/js/carousel.js:110-114",
+    "evidence": "void carousel.offsetHeight; // 3. Force reflow — buộc browser tính layout mỗi lần chuyển; mỗi 3 giây khi autoplay chạy.",
+    "impact": "Mỗi 3s có 1 full layout reflow — trên điện thoại cấp thấp (Android Go) có thể tạo jank 8–16ms, đặc biệt khi kết hợp scroll.",
+    "suggestion": "Thay mô hình từ-đến bằng requestAnimationFrame 2 frame: frame 1 set starting transform với transition:none, frame 2 set ending transform với transition bật. Tránh đọc offsetHeight trực tiếp.",
+    "effort": "M"
+  },
+  {
+    "id": "PERF-007",
+    "severity": "MEDIUM",
+    "title": "Font woff2 thứ ba (latin-ext, 85KB) không được preload — FOUT khi render ký tự đặc biệt",
+    "file": "src/input.css:14-21, src/index.src.html:62-63",
+    "evidence": "input.css khai báo 3 @font-face (vietnamese, latin-ext, latin) nhưng index.src.html chỉ preload inter-latin.woff2 và inter-vietnamese.woff2. File inter-latin-ext.woff2 là 85KB, lớn hơn cả 2 file được preload.",
+    "impact": "Nếu trang có ký tự thuộc range latin-ext (ví dụ biểu tượng tiền €, ký tự châu Âu khác), browser phải tải font này sau khi CSS parse xong — FOUT trễ và tải non-critical font.",
+    "suggestion": "Hoặc preload cả 3 file, hoặc xoá @font-face latin-ext khỏi input.css nếu nội dung VN không dùng tới range này (unicode-range sẽ không load nhưng file vẫn tồn tại trong build).",
+    "effort": "S"
+  },
+  {
+    "id": "PERF-008",
+    "severity": "MEDIUM",
+    "title": "CSS styles.css và carousel.css load đồng bộ trong <head> — render-blocking",
+    "file": "src/index.src.html:65-66",
+    "evidence": "<link rel=\"stylesheet\" href=\"assets/css/styles.css\" /><link rel=\"stylesheet\" href=\"assets/css/carousel.css\" /> — đều blocking render; styles.css minified ~17KB nhưng carousel.css chỉ dùng cho 1 section dưới fold.",
+    "impact": "First Contentful Paint phải chờ cả 2 stylesheet tải xong; carousel.css dưới fold không cần cho FCP.",
+    "suggestion": "Inline critical CSS trong <style> + load styles.css async (rel=preload + onload swap hoặc media=\"print\" trick). Với carousel.css (<1KB) có thể inline luôn, hoặc merge vào styles.css để giảm 1 HTTP request.",
+    "effort": "M"
+  },
+  {
+    "id": "PERF-009",
+    "severity": "MEDIUM",
+    "title": "7 ảnh carousel đều loading=\"lazy\" — slide trung tâm cần eager",
+    "file": "src/index.src.html:899-968",
+    "evidence": "Tất cả 7 .phone-item <img> đều có loading=\"lazy\". Ảnh đầu (venue-detail.webp) là ảnh center khi JS khởi tạo nhưng có thể nằm dưới viewport ban đầu — lazy hợp lý — nhưng khi JS chưa chạy, carousel vẫn nên hiển thị ít nhất 1 ảnh.",
+    "evidence_extra": "Nếu user scroll nhanh xuống section carousel khi JS chưa parse xong (Android cũ), ảnh sẽ bị delay tải.",
+    "impact": "Trên thiết bị cấp thấp/3G, user có thể thấy khoảng trống trong section gallery trong 1–2 giây.",
+    "suggestion": "Bỏ loading=\"lazy\" cho ảnh đầu tiên (venue-detail) và đặt decoding=\"async\" + fetchpriority=\"low\" cho 6 ảnh còn lại. Hoặc dùng IntersectionObserver preload center khi section gần viewport.",
+    "effort": "S"
+  },
+  {
+    "id": "PERF-010",
+    "severity": "MEDIUM",
+    "title": "Không có decoding=\"async\" trên bất kỳ <img> nào",
+    "file": "src/index.src.html (toàn bộ img), partials/footer.html",
+    "evidence": "Grep img src trong index.src.html cho thấy không có thuộc tính decoding. Mặc định 'auto' có thể đồng bộ với main thread trên browser cũ.",
+    "impact": "Ảnh lớn (ví dụ carousel .webp 1242x2208) có thể block main thread khi decode trên Android cấp thấp, gây jank khi scroll vào section.",
+    "suggestion": "Thêm decoding=\"async\" cho mọi <img> trừ LCP hero (để LCP decode đồng bộ, ưu tiên render).",
+    "effort": "S"
+  },
+  {
+    "id": "PERF-011",
+    "severity": "MEDIUM",
+    "title": "scroll-behavior: smooth toàn cục gây jank khi scroll dài + có thể ảnh hưởng INP",
+    "file": "src/input.css:35-37",
+    "evidence": "html { scroll-behavior: smooth; } áp dụng toàn cục — mọi anchor click (FAQ, #features, #download) sẽ smooth scroll qua toàn bộ trang 1200+ LOC.",
+    "impact": "Trên Android cấp thấp, smooth scroll qua hero + carousel + FAQ có thể drop frame, kéo dài INP cho click điều hướng.",
+    "suggestion": "Giới hạn trong @media (prefers-reduced-motion: no-preference) hoặc bỏ scroll-behavior smooth và xử lý bằng JS cho từng anchor nếu cần; đảm bảo tôn trọng reduced-motion.",
+    "effort": "S"
+  },
+  {
+    "id": "PERF-012",
+    "severity": "LOW",
+    "title": "SVG ngôi sao testimonial lặp lại 15 lần inline — tăng HTML payload không cần thiết",
+    "file": "src/index.src.html:649-829",
+    "evidence": "Cùng một <svg viewBox=\"0 0 20 20\"><path d=\"M9.049 2.927...\"/></svg> được inline 15 lần (3 testimonial × 5 sao). Mỗi path ~300 byte → tổng ~4.5KB HTML dư thừa.",
+    "impact": "Tăng kích thước HTML (trang chính 54KB src), làm chậm parse HTML nhẹ trên thiết bị cấp thấp. Không ảnh hưởng runtime.",
+    "suggestion": "Định nghĩa 1 <symbol id=\"star\"> trong partials/icons.svg (hoặc inline 1 lần ở đầu body) và dùng <svg><use href=\"#star\"/></svg> — giảm ~4KB. Hoặc dùng background-image CSS.",
+    "effort": "S"
+  },
+  {
+    "id": "PERF-013",
+    "severity": "LOW",
+    "title": "Thiếu preconnect cho các domain bên ngoài trong CTA",
+    "file": "src/index.src.html:222, 245, 1184, 1207",
+    "evidence": "Các link tới testflight.apple.com, github.com (APK release), facebook.com, linkedin.com không có preconnect/dns-prefetch trong <head>.",
+    "impact": "Khi user click vào Tải ứng dụng, DNS lookup + TLS handshake phải làm từ đầu → thêm 100–500ms latency (đặc biệt ở VN).",
+    "suggestion": "Thêm <link rel=\"dns-prefetch\" href=\"//testflight.apple.com\"> và <link rel=\"dns-prefetch\" href=\"//github.com\"> trong <head>. Với testflight có thể preconnect vì là CTA chính.",
+    "effort": "S"
+  },
+  {
+    "id": "PERF-014",
+    "severity": "LOW",
+    "title": "Không có Cache-Control meta hoặc service worker — lần load thứ 2 không tối ưu",
+    "file": "toàn project — không có sw.js, không có Cache-Control meta",
+    "evidence": "Không tìm thấy file sw.js, không có <meta http-equiv=\"Cache-Control\"> trong index.src.html. Asset filenames không có content hash (styles.css cố định, không phải styles.abcd1234.css).",
+    "impact": "Khi deploy thay đổi CSS/JS, user có thể bị cache cũ (stale) do tên file không đổi; và không có offline experience cho landing page.",
+    "suggestion": "Thêm bước build hash filename (hoặc dùng query ?v={{APK_VERSION}} đã có sẵn trong build-html.js). Cân nhắc service worker nhẹ cache hero image + CSS cho repeat visit.",
+    "effort": "M"
+  },
+  {
+    "id": "PERF-015",
+    "severity": "LOW",
+    "title": "will-change: transform, opacity áp dụng vĩnh viễn cho mọi phone-item",
+    "file": "assets/css/carousel.css:12-18",
+    "evidence": ".phone-item { ... will-change: transform, opacity; } — áp dụng cho cả 7 phần tử cùng lúc, kể cả các phần tử ẩn (opacity 0, zIndex 0).",
+    "impact": "will-change tạo compositor layer cho mỗi phần tử — 7 layer trên mobile GPU cấp thấp có thể tiêu tốn VRAM, đặc biệt khi ảnh 1242×2208. Tăng memory footprint cho section dưới fold.",
+    "suggestion": "Chỉ áp dụng will-change cho 5 phần tử visible (dùng class .is-visible do JS thêm), hoặc bỏ hoàn toàn và để browser tự quyết định — CSS transform 3D đã tự promote layer rồi.",
+    "effort": "S"
+  }
+]

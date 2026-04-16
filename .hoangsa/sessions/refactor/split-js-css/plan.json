@@ -1,0 +1,62 @@
+{
+  "name": "refactor: Tách JS/CSS ra file riêng + quick wins",
+  "workspace_dir": "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web",
+  "spec_ref": "split-js-css-spec-v1.0",
+  "language": "javascript",
+  "budget_tokens": "75000",
+  "tasks": [
+    {
+      "id": "T-01",
+      "name": "Tách carousel CSS ra assets/css/carousel.css",
+      "complexity": "low",
+      "budget_tokens": "10000",
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/assets/css/carousel.css"
+      ],
+      "depends_on": [],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:861-880"
+      ],
+      "covers": ["REQ-02"],
+      "acceptance": "cd '/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web' && test -f assets/css/carousel.css && grep -q 'perspective' assets/css/carousel.css && ! grep -q '#phone-carousel' index.html"
+    },
+    {
+      "id": "T-02",
+      "name": "Tách JS ra assets/js/menu.js + assets/js/carousel.js với named constants",
+      "complexity": "high",
+      "budget_tokens": "40000",
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/assets/js/menu.js",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/assets/js/carousel.js"
+      ],
+      "depends_on": ["T-01"],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:1351-1507",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/.hoangsa/sessions/refactor/split-js-css/DESIGN-SPEC.md:1-150"
+      ],
+      "covers": ["REQ-01", "REQ-03", "REQ-08"],
+      "acceptance": "cd '/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web' && test -f assets/js/menu.js && test -f assets/js/carousel.js && grep -c 'BREAKPOINT_' assets/js/carousel.js | grep -qv '^0$' && test $(grep -c '<script>' index.html) -eq 0"
+    },
+    {
+      "id": "T-03",
+      "name": "Fix quick wins: company_logo, social links, copyright, twitter:image",
+      "complexity": "low",
+      "budget_tokens": "15000",
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html"
+      ],
+      "depends_on": ["T-02"],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:40-42",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:1321-1345"
+      ],
+      "covers": ["REQ-04", "REQ-05", "REQ-06", "REQ-07"],
+      "acceptance": "cd '/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web' && test $(grep -c 'javascript:void' index.html) -eq 0 && grep -q 'twitter:image.*\\.webp' index.html && grep -q 'company-logo' index.html"
+    }
+  ]
+}

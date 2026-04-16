@@ -1,0 +1,14 @@
+{
+  "conventions": {
+    "async_pattern": "async/await",
+    "error_handling": "try-catch + { error } return",
+    "naming": "camelCase functions, snake_case JSON",
+    "test_framework": "node:test"
+  },
+  "key_interfaces": [],
+  "key_types": [],
+  "project": "weekend-go-web",
+  "stack": "node",
+  "updated_at": "2026-04-09T04:57:33.782Z",
+  "version": 1
+}

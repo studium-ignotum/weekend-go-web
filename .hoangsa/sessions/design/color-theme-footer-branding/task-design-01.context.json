@@ -1,0 +1,25 @@
+{
+  "acceptance": [
+    "grep -q '22c55e' \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tailwind.config.js\" && grep -q '16a34a' \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tailwind.config.js\" && ! grep -q '34C759' \"/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tailwind.config.js\" && echo PASS"
+  ],
+  "conventions_subset": {
+    "async_pattern": "async/await",
+    "error_handling": "try-catch + { error } return",
+    "naming": "camelCase functions, snake_case JSON",
+    "test_framework": "node:test"
+  },
+  "dependency_signatures": [],
+  "description": "Update primary color token in tailwind.config.js",
+  "estimated_tokens": 474,
+  "file_segments": [
+    {
+      "action": "MODIFY",
+      "end_line": 33,
+      "lines": "/** @type {import('tailwindcss').Config} */\nmodule.exports = {\n  content: [\"./*.html\"],\n  theme: {\n    extend: {\n      fontFamily: {\n        inter: [\"Inter\", \"system-ui\", \"sans-serif\"],\n      },\n      colors: {\n        primary: {\n          DEFAULT: \"#34C759\",\n          dark: \"#15803D\",\n          light: \"#86efac\",\n        },\n        accent: {\n          DEFAULT: \"#fb923c\",\n          light: \"#fed7aa\",\n        },\n        \"bg-warm\": \"#F9FAFB\",\n        \"text-primary\": \"#111827\",\n        \"text-secondary\": \"#4B5563\",\n        \"text-tertiary\": \"#6B7280\",\n        \"border-default\": \"#E5E7EB\",\n        \"footer-bg\": \"#292524\",\n      },\n      borderRadius: {\n        button: \"999px\",\n        card: \"16px\",\n      },\n    },\n  },\n  plugins: [],\n};\n",
+      "path": "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tailwind.config.js",
+      "start_line": 1
+    }
+  ],
+  "task_id": "design-01",
+  "task_name": "Update primary color token in tailwind.config.js"
+}

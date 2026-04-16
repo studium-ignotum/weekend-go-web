@@ -1,0 +1,153 @@
+[
+  {
+    "id": "ARCH-001",
+    "severity": "HIGH",
+    "title": "src/index.src.html phình to 1239 dòng — cần tách thành partials",
+    "file": "src/index.src.html:1-1239",
+    "evidence": "<!-- Hero Section --> (line 167)\n<!-- Social Proof Stats --> (line 315)\n<!-- Features Section --> (line 353)\n<!-- How it Works --> (line 558)\n<!-- Testimonials --> (line 628)\n<!-- Screenshots Gallery / Phone Carousel --> (line 853)\n<!-- FAQ Section --> (line 1003)\n<!-- Download CTA --> (line 1159)",
+    "impact": "Một file landing duy nhất chứa 8 section + header + footer-include khiến edit, review PR, và diff rất khó; mỗi thay đổi nhỏ ở 1 section đều chạm file khổng lồ. Build system đã có cơ chế @include partials (đã dùng cho footer), nhưng chưa tận dụng cho các khối HTML lặp/lớn khác.",
+    "suggestion": "Tách theo cơ chế đã có: `partials/header.html`, `partials/hero.html`, `partials/features.html`, `partials/how-it-works.html`, `partials/testimonials.html`, `partials/carousel.html`, `partials/faq.html`, `partials/cta-download.html`. Giữ `index.src.html` làm shell lắp ráp (~80 LOC).",
+    "effort": "L"
+  },
+  {
+    "id": "ARCH-002",
+    "severity": "HIGH",
+    "title": "partials/icons.svg tồn tại nhưng KHÔNG được include — dead partial, SVG vẫn trùng lặp inline",
+    "file": "partials/icons.svg:1-38",
+    "evidence": "partials/icons.svg định nghĩa 10 <symbol> (icon-star, icon-faq-chevron, icon-app-store, icon-google-play, icon-mail-fill, icon-facebook, icon-linkedin, icon-carousel-prev/next/pause/play) nhưng không file nào có `<!-- @include partials/icons.svg -->` (grep: chỉ 4 include trong src, toàn `partials/footer.html`).\nVí dụ index.src.html:650-694 — 6 <svg> star giống hệt nhau inline, thay vì <use href=\"#icon-star\"/>.",
+    "impact": "Sprite đã được tạo và tooling Tailwind đã whitelist `partials/**/*.svg` nhưng không có trang nào dùng. Mọi trang vẫn lặp inline SVG paths — index.src.html riêng testimonials có 15 <path> star giống hệt (line 650-828), FAQ có 5 chevron giống hệt (line 1025-1145). Dead code + HTML phình.",
+    "suggestion": "Hoặc (a) thực sự include sprite (`<!-- @include partials/icons.svg -->` đầu <body> của 4 src file) rồi thay mọi SVG trùng lặp bằng `<svg><use href=\"#icon-star\"/></svg>`; hoặc (b) xoá partials/icons.svg và content glob trong tailwind.config.js nếu không có kế hoạch dùng.",
+    "effort": "M"
+  },
+  {
+    "id": "ARCH-003",
+    "severity": "MEDIUM",
+    "title": "Ba trang legal (privacy/terms/community-standards) trùng cấu trúc nav + head ~85 dòng — chưa tách partial",
+    "file": "src/privacy.src.html:1-84, src/terms.src.html:1-80, src/community-standards.src.html:1-80",
+    "evidence": "privacy.src.html:62-84 và terms.src.html:62-80 và community-standards.src.html:62-80 đều chung nav header gần như giống hệt (logo + link về trang chủ). Phần head/meta + JSON-LD BreadcrumbList cũng có cấu trúc hoàn toàn giống nhau — chỉ khác title/description/url.",
+    "impact": "Sửa nav (ví dụ đổi logo, đổi class sticky) phải sửa 3 chỗ; dễ drift (đã có khác biệt: index dùng h-[72px] còn legal dùng h-16, index dùng border-b border-gray-200 còn legal dùng backdrop-blur-sm border-b border-border-default).",
+    "suggestion": "Tách `partials/nav-legal.html` (header đơn giản cho trang phụ) và `partials/head-legal.html` (các meta share chung, lấy title qua placeholder tương tự {{APK_VERSION}}), hoặc mở rộng build-html.js hỗ trợ biến để generate JSON-LD theo trang.",
+    "effort": "M"
+  },
+  {
+    "id": "ARCH-004",
+    "severity": "MEDIUM",
+    "title": "Layering không nhất quán: 2 CSS file ở 2 thư mục khác nhau (src/input.css vs assets/css/carousel.css)",
+    "file": "src/input.css:1-56, assets/css/carousel.css:1-26",
+    "evidence": "src/input.css là nguồn Tailwind (compile → assets/css/styles.css).\nassets/css/carousel.css nằm trực tiếp trong assets (không qua build), chứa rule thuần CSS.\nindex.src.html:65-66 load cả hai: `<link rel=\"stylesheet\" href=\"assets/css/styles.css\" />` + `<link rel=\"stylesheet\" href=\"assets/css/carousel.css\" />`.",
+    "impact": "Hai pipeline CSS khác nhau (build vs raw) cho cùng project; developer mới dễ sửa nhầm file. carousel.css lẽ ra nên nằm trong src/ rồi @layer components vào Tailwind để tận dụng minify/purge, hoặc ít nhất đặt cùng thư mục với source.",
+    "suggestion": "Chuyển rule của carousel.css vào `src/input.css` dưới `@layer components` (hoặc tạo `src/carousel.css` rồi @import trong input.css). Sau build chỉ có 1 stylesheet duy nhất; giảm 1 HTTP request, tránh render-blocking kép.",
+    "effort": "S",
+    "note": "Điều này cũng liên quan tới branch hiện tại `refactor/split-js-css-carousel` — cần kết thúc refactor đúng hướng."
+  },
+  {
+    "id": "ARCH-005",
+    "severity": "MEDIUM",
+    "title": "Chỉ index.src.html load carousel.css; 3 trang legal không load — nhưng tất cả dùng chung styles.css, inconsistency khi sau này thêm page mới",
+    "file": "src/privacy.src.html:28, src/terms.src.html:28, src/community-standards.src.html:28, src/index.src.html:65-66",
+    "evidence": "index.src.html:65-66 → styles.css + carousel.css\nprivacy.src.html:28 → chỉ styles.css\nterms.src.html:28 → chỉ styles.css\ncommunity-standards.src.html:28 → chỉ styles.css",
+    "impact": "Việc load CSS theo thủ công trên từng trang dễ bị quên khi thêm trang mới hoặc khi bundle lại. Không có pattern chuẩn (ví dụ `head-common.html` partial hay data-driven list).",
+    "suggestion": "Gộp carousel.css vào styles.css (xem ARCH-004), hoặc thống nhất qua partial `partials/head-common.html` để mọi page đều chung baseline <link>.",
+    "effort": "S"
+  },
+  {
+    "id": "ARCH-006",
+    "severity": "MEDIUM",
+    "title": "Font `inter-latin-ext.woff2` được @font-face nhưng KHÔNG preload trên bất kỳ trang nào",
+    "file": "src/input.css:19, src/index.src.html:62-63",
+    "evidence": "src/input.css:14-21 khai báo @font-face thứ 2 dùng `/assets/fonts/inter-latin-ext.woff2`.\nindex.src.html:62-63 chỉ preload 2 file:\n`<link rel=\"preload\" as=\"font\" type=\"font/woff2\" href=\"assets/fonts/inter-latin.woff2\" crossorigin />`\n`<link rel=\"preload\" as=\"font\" type=\"font/woff2\" href=\"assets/fonts/inter-vietnamese.woff2\" crossorigin />`\nCùng pattern ở privacy/terms/community-standards.",
+    "impact": "Inconsistency giữa CSS source và HTML preload — hoặc latin-ext là dead code (nên xoá), hoặc đang gây FOUT lúc cần chữ Latin-ext. Font file 3 thực sự tồn tại trong assets/fonts/.",
+    "suggestion": "Nếu cần ký tự latin-ext: thêm preload line tương ứng vào cả 4 src HTML. Nếu không: xoá @font-face block (input.css:14-21) và xoá file inter-latin-ext.woff2 khỏi assets/fonts/.",
+    "effort": "S"
+  },
+  {
+    "id": "ARCH-007",
+    "severity": "MEDIUM",
+    "title": "Dead CSS: class `.nav-link` (input.css) không được sử dụng trong bất kỳ HTML nguồn nào",
+    "file": "src/input.css:39-56",
+    "evidence": ".nav-link {\n    position: relative;\n}\n.nav-link::after { content: \"\"; ... background-color: #22c55e; ... }\n.nav-link:hover::after { width: 100%; }\n→ grep `nav-link` trên src/**/*.html: 0 match. Chỉ tồn tại trong session docs (.hoangsa).",
+    "impact": "~18 dòng CSS dead, đang ship xuống bundle production. Màu `#22c55e` cũng hard-code (trùng primary trong tailwind.config.js line 16) — vi phạm DRY.",
+    "suggestion": "Xoá block `.nav-link` và pseudo-elements khỏi input.css. Nếu sau này cần hiệu ứng underline cho nav desktop, thêm lại bằng Tailwind utility hoặc @layer components kèm `theme('colors.primary.DEFAULT')`.",
+    "effort": "S"
+  },
+  {
+    "id": "ARCH-008",
+    "severity": "MEDIUM",
+    "title": "assets/css/styles.css được commit ở root nhưng là output build — lẫn source/build không rõ ràng",
+    "file": "assets/css/styles.css (build output)",
+    "evidence": "package.json:7 `build:css: tailwindcss -i ./src/input.css -o ./assets/css/styles.css --minify`.\n.gitignore (đã đọc 66 bytes — rất nhỏ) nghi vấn không ignore file build.\nls cho thấy styles.css vẫn hiện diện trong repo.",
+    "impact": "Build artifact trộn lẫn với source file thuần (carousel.css, input.css source trong src/). PR sẽ có noise do styles.css minified thay đổi theo mỗi build; merge conflict thường xuyên. Tương tự với root *.html (output của build-html.js) đang được audit loại trừ — nhưng rõ ràng repo đang commit cả source lẫn build.",
+    "suggestion": "Quyết định rõ chiến lược: (a) Commit build (phục vụ GitHub Pages/Netlify không build) → thêm CI check build output up-to-date; hoặc (b) .gitignore các file build (styles.css, root *.html) và build ở CI/hosting. Tài liệu hoá trong README.",
+    "effort": "S"
+  },
+  {
+    "id": "ARCH-009",
+    "severity": "MEDIUM",
+    "title": "Carousel 7 ảnh phone hard-coded inline trong HTML — data và view trộn lẫn, lặp class dài 3 lần",
+    "file": "src/index.src.html:895-969",
+    "evidence": "Bảy `<div class=\"phone-item absolute\">` giống hệt, mỗi block chứa:\n`<img src=\"assets/images/venue-detail.webp\" alt=\"...\" width=\"...\" height=\"...\" loading=\"lazy\" class=\"w-48 sm:w-64 lg:w-80 h-auto drop-shadow-2xl\"/>`\nchỉ khác src/alt/width/height. Class 'w-48 sm:w-64 lg:w-80 h-auto drop-shadow-2xl' lặp 7 lần.",
+    "impact": "Thêm/bớt ảnh carousel phải đụng chạm HTML; lặp class tạo rủi ro lệch nhau (và thực tế carousel.js:18 phụ thuộc `.phone-item` tồn tại). Nên sinh HTML từ JSON để dễ maintain.",
+    "suggestion": "Nhẹ nhất: để carousel.js nhận 1 array cấu hình (có sẵn ảnh + alt) và render các `.phone-item` động; hoặc nặng hơn: chuyển carousel thành partial `partials/carousel.html` (xem ARCH-001) và dùng CSS class utility wrapper.",
+    "effort": "M"
+  },
+  {
+    "id": "ARCH-010",
+    "severity": "LOW",
+    "title": "Script module không có lazy-load boundary: menu.js + carousel.js chạy trên mọi page dù carousel chỉ tồn tại ở index",
+    "file": "src/privacy.src.html:196, src/terms.src.html:180, src/community-standards.src.html:193, src/index.src.html:1236-1237",
+    "evidence": "privacy/terms/community-standards chỉ load `<script src=\"assets/js/menu.js\" defer></script>`.\nindex.src.html load thêm `<script src=\"assets/js/carousel.js\" defer></script>`.\nNhưng carousel.js:16-17: `const carousel = document.getElementById(\"phone-carousel\"); if (!carousel) throw new Error(...)` — throw cứng nếu không có element.",
+    "impact": "Logic phòng thủ hiện tại đúng (legal page không load carousel.js → không lỗi). Nhưng nếu ai lỡ copy `<script src=\"carousel.js\">` vào page khác sẽ throw Error toàn cục, chặn script sau. Cần defensive hoặc guard-exit.",
+    "suggestion": "Thay `throw new Error` bằng `if (!carousel) return;` (early-exit) — hoặc wrap toàn bộ carousel.js trong `(() => { if (!document.getElementById('phone-carousel')) return; ... })();` IIFE để an toàn hơn.",
+    "effort": "S"
+  },
+  {
+    "id": "ARCH-011",
+    "severity": "LOW",
+    "title": "Naming inconsistency: Tailwind color token dùng kebab-case với namespace (`text-primary`, `footer-bg`, `border-default`) nhưng ở cùng nesting level với nested scale (`primary.dark`)",
+    "file": "tailwind.config.js:14-30",
+    "evidence": "colors: {\n  primary: { DEFAULT: \"#22c55e\", dark: \"#16a34a\", light: \"#86efac\" },\n  accent:  { DEFAULT: \"#fb923c\", light: \"#fed7aa\" },\n  \"bg-warm\": \"#F9FAFB\",\n  \"text-primary\": \"#111827\",\n  \"text-secondary\": \"#4B5563\",\n  \"text-tertiary\": \"#6B7280\",\n  \"border-default\": \"#E5E7EB\",\n  \"footer-bg\": \"#292524\",\n}",
+    "impact": "Hai quy ước song song (nested object vs flat kebab-case). Ví dụ `text-primary` có thể nhầm với utility `text-primary` (color của `primary.DEFAULT`). Không đồng nhất làm IntelliSense khó.",
+    "suggestion": "Chuyển tất cả về nested object: `text: { primary, secondary, tertiary }`, `bg: { warm }`, `border: { default }`, `footer: { bg }`. Utility thành `text-text-primary` → `text-text-primary` giữ nguyên, nhưng Tailwind class `text-primary` (màu xanh lá) sẽ rõ ràng hơn.",
+    "effort": "M"
+  },
+  {
+    "id": "ARCH-012",
+    "severity": "LOW",
+    "title": "Carousel.js là module-level script (không IIFE/không export), chạy top-level với biến global",
+    "file": "assets/js/carousel.js:16-187",
+    "evidence": "Không có `(function(){...})()` hoặc `<script type=\"module\">`. Biến `carousel`, `phones`, `total`, `centerIndex`, `animating`, `autoTimer`, `isPaused`, `reducedMotionMQ` đều ở scope top-level của file khi browser thực thi → có thể leak ra window.\nindex.src.html:1237: `<script src=\"...\" defer></script>` (không có type=\"module\").",
+    "impact": "Tuy dùng `const` nên không thực sự global, nhưng do 2 file JS (menu.js, carousel.js) đều chạy cùng global scope, dễ va chạm tên biến trong tương lai. Ngoài ra, không test được.",
+    "suggestion": "Chuyển hai file sang `<script type=\"module\">` hoặc wrap IIFE. Nâng cấp nhẹ: `export function initCarousel(root) {...}` + gọi trong module, dễ unit-test và tái sử dụng.",
+    "effort": "S"
+  },
+  {
+    "id": "ARCH-013",
+    "severity": "LOW",
+    "title": "Inline SVG star lặp lại 15 lần trong testimonials (3 testimonial × 5 sao), 5 lần FAQ chevron",
+    "file": "src/index.src.html:650-828 (stars), 1025-1145 (chevrons)",
+    "evidence": "Line 650-694 (testimonial 1): 5 <svg> star với path `M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292...`.\nLine 718-762 (testimonial 2): lặp 5 lần cùng path.\nLine 786-828 (testimonial 3): lặp 5 lần cùng path.\nLine 1025, 1053, 1081, 1109, 1137: 5 FAQ chevron svg cùng path `M19 9l-7 7-7-7`.",
+    "impact": "~1.6KB HTML redundant chỉ cho icons (chưa nén). Liên quan chặt với ARCH-002 — sprite đã sẵn sàng nhưng không dùng.",
+    "suggestion": "Dùng sprite partials/icons.svg (xem ARCH-002): `<svg class=\"w-5 h-5 text-primary\"><use href=\"#icon-star\"/></svg>`. Cân nhắc loop testimonial/FAQ trong build-html.js nếu muốn data-driven.",
+    "effort": "S"
+  },
+  {
+    "id": "ARCH-014",
+    "severity": "LOW",
+    "title": "Icon hamburger trong header vẫn inline SVG thay vì dùng partial/sprite",
+    "file": "src/index.src.html:124-138",
+    "evidence": "<button id=\"menu-toggle\" class=\"md:hidden p-2\" aria-label=\"Menu\">\n  <svg class=\"w-6 h-6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" viewBox=\"0 0 24 24\">\n    <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M4 6h16M4 12h16M4 18h16\"/>\n  </svg>\n</button>\n→ partials/icons.svg không có symbol hamburger (dù DESIGN-SPEC line 24 đã liệt kê).",
+    "impact": "Kế hoạch sprite không hoàn thiện — spec đã liệt kê hamburger nhưng thực tế không add. Thêm trigger ARCH-002.",
+    "suggestion": "Thêm `<symbol id=\"icon-hamburger\">` vào partials/icons.svg và dùng `<use>` (sau khi đã include sprite).",
+    "effort": "S"
+  },
+  {
+    "id": "ARCH-015",
+    "severity": "LOW",
+    "title": "package.json không có `start`/`serve`/`preview` script — DX thiếu khi reviewer muốn chạy nhanh",
+    "file": "package.json:6-12",
+    "evidence": "\"scripts\": {\n  \"build:css\": \"tailwindcss -i ./src/input.css -o ./assets/css/styles.css --minify\",\n  \"build:html\": \"node scripts/build-html.js\",\n  \"build\": \"npm run build:css && npm run build:html\",\n  \"dev:css\": \"tailwindcss -i ./src/input.css -o ./assets/css/styles.css --watch\",\n  \"dev\": \"npm run build:html && npm run dev:css\"\n}",
+    "impact": "`npm run dev` chỉ watch CSS, không serve HTML ở localhost và không watch HTML source (edit src/index.src.html không rebuild). Contributor phải tự mở file:// hoặc dùng tool riêng (live-server), thiếu nhất quán.",
+    "suggestion": "Thêm `\"serve\": \"npx http-server -p 5173 .\"` (hoặc `vite`/`browser-sync`), và `\"dev:html\": \"nodemon --watch src --watch partials -e html --exec npm run build:html\"` rồi gộp vào dev bằng `concurrently`.",
+    "effort": "S"
+  }
+]

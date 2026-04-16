@@ -1,0 +1,167 @@
+{
+  "name": "refactor: Icon Sprite Adoption — replace inline SVG with <use> across all HTML sources",
+  "workspace_dir": "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web",
+  "spec_ref": "icon_sprite-spec-v1.0",
+  "language": "html, vanilla-js, nodejs-build",
+  "budget_tokens": 133000,
+  "tasks": [
+    {
+      "id": "T-01",
+      "name": "Add icon-hamburger <symbol> to partials/icons.svg",
+      "complexity": "low",
+      "budget_tokens": 8000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/partials/icons.svg"
+      ],
+      "depends_on": [],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/partials/icons.svg:1-38",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/index.src.html:124-138"
+      ],
+      "covers": ["REQ-01"],
+      "acceptance": "grep -c 'id=\"icon-hamburger\"' /Users/thuylenguyenmai/Desktop/Projects/Cuối\\ tuần\\ đi\\ đâu/weekend-go-web/partials/icons.svg | grep -qx 1"
+    },
+    {
+      "id": "T-02",
+      "name": "Setup Playwright infrastructure (install, config, test file, scripts)",
+      "complexity": "medium",
+      "budget_tokens": 20000,
+      "namespace": "weekend-go-web",
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/package.json",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/playwright.config.js",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tests/visual/pages.spec.js",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/.gitignore"
+      ],
+      "depends_on": [],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/package.json:1-50",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/.gitignore:1-20",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/.hoangsa/sessions/refactor/icon-sprite-adoption/TEST-SPEC.md:60-135"
+      ],
+      "covers": ["REQ-12"],
+      "acceptance": "cd /Users/thuylenguyenmai/Desktop/Projects/Cuối\\ tuần\\ đi\\ đâu/weekend-go-web && test -f playwright.config.js && test -f tests/visual/pages.spec.js && grep -q '\"test:visual\"' package.json && npx playwright --version >/dev/null"
+    },
+    {
+      "id": "T-03",
+      "name": "Capture baseline visual snapshots (16 PNG) BEFORE any icon refactor",
+      "complexity": "low",
+      "budget_tokens": 10000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tests/visual/__snapshots__"
+      ],
+      "depends_on": ["T-02"],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/playwright.config.js:1-50",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tests/visual/pages.spec.js:1-40"
+      ],
+      "covers": ["REQ-12"],
+      "acceptance": "cd /Users/thuylenguyenmai/Desktop/Projects/Cuối\\ tuần\\ đi\\ đâu/weekend-go-web && npm run build && npx playwright test --update-snapshots && test $(ls tests/visual/__snapshots__/pages.spec.js-snapshots/*.png 2>/dev/null | wc -l) -eq 16"
+    },
+    {
+      "id": "T-04",
+      "name": "Include <!-- @include partials/icons.svg --> in 4 src/*.src.html files (right after <body>)",
+      "complexity": "low",
+      "budget_tokens": 10000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/index.src.html",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/privacy.src.html",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/terms.src.html",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/community-standards.src.html"
+      ],
+      "depends_on": ["T-01"],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/index.src.html:70-120",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/privacy.src.html:58-90",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/scripts/build-html.js:1-54"
+      ],
+      "covers": ["REQ-02"],
+      "acceptance": "cd /Users/thuylenguyenmai/Desktop/Projects/Cuối\\ tuần\\ đi\\ đâu/weekend-go-web && test $(grep -l '<!-- @include partials/icons.svg -->' src/*.src.html | wc -l) -eq 4"
+    },
+    {
+      "id": "T-05",
+      "name": "Replace 3 inline <svg> (mail-fill, facebook, linkedin) in partials/footer.html with <use href>",
+      "complexity": "low",
+      "budget_tokens": 10000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/partials/footer.html"
+      ],
+      "depends_on": ["T-04"],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/partials/footer.html:55-90",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/partials/icons.svg:15-24"
+      ],
+      "covers": ["REQ-10"],
+      "acceptance": "cd /Users/thuylenguyenmai/Desktop/Projects/Cuối\\ tuần\\ đi\\ đâu/weekend-go-web && test $(grep -cE '<use href=\"#icon-(mail-fill|facebook|linkedin)\"' partials/footer.html) -eq 3 && test $(grep -c '<svg ' partials/footer.html) -eq 3"
+    },
+    {
+      "id": "T-06",
+      "name": "Replace nav-back <svg> in privacy/terms/community-standards with <use href=\"#icon-carousel-prev\">",
+      "complexity": "low",
+      "budget_tokens": 12000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/privacy.src.html",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/terms.src.html",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/community-standards.src.html"
+      ],
+      "depends_on": ["T-04"],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/privacy.src.html:60-90",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/terms.src.html:60-90",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/community-standards.src.html:60-90",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/partials/icons.svg:25-27"
+      ],
+      "covers": ["REQ-08"],
+      "acceptance": "cd /Users/thuylenguyenmai/Desktop/Projects/Cuối\\ tuần\\ đi\\ đâu/weekend-go-web && test $(grep -c 'href=\"#icon-carousel-prev\"' src/privacy.src.html src/terms.src.html src/community-standards.src.html | awk -F: '{s+=$2}END{print s}') -eq 3 && test $(grep -c '\"M15 19l-7-7 7-7\"' src/privacy.src.html src/terms.src.html src/community-standards.src.html | awk -F: '{s+=$2}END{print s}') -eq 0"
+    },
+    {
+      "id": "T-07",
+      "name": "Replace ALL 36 inline <svg> in src/index.src.html with <use href> (hamburger, carousel controls, 15 stars, 5 FAQ chevrons, 2 App Store, 2 Google Play)",
+      "complexity": "high",
+      "budget_tokens": 40000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/index.src.html"
+      ],
+      "depends_on": ["T-04"],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/index.src.html:120-170",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/index.src.html:215-270",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/index.src.html:640-840",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/index.src.html:980-1005",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/index.src.html:1015-1160",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/src/index.src.html:1180-1230",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/partials/icons.svg:1-38",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/assets/css/carousel.css:24-26"
+      ],
+      "covers": ["REQ-03", "REQ-04", "REQ-05", "REQ-06", "REQ-07", "REQ-09"],
+      "acceptance": "cd /Users/thuylenguyenmai/Desktop/Projects/Cuối\\ tuần\\ đi\\ đâu/weekend-go-web && test $(grep -c 'href=\"#icon-star\"' src/index.src.html) -eq 15 && test $(grep -c 'href=\"#icon-faq-chevron\"' src/index.src.html) -eq 5 && test $(grep -c 'href=\"#icon-app-store\"' src/index.src.html) -eq 2 && test $(grep -c 'href=\"#icon-google-play\"' src/index.src.html) -eq 2 && test $(grep -c 'href=\"#icon-hamburger\"' src/index.src.html) -eq 1 && test $(grep -cE 'href=\"#icon-carousel-(prev|next|pause|play)\"' src/index.src.html) -eq 4 && test $(grep -c 'zm3.199-1.4l2.533 1.467' src/index.src.html) -eq 0 && test $(grep -c 'M9.049 2.927' src/index.src.html) -eq 0 && test $(grep -c 'class=\"carousel-toggle-pause' src/index.src.html) -eq 1 && test $(grep -c 'class=\"carousel-toggle-play' src/index.src.html) -eq 1"
+    },
+    {
+      "id": "T-08",
+      "name": "Build output + run full verification (markup grep + Playwright visual diff + approve GP snapshot update)",
+      "complexity": "medium",
+      "budget_tokens": 25000,
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/privacy.html",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/terms.html",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/community-standards.html",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/tests/visual/__snapshots__"
+      ],
+      "depends_on": ["T-03", "T-05", "T-06", "T-07"],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/.hoangsa/sessions/refactor/icon-sprite-adoption/TEST-SPEC.md:1-250",
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/playwright.config.js:1-50"
+      ],
+      "covers": ["REQ-11", "REQ-12", "REQ-13"],
+      "acceptance": "cd /Users/thuylenguyenmai/Desktop/Projects/Cuối\\ tuần\\ đi\\ đâu/weekend-go-web && npm run build && git diff --exit-code -- assets/css/styles.css && node -e \"const fs=require('fs');const files=['index.html','privacy.html','terms.html','community-standards.html'];let bad=[];for(const f of files){const h=fs.readFileSync(f,'utf8');const uses=(h.match(/href=\\\"#icon-[a-z-]+\\\"/g)||[]).map(u=>u.slice(7,-1));const ids=(h.match(/id=\\\"icon-[a-z-]+\\\"/g)||[]).map(i=>i.slice(4,-1));const idset=new Set(ids);for(const u of uses)if(!idset.has(u))bad.push(f+': #'+u);}if(bad.length){console.error('BROKEN:',bad);process.exit(1);}console.log('OK');\" && npx playwright test"
+    }
+  ]
+}

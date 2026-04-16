@@ -1,0 +1,28 @@
+{
+  "preferences": {
+    "auto_plate": false,
+    "auto_serve": null,
+    "auto_taste": true,
+    "interaction_level": null,
+    "lang": "vi",
+    "research_mode": "auto",
+    "research_scope": "codebase",
+    "review_style": "whole_document",
+    "spec_lang": "vi",
+    "tech_stack": [
+      "html",
+      "css",
+      "javascript",
+      "tailwindcss"
+    ]
+  },
+  "profile": "balanced",
+  "task_manager": {
+    "default_list": null,
+    "mcp_server": null,
+    "project_id": null,
+    "provider": null,
+    "verified": false,
+    "verified_at": null
+  }
+}

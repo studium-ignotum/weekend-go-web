@@ -1,0 +1,25 @@
+{
+  "name": "feature: Thêm ảnh vào carousel Xem trước ứng dụng",
+  "workspace_dir": "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web",
+  "spec_ref": "index-page-spec-v1.0",
+  "language": "html",
+  "budget_tokens": "10000",
+  "tasks": [
+    {
+      "id": "T-01",
+      "name": "Thêm 3 phone-item mới vào #phone-carousel",
+      "complexity": "low",
+      "budget_tokens": "10000",
+      "namespace": null,
+      "files": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html"
+      ],
+      "depends_on": [],
+      "context_pointers": [
+        "/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web/index.html:902-936"
+      ],
+      "covers": ["REQ-01", "REQ-02"],
+      "acceptance": "cd '/Users/thuylenguyenmai/Desktop/Projects/Cuối tuần đi đâu/weekend-go-web' && test $(grep -c 'phone-item' index.html) -eq 6 && ls assets/images/share.webp assets/images/AI.webp assets/images/plan.webp"
+    }
+  ]
+}

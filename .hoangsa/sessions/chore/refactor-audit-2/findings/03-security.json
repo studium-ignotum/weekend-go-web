@@ -1,0 +1,152 @@
+[
+  {
+    "id": "SEC-001",
+    "severity": "MEDIUM",
+    "title": "Thiếu HTTP security headers (X-Frame-Options, Referrer-Policy, HSTS, Permissions-Policy, X-Content-Type-Options)",
+    "file": "weekend-go-web/ (không có _headers, vercel.json, netlify.toml)",
+    "evidence": "Không tìm thấy file cấu hình security headers ở host tĩnh (no _headers / vercel.json / netlify.toml). CSP chỉ được khai báo qua <meta http-equiv> trong src/*.src.html. Chỉ thị 'frame-ancestors' không thể set qua <meta> (spec CSP2 cấm), nên trang dễ bị nhúng iframe (clickjacking).",
+    "impact": "Không có phòng thủ clickjacking (attacker có thể nhúng site vào iframe để lừa click), referrer bị rò rỉ sang bên thứ ba khi người dùng click link ngoài, browser có thể MIME-sniff sai loại file, không bắt buộc HTTPS giữa các request (downgrade attack).",
+    "suggestion": "Thêm file cấu hình host tĩnh (ví dụ public/_headers cho Netlify, hoặc vercel.json với \"headers\") đặt: X-Frame-Options: DENY (hoặc frame-ancestors 'none' trong CSP response-header), Referrer-Policy: strict-origin-when-cross-origin, Permissions-Policy: camera=(), microphone=(), geolocation=(), Strict-Transport-Security: max-age=63072000; includeSubDomains; preload, X-Content-Type-Options: nosniff. Đồng thời chuyển CSP sang response-header để có thể dùng frame-ancestors.",
+    "effort": "S"
+  },
+  {
+    "id": "SEC-002",
+    "severity": "LOW",
+    "title": "CSP không đồng nhất giữa các trang — index.src.html cho phép 'unsafe-inline' trong style-src",
+    "file": "src/index.src.html:6",
+    "evidence": "src/index.src.html: <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; ...\"> trong khi src/privacy.src.html:6, src/terms.src.html:6, src/community-standards.src.html:6 dùng style-src 'self' (không có 'unsafe-inline'). Nguyên nhân 'unsafe-inline' là do carousel.js set phone.style.transform / opacity / zIndex inline (assets/js/carousel.js:76-82).",
+    "impact": "'unsafe-inline' trong style-src làm giảm hiệu quả CSP trước style injection (style-based data exfil, UI redress). Rủi ro thấp vì không có input người dùng được render, nhưng là điểm làm cứng bỏ lỡ.",
+    "suggestion": "Hai lựa chọn: (a) thêm nonce cho style inline qua response-header CSP + rewrite carousel.js dùng CSS custom properties (--tx, --scale...) trên element còn keyframe nằm trong carousel.css — khi đó có thể bỏ 'unsafe-inline'; hoặc (b) chấp nhận 'unsafe-inline' cho style và ghi chú lý do, nhưng giữ đồng nhất CSP giữa các trang để review dễ hơn.",
+    "effort": "M"
+  },
+  {
+    "id": "SEC-003",
+    "severity": "LOW",
+    "title": "CSP không khai báo form-action và frame-src — chính sách có thể chặt hơn",
+    "file": "src/index.src.html:6, src/privacy.src.html:6, src/terms.src.html:6, src/community-standards.src.html:6",
+    "evidence": "CSP hiện tại: \"default-src 'self'; img-src 'self' data:; style-src ...; font-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self';\" — thiếu form-action, frame-src, connect-src (dù có default-src 'self' làm fallback).",
+    "impact": "Thiếu form-action 'self' có nghĩa nếu có XSS trong tương lai, kẻ tấn công có thể chèn <form action=\"https://evil\"> để exfil dữ liệu. Thiếu frame-src làm yếu phòng thủ chèn iframe quảng cáo/phishing.",
+    "suggestion": "Bổ sung: form-action 'self'; frame-src 'none'; frame-ancestors 'none' (phải đặt qua HTTP header); connect-src 'self'; upgrade-insecure-requests — để phòng thủ theo chiều sâu (defense-in-depth).",
+    "effort": "S"
+  },
+  {
+    "id": "SEC-004",
+    "severity": "LOW",
+    "title": "Link ngoài không có rel=\"noreferrer\" — rò rỉ Referer header sang Apple/GitHub",
+    "file": "src/index.src.html:222,245,1180 (giá trị tham khảo — link TestFlight và GitHub APK)",
+    "evidence": "src/index.src.html:222: <a href=\"https://testflight.apple.com/join/abfrzXm7\" class=\"inline-flex items-center ...\"> — không có rel, không có target. src/index.src.html:245 và 1207: <a href=\"https://github.com/studium-ignotum/weekend-go-android-distribution/releases/download/v{{APK_VERSION}}/release.apk\"> — tương tự.",
+    "impact": "Khi user click, trình duyệt gửi Referer: https://cuoituandidau.vn/... sang Apple và GitHub — tiết lộ query string (nếu sau này thêm utm/tracking) và đường dẫn. Không có reverse-tabnabbing vì cùng tab.",
+    "suggestion": "Thêm rel=\"noreferrer\" (hoặc đặt Referrer-Policy: strict-origin-when-cross-origin ở header — xem SEC-001, giải quyết rộng hơn). Không cần target=\"_blank\" vì UX download APK cùng tab là chủ ý.",
+    "effort": "S"
+  },
+  {
+    "id": "SEC-005",
+    "severity": "LOW",
+    "title": "CSP meta tag không thể thay thế HTTP response header cho một số chỉ thị",
+    "file": "src/index.src.html:6, src/privacy.src.html:6, src/terms.src.html:6, src/community-standards.src.html:6",
+    "evidence": "CSP được khai báo qua <meta http-equiv=\"Content-Security-Policy\">. Spec CSP quy định các chỉ thị sau KHÔNG có hiệu lực khi đặt trong meta: frame-ancestors, report-uri, report-to, sandbox. Ngoài ra CSP meta được áp dụng trễ hơn HTTP header (một số resource có thể đã request trước khi parse meta).",
+    "impact": "frame-ancestors (chống clickjacking) và reporting (phát hiện vi phạm) không hoạt động. Resource ở trên meta tag (nếu có) có thể không bị CSP chặn.",
+    "suggestion": "Chuyển CSP sang HTTP response header khi deploy (qua _headers / vercel.json / netlify.toml — xem SEC-001). Giữ meta tag như fallback. Thêm report-to / report-uri để quan sát vi phạm.",
+    "effort": "S"
+  },
+  {
+    "id": "SEC-006",
+    "severity": "LOW",
+    "title": "Không có Subresource Integrity (SRI) cho asset tự host",
+    "file": "src/index.src.html:65-66, 1236-1237; các trang khác tương tự",
+    "evidence": "<link rel=\"stylesheet\" href=\"assets/css/styles.css\" />, <script src=\"assets/js/menu.js\" defer>, <script src=\"assets/js/carousel.js\" defer>, <link ... href=\"assets/fonts/inter-*.woff2\" crossorigin>. Tất cả self-hosted, không có thuộc tính integrity=\"sha384-...\".",
+    "impact": "Rủi ro rất thấp với asset self-hosted (attacker cần đã compromise host). Tuy nhiên nếu sau này dùng CDN hoặc có supply-chain tampering, SRI giúp phát hiện. Không phải XSS trực tiếp.",
+    "suggestion": "Nếu chuyển sang CDN, BẮT BUỘC thêm integrity + crossorigin=\"anonymous\". Với self-hosted hiện tại, có thể bỏ qua nhưng nên thêm vào build pipeline (tailwind đã minify — hash sha384 của styles.css, carousel.css, menu.js, carousel.js) để phòng xa.",
+    "effort": "M"
+  },
+  {
+    "id": "SEC-007",
+    "severity": "LOW",
+    "title": "URL download APK dùng placeholder {{APK_VERSION}} từ package.json — cần bảo đảm kênh build tin cậy",
+    "file": "src/index.src.html:245, src/index.src.html:1207, scripts/build-html.js:11,30",
+    "evidence": "scripts/build-html.js:11 — const APK_VERSION = pkg.appVersion || pkg.version || '0.0.0'; render() dùng .replace(/\\{\\{APK_VERSION\\}\\}/g, APK_VERSION). Giá trị nhúng vào URL href=\"https://github.com/.../releases/download/v{{APK_VERSION}}/release.apk\" — APK_VERSION không qua HTML-escape.",
+    "impact": "Hiện tại an toàn vì package.json nằm trong repo và do maintainer kiểm soát (appVersion = \"1.0.35\"). NHƯNG nếu ai đó chèn ký tự \" hoặc > vào appVersion (ví dụ CI auto-bump, dependency bot), attribute HTML sẽ bị phá vỡ → XSS phản ánh thông qua build. Hiện placeholder cũng chỉ dùng trong href, không phải trong <script>.",
+    "suggestion": "Trong scripts/build-html.js, validate APK_VERSION khớp regex ^[0-9]+\\.[0-9]+\\.[0-9]+([-.][A-Za-z0-9]+)*$ trước khi thay thế; hoặc HTML-encode (& → &amp;, \" → &quot;, < → &lt;, > → &gt;) khi chèn vào output. Lỗi build khi giá trị không hợp lệ.",
+    "effort": "S"
+  },
+  {
+    "id": "SEC-008",
+    "severity": "LOW",
+    "title": "JSON-LD inline script có thể bị CSP script-src 'self' chặn (tùy trình duyệt)",
+    "file": "src/privacy.src.html:30, src/terms.src.html:30, src/community-standards.src.html:30",
+    "evidence": "Các trang legal có <script type=\"application/ld+json\"> {...} </script> inline, trong khi CSP các trang này khai báo script-src 'self' (không có 'unsafe-inline', không có nonce/hash).",
+    "impact": "Theo spec CSP3, script-src KHÔNG chặn <script type=\"application/ld+json\"> vì nó không phải executable script. Thực tế Chrome/Firefox/Safari hiện tại đều cho phép. Tuy nhiên điều này phụ thuộc implementation — một số engine cũ hoặc extension có thể chặn, khiến SEO JSON-LD không được parse.",
+    "suggestion": "Tùy chọn: (a) giữ nguyên — rủi ro rất thấp; (b) thêm hash vào script-src: script-src 'self' 'sha256-<hash-của-JSON-LD>'; (c) chuyển JSON-LD thành file tĩnh .jsonld và link qua <link rel=\"alternate\" type=\"application/ld+json\" href=\"...\"> (ít hỗ trợ SEO).",
+    "effort": "S"
+  },
+  {
+    "id": "SEC-009",
+    "severity": "LOW",
+    "title": "Inline SVG paths data nhiều — giữ nguyên OK, nhưng nên kiểm tra SVG người dùng trong tương lai",
+    "file": "src/index.src.html (nhiều vị trí với <svg>...</svg>), partials/icons.svg",
+    "evidence": "Toàn bộ SVG inline là do developer viết (icons trang, App Store, Google Play, Facebook, LinkedIn). Không có SVG từ nguồn bên thứ ba, không có <script> trong SVG.",
+    "impact": "Không có rủi ro hiện tại. Đây là note cho tương lai: SVG có thể chứa <script>, <foreignObject>, <use href=\"data:...\"> — nếu sau này nhận SVG từ user upload hoặc CMS, cần sanitize (DOMPurify profile SVG).",
+    "suggestion": "Thêm quy ước dev: SVG từ bên ngoài phải đi qua svgo --disable=removeTitle + sanitizer trước khi commit. Hiện tại không cần hành động.",
+    "effort": "S"
+  },
+  {
+    "id": "SEC-010",
+    "severity": "LOW",
+    "title": "Không có CSP reporting — khó phát hiện khi chính sách bị vi phạm",
+    "file": "src/index.src.html:6, src/privacy.src.html:6, src/terms.src.html:6, src/community-standards.src.html:6",
+    "evidence": "CSP meta không có report-to / report-uri. Không có endpoint thu thập violation.",
+    "impact": "Nếu attacker tìm được cách bypass CSP (hoặc có XSS) — không có telemetry để phát hiện. Cũng không phát hiện được false-positive khi dev vô ý thêm inline script/style.",
+    "suggestion": "Khi chuyển CSP sang HTTP header (SEC-001), thêm: report-to csp-endpoint; và header Reporting-Endpoints: csp-endpoint=\"https://...\". Hoặc dùng dịch vụ miễn phí như report-uri.com trong giai đoạn đầu. Có thể dùng Content-Security-Policy-Report-Only song song để test policy chặt hơn mà không block.",
+    "effort": "M"
+  },
+  {
+    "id": "SEC-011",
+    "severity": "LOW",
+    "title": "robots.txt / sitemap không giới hạn — acceptable cho landing page",
+    "file": "weekend-go-web/robots.txt, weekend-go-web/sitemap.xml",
+    "evidence": "Tồn tại robots.txt (70 bytes) và sitemap.xml (651 bytes) ở root. Không có endpoint nhạy cảm để giấu (site tĩnh, marketing).",
+    "impact": "Không có rủi ro. Đây là note để audit sau này: nếu thêm admin panel / API endpoint, phải cập nhật robots.txt và đảm bảo security-by-auth (không chỉ robots).",
+    "suggestion": "Không cần thay đổi. Khi mở rộng site, đảm bảo robots.txt không phải là lớp bảo mật duy nhất cho nội dung nhạy cảm.",
+    "effort": "S"
+  },
+  {
+    "id": "SEC-012",
+    "severity": "LOW",
+    "title": "npm audit: 0 lỗ hổng — baseline an toàn",
+    "file": "package.json, package-lock.json",
+    "evidence": "`npm audit --json` kết quả: {\"vulnerabilities\":{},\"metadata\":{\"vulnerabilities\":{\"info\":0,\"low\":0,\"moderate\":0,\"high\":0,\"critical\":0,\"total\":0},\"dependencies\":{\"prod\":1,\"dev\":73,...}}}. Dependency duy nhất: tailwindcss ^3.4.19 (dev). Không có runtime dependency ship tới client.",
+    "impact": "Không có lỗ hổng hiện tại. Tailwind chỉ chạy ở build time, không expose tới user.",
+    "suggestion": "Duy trì — chạy `npm audit` trong CI pipeline (ví dụ GitHub Actions step: npm audit --audit-level=high). Bật Dependabot/Renovate cho auto-update.",
+    "effort": "S"
+  },
+  {
+    "id": "SEC-013",
+    "severity": "LOW",
+    "title": "Không có phân tích/tracking script — không có rủi ro GDPR ở trạng thái hiện tại",
+    "file": "(toàn repo) — không tìm thấy gtag, googletagmanager, facebook pixel, analytics, mixpanel, hotjar, segment, fathom, plausible, umami",
+    "evidence": "Grep pattern \"googletagmanager|google-analytics|gtag|facebook\\.net|analytics|tracker|mixpanel|hotjar|segment|fathom|plausible|umami\" trên *.html trả về 0 match. Chỉ có link ngoài đến facebook.com, linkedin.com, testflight.apple.com, github.com (do user tự click).",
+    "impact": "Không set cookie tracking. Không cần banner consent hiện tại. Note: khi thêm analytics, PHẢI có cookie banner + consent trước khi load script (đặc biệt với người dùng EU), và cập nhật privacy.html.",
+    "suggestion": "Khi thêm analytics trong tương lai: (1) dùng privacy-first (Plausible / Umami self-hosted, hoặc Vercel Analytics anonymized); (2) lazy-load sau consent; (3) khai báo trong privacy policy; (4) cập nhật CSP connect-src và script-src.",
+    "effort": "S"
+  },
+  {
+    "id": "SEC-014",
+    "severity": "LOW",
+    "title": ".gitignore bao phủ .env nhưng không bao phủ các file secret khác (credentials.json, *.pem, .npmrc với token)",
+    "file": "weekend-go-web/.gitignore",
+    "evidence": ".gitignore hiện tại:\nCLAUDE.md\n*.DS_Store\n.gitnexus\nnode_modules/\n.env\n.env.*\n.claude/\n\nChưa liệt kê: *.pem, *.key, credentials.json, .npmrc, *.p12, id_rsa*, .aws/, .vercel.",
+    "impact": "Hiện tại không có file secret nào tồn tại trong repo (đã grep API key pattern — không match). Rủi ro là tương lai dev có thể vô ý commit credentials.json / *.pem.",
+    "suggestion": "Bổ sung .gitignore: *.pem, *.key, *.p12, credentials.json, .npmrc, .aws/, .vercel/, *.log. Cân nhắc dùng pre-commit hook (git-secrets hoặc gitleaks) để chặn commit có secret.",
+    "effort": "S"
+  },
+  {
+    "id": "SEC-015",
+    "severity": "LOW",
+    "title": "scripts/build-html.js đã check path traversal — tốt, giữ nguyên",
+    "file": "scripts/build-html.js:15-20",
+    "evidence": "function resolvePartial(ref) {\n  const abs = path.join(ROOT, ref);\n  if (!abs.startsWith(ROOT + path.sep)) throw new Error(`Unsafe include path: ${ref}`);\n  if (!fs.existsSync(abs)) throw new Error(`Missing partial: ${ref}`);\n  return fs.readFileSync(abs, 'utf8');\n}",
+    "impact": "Phòng vệ đúng. Kiểm tra startsWith(ROOT + path.sep) chặn `<!-- @include ../../../etc/passwd -->`. Include đi qua path.join nên resolve đúng.",
+    "suggestion": "Giữ nguyên. Ghi chú: build-html.js chạy offline trong dev, không expose tới user — nhưng vẫn tốt khi có hardening này.",
+    "effort": "S"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "DEP-001",
+    "severity": "MEDIUM",
+    "title": "Tailwind CSS trễ một phiên bản major (3.4.19 so với 4.2.2)",
+    "file": "package.json:29",
+    "evidence": "devDependencies.tailwindcss = \"^3.4.19\". npm outdated cho biết current=3.4.19, latest=4.2.2. Tailwind v4.0 đã phát hành ổn định từ đầu 2025, nhánh 3.x chỉ còn nhận bản vá bảo trì. Dự án là landing tĩnh, Tailwind chỉ được dùng ở bước build CSS nên nâng cấp không ảnh hưởng runtime.",
+    "impact": "Không nâng cấp sớm sẽ làm nợ kỹ thuật tích tụ: khi cần nâng cấp gấp (bug/security) sẽ phải xử lý nhiều breaking change cùng lúc (engine Oxide mới, bỏ tailwind.config.js, chuyển sang @import \"tailwindcss\" trong CSS, không còn postcss-nested nội bộ, v.v.). Đồng thời mất hiệu năng build ~10x và các class utility mới của v4.",
+    "suggestion": "Giữ 3.4.19 trong ngắn hạn (ổn định, vẫn được Tailwind bảo trì), nhưng lên lịch nâng lên Tailwind v4 khi có thời gian: (1) chuyển tailwind.config.js sang @theme trong src/input.css; (2) đổi content globs sang @source; (3) kiểm thử lại styles.css đầu ra; (4) cập nhật CLI command nếu cần. Ghi vào backlog tech-debt, không bắt buộc làm ngay.",
+    "effort": "M"
+  },
+  {
+    "id": "DEP-002",
+    "severity": "LOW",
+    "title": "Phạm vi phiên bản caret (^) cho phép minor/patch tự động — có thể gây bất ổn build",
+    "file": "package.json:29",
+    "evidence": "\"tailwindcss\": \"^3.4.19\" — caret cho phép cập nhật lên bất kỳ 3.x.y mới nào. Với dự án landing chỉ sinh CSS tĩnh và có package-lock.json, điều này không trực tiếp gây lỗi, nhưng một `npm install` mới trên máy chưa có lockfile (hoặc `npm update`) có thể kéo bản 3.4.x khác và thay đổi output styles.css (thứ tự utility, vendor prefix, v.v.) dẫn tới diff khó đọc trong CI.",
+    "impact": "Build CSS có thể không reproducible 100% giữa các máy dev khi lockfile bị bỏ qua hoặc reset. Rủi ro thấp nhưng có — đặc biệt khi chỉ có duy nhất 1 maintainer/dev.",
+    "suggestion": "Cân nhắc pin chính xác (\"tailwindcss\": \"3.4.19\") hoặc dùng \"~3.4.19\" (chỉ cho patch) nếu muốn build hoàn toàn tất định. Luôn commit package-lock.json và dùng `npm ci` thay vì `npm install` trong CI/CD để đảm bảo lockfile được tôn trọng.",
+    "effort": "S"
+  },
+  {
+    "id": "DEP-003",
+    "severity": "LOW",
+    "title": "Thiếu trường \"private\": true — rủi ro publish nhầm lên npm registry",
+    "file": "package.json:1",
+    "evidence": "package.json không có \"private\": true. Dự án là landing page nội bộ (không phải gói công khai) nhưng vẫn có name=\"weekend-go-web\", version=\"1.0.0\", license=\"ISC\" — đủ điều kiện để `npm publish` đẩy mã nguồn lên registry nếu ai đó chạy nhầm lệnh.",
+    "impact": "Rò rỉ mã nguồn lên npm public registry nếu có maintainer đăng nhập npm và chạy nhầm `npm publish`. Đây là chân quỷ cổ điển gây leak code/secret hay gặp trong các repo nội bộ.",
+    "suggestion": "Thêm \"private\": true vào package.json để npm CLI từ chối publish. Đồng thời cân nhắc bỏ author/keywords/homepage không cần thiết nếu đây không phải gói sẽ phát hành.",
+    "effort": "S"
+  },
+  {
+    "id": "DEP-004",
+    "severity": "LOW",
+    "title": "Không có script \"start\" và scripts dev/build không có bảo vệ \"prebuild\"/\"postinstall\"",
+    "file": "package.json:6-11",
+    "evidence": "scripts chỉ có build:css, build:html, build, dev:css, dev. Không có script \"start\" chuẩn, không có \"prepare\"/\"postinstall\" để tự chạy `npm run build` sau khi clone. Output assets/css/styles.css là file generated nhưng đang được commit vào repo.",
+    "impact": "Developer mới clone dễ chạy `npm run dev` mà không rõ thứ tự; hoặc deploy từ nhánh chưa build CSS. Không phải bug nhưng là lỗ hổng quy trình — một đồng đội sửa class Tailwind quên chạy build sẽ commit HTML với class mới nhưng styles.css cũ.",
+    "suggestion": "(a) Thêm \"prepare\": \"npm run build\" để chạy tự động sau `npm install` (hoặc chỉ build:css nếu muốn nhẹ). (b) Hoặc dùng husky + lint-staged để tự build:css trước commit. (c) Tối thiểu: ghi rõ trong README/AGENTS.md quy trình bắt buộc chạy `npm run build` trước khi commit thay đổi class.",
+    "effort": "S"
+  },
+  {
+    "id": "DEP-005",
+    "severity": "LOW",
+    "title": "Dependency tree 73 gói cho dự án chỉ khai báo 1 dep — bloat transitively",
+    "file": "package-lock.json:1",
+    "evidence": "npm audit metadata: dev=73, prod=1, optional=1, total=73. Chỉ có 1 devDep duy nhất (tailwindcss) nhưng kéo theo 73 transitive (postcss, lilconfig, chokidar, browserslist, v.v.). Điều này là bình thường với Tailwind 3 nhưng đáng lưu ý vì đây là landing tĩnh không cần JS runtime.",
+    "impact": "Tăng bề mặt tấn công supply-chain (mỗi gói là một điểm rủi ro), thời gian `npm install` ~10-20s, node_modules ~60-100MB. Hiện không có CVE nào (npm audit sạch) nên ưu tiên thấp.",
+    "suggestion": "(a) Nâng lên Tailwind v4 (DEP-001) sẽ giảm đáng kể dependency tree nhờ engine Rust Oxide. (b) Hoặc cân nhắc dùng Tailwind CLI standalone (binary, không cần node_modules) cho workflow build CSS: https://tailwindcss.com/blog/standalone-cli. (c) Đảm bảo chạy `npm audit` định kỳ trong CI.",
+    "effort": "M"
+  },
+  {
+    "id": "DEP-006",
+    "severity": "LOW",
+    "title": "Thiếu engines.npm và thiếu packageManager — phiên bản toolchain không khóa",
+    "file": "package.json:12-14",
+    "evidence": "engines = { \"node\": \">=18\" }. Không khóa phiên bản npm, không có trường \"packageManager\" (dùng để Corepack chốt npm/yarn/pnpm phiên bản cụ thể).",
+    "impact": "Các máy dev/CI dùng Node khác nhau có thể sinh ra package-lock.json có cấu trúc khác (npm v9 vs v10 có lockfile v3 khác nhau), dẫn tới diff lockfile không mong muốn khi người khác chạy `npm install`.",
+    "suggestion": "Thêm \"packageManager\": \"npm@10.x.x\" (chốt major) và/hoặc \"engines\": { \"node\": \">=18\", \"npm\": \">=10\" }. Cân nhắc .nvmrc để chốt phiên bản Node cho toàn đội.",
+    "effort": "S"
+  }
+]
