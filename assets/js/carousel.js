@@ -20,11 +20,11 @@ const HIDDEN = { scale: 0.5, rotateY: 0, translateX: 0, opacity: 0, zIndex: 0 };
 
 // POSITIONS arrays — indexed by DOM slot 0..4 = positions -2, -1, 0, +1, +2
 const POSITIONS_DESKTOP = [
-  { scale: 0.45, rotateY: 45,  translateX: -420, opacity: 0.4, zIndex: 2  },
-  { scale: 0.6,  rotateY: 40,  translateX: -230, opacity: 0.7, zIndex: 5  },
-  { scale: 0.8,  rotateY: 0,   translateX: 0,    opacity: 1.0, zIndex: 10 },
-  { scale: 0.6,  rotateY: -40, translateX: 230,  opacity: 0.7, zIndex: 5  },
-  { scale: 0.45, rotateY: -45, translateX: 420,  opacity: 0.4, zIndex: 2  },
+  { scale: 0.55, rotateY: 55,  translateX: -420, opacity: 0.4, zIndex: 2  },
+  { scale: 0.75, rotateY: 40,  translateX: -230, opacity: 0.7, zIndex: 5  },
+  { scale: 1.0,  rotateY: 0,   translateX: 0,    opacity: 1.0, zIndex: 10 },
+  { scale: 0.75, rotateY: -40, translateX: 230,  opacity: 0.7, zIndex: 5  },
+  { scale: 0.55, rotateY: -55, translateX: 420,  opacity: 0.4, zIndex: 2  },
 ];
 
 const POSITIONS_TABLET = [
@@ -122,6 +122,7 @@ function initScrollMode() {
 
   requestAnimationFrame(() => {
     scrollToIndex(centerIndex, 'instant');
+    updateCenterClass();
   });
 
   if ('onscrollend' in carousel) {
@@ -187,6 +188,14 @@ function handleScrollEnd() {
 
   updateDots(centerIndex);
   carousel.dataset.centerIndex = String(centerIndex);
+  updateCenterClass();
+}
+
+function updateCenterClass() {
+  if (!isScrollMode) return;
+  const items = Array.from(carousel.children);
+  const targetDomIdx = centerIndex + 1; // offset for prepended clone
+  items.forEach((el, i) => el.classList.toggle('is-center', i === targetDomIdx));
 }
 
 let scrollEndTimer = null;
@@ -240,6 +249,7 @@ function goTo(newCenter, direction) {
     centerIndex = ((newCenter % total) + total) % total;
     scrollToIndex(centerIndex, 'smooth');
     updateDots(centerIndex);
+    updateCenterClass();
     carousel.dataset.centerIndex = String(centerIndex);
     return;
   }
