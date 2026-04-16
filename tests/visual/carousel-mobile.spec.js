@@ -93,6 +93,64 @@ test('mobile: clones exist with aria-hidden', async ({ page: p }) => {
   });
 });
 
+test('mobile: center item has scale ~1.0 after load', async ({ page: p }) => {
+  test.skip(test.info().project.name !== 'mobile');
+  await setup(p);
+  // Wait for interpolation to apply
+  await p.waitForTimeout(500);
+  const result = await p.evaluate(() => {
+    const carousel = document.getElementById('phone-carousel');
+    const scrollLeft = carousel.scrollLeft;
+    const containerCenter = scrollLeft + carousel.offsetWidth / 2;
+    const items = Array.from(carousel.querySelectorAll('.phone-item:not(.clone)'));
+    let closestItem = items[0];
+    let closestDist = Infinity;
+    items.forEach(item => {
+      const itemCenter = item.offsetLeft + item.offsetWidth / 2;
+      const dist = Math.abs(itemCenter - containerCenter);
+      if (dist < closestDist) { closestDist = dist; closestItem = item; }
+    });
+    const transform = closestItem.style.transform || getComputedStyle(closestItem).transform;
+    const opacity = parseFloat(closestItem.style.opacity || getComputedStyle(closestItem).opacity);
+    // Extract scale value
+    const scaleMatch = transform.match(/scale\(([^)]+)\)/);
+    const scale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+    return { scale, opacity };
+  });
+  expect(result.scale).toBeGreaterThan(0.95);
+  expect(result.opacity).toBeGreaterThan(0.9);
+});
+
+test('mobile: side items have reduced scale and opacity', async ({ page: p }) => {
+  test.skip(test.info().project.name !== 'mobile');
+  await setup(p);
+  await p.waitForTimeout(500);
+  const result = await p.evaluate(() => {
+    const carousel = document.getElementById('phone-carousel');
+    const scrollLeft = carousel.scrollLeft;
+    const containerCenter = scrollLeft + carousel.offsetWidth / 2;
+    const items = Array.from(carousel.querySelectorAll('.phone-item:not(.clone)'));
+    // Find the item farthest from center (but still visible)
+    let farthestItem = items[0];
+    let farthestDist = 0;
+    items.forEach(item => {
+      const itemCenter = item.offsetLeft + item.offsetWidth / 2;
+      const dist = Math.abs(itemCenter - containerCenter);
+      if (dist > farthestDist && dist < carousel.offsetWidth) {
+        farthestDist = dist;
+        farthestItem = item;
+      }
+    });
+    const transform = farthestItem.style.transform || getComputedStyle(farthestItem).transform;
+    const opacity = parseFloat(farthestItem.style.opacity || getComputedStyle(farthestItem).opacity);
+    const scaleMatch = transform.match(/scale\(([^)]+)\)/);
+    const scale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+    return { scale, opacity };
+  });
+  expect(result.scale).toBeLessThan(0.95);
+  expect(result.opacity).toBeLessThan(0.8);
+});
+
 // --- Desktop tests ---
 
 test('desktop: coverflow mode (no scroll-snap)', async ({ page: p }) => {
