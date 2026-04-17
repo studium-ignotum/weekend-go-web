@@ -21,19 +21,19 @@ const HIDDEN = { scale: 0.5, rotateY: 0, txRatio: 0, translateZ: 0, opacity: 0, 
 // POSITIONS arrays — indexed by DOM slot 0..4 = positions -2, -1, 0, +1, +2
 // txRatio = translateX as fraction of carousel.offsetWidth (responsive)
 const POSITIONS_DESKTOP = [
-  { scale: 0.7,  rotateY: 55,  txRatio: -0.38, translateZ: 0,   opacity: 0.4, zIndex: 2  },
-  { scale: 0.85, rotateY: 45,  txRatio: -0.25, translateZ: 50,  opacity: 0.8, zIndex: 5  },
-  { scale: 1.1,  rotateY: 0,   txRatio: 0,     translateZ: 150, opacity: 1.0, zIndex: 10 },
-  { scale: 0.85, rotateY: -45, txRatio: 0.25,  translateZ: 50,  opacity: 0.8, zIndex: 5  },
-  { scale: 0.7,  rotateY: -55, txRatio: 0.38,  translateZ: 0,   opacity: 0.4, zIndex: 2  },
+  { scale: 0.7,  rotateY: 55,  txRatio: -0.44, translateZ: 0, opacity: 0.4, zIndex: 2  },
+  { scale: 0.85, rotateY: 45,  txRatio: -0.22, translateZ: 0, opacity: 0.8, zIndex: 5  },
+  { scale: 1.0,  rotateY: 0,   txRatio: 0,     translateZ: 0, opacity: 1.0, zIndex: 10 },
+  { scale: 0.85, rotateY: -45, txRatio: 0.22,  translateZ: 0, opacity: 0.8, zIndex: 5  },
+  { scale: 0.7,  rotateY: -55, txRatio: 0.44,  translateZ: 0, opacity: 0.4, zIndex: 2  },
 ];
 
 const POSITIONS_MOBILE = [
-  { scale: 0.5,  rotateY: 0,   txRatio: 0,     translateZ: 0,   opacity: 0,   zIndex: 0  },
-  { scale: 0.85, rotateY: 35,  txRatio: -0.28, translateZ: 30,  opacity: 0.7, zIndex: 5  },
-  { scale: 1.1,  rotateY: 0,   txRatio: 0,     translateZ: 120, opacity: 1.0, zIndex: 10 },
-  { scale: 0.85, rotateY: -35, txRatio: 0.28,  translateZ: 30,  opacity: 0.7, zIndex: 5  },
-  { scale: 0.5,  rotateY: 0,   txRatio: 0,     translateZ: 0,   opacity: 0,   zIndex: 0  },
+  { scale: 0.5,  rotateY: 0,   txRatio: 0,     translateZ: 0, opacity: 0,   zIndex: 0  },
+  { scale: 0.85, rotateY: 35,  txRatio: -0.28, translateZ: 0, opacity: 0.7, zIndex: 5  },
+  { scale: 1.0,  rotateY: 0,   txRatio: 0,     translateZ: 0, opacity: 1.0, zIndex: 10 },
+  { scale: 0.85, rotateY: -35, txRatio: 0.28,  translateZ: 0, opacity: 0.7, zIndex: 5  },
+  { scale: 0.5,  rotateY: 0,   txRatio: 0,     translateZ: 0, opacity: 0,   zIndex: 0  },
 ];
 
 const carousel = document.getElementById("phone-carousel");
@@ -55,34 +55,6 @@ function getPositions() {
 function getPosition(domIndex) {
   const positions = getPositions();
   return domIndex < positions.length ? positions[domIndex] : HIDDEN;
-}
-
-function buildDots() {
-  const container = document.getElementById('carousel-dots');
-  if (!container) return;
-  // Idempotent: clear first
-  container.innerHTML = '';
-  for (let i = 0; i < total; i++) {
-    const dot = document.createElement('button');
-    dot.type = 'button';
-    dot.className = 'carousel-dot';
-    dot.setAttribute('aria-label', `Ảnh ${i + 1}`);
-    dot.setAttribute('role', 'tab');
-    dot.addEventListener('click', () => {
-      if (i === centerIndex) return;
-      const direction = i > centerIndex ? 1 : -1;
-      goTo(i, direction);
-      resetAutoPlay();
-    });
-    container.appendChild(dot);
-  }
-}
-
-function updateDots(active) {
-  document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
-    dot.classList.toggle('active', i === active);
-    dot.setAttribute('aria-selected', i === active ? 'true' : 'false');
-  });
 }
 
 function reorderDOM() {
@@ -133,7 +105,6 @@ function applyPositions(transition) {
   // Expose state for tests
   carousel.dataset.centerIndex = String(centerIndex);
   carousel.dataset.viewportMode = getViewportMode();
-  updateDots(centerIndex);
 }
 
 function goTo(newCenter, direction) {
@@ -175,8 +146,6 @@ function goPrev() {
 // Initial render
 reorderDOM();
 applyPositions(false);
-buildDots();
-updateDots(centerIndex);
 
 // Next / Prev buttons
 document.getElementById("carousel-next")?.addEventListener("click", () => {
