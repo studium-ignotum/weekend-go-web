@@ -4,67 +4,18 @@ async function setup(p) {
   await p.goto('/');
   await p.evaluate(() => document.fonts.ready);
   await p.waitForLoadState('networkidle');
-  // Stop autoplay
-  await p.evaluate(() => {
-    const toggle = document.getElementById('carousel-toggle');
-    if (toggle && toggle.dataset.state === 'playing') toggle.click();
-  });
 }
 
-// --- Mobile tests (viewport < 768) ---
-
-test('mobile: scroll-snap active', async ({ page: p }) => {
-  test.skip(test.info().project.name !== 'mobile');
-  await setup(p);
-  const snapType = await p.evaluate(() => getComputedStyle(document.getElementById('phone-carousel')).scrollSnapType);
-  expect(snapType).toContain('x');
-  expect(snapType).toContain('mandatory');
-});
-
-test('mobile: items are static (not absolute)', async ({ page: p }) => {
-  test.skip(test.info().project.name !== 'mobile');
-  await setup(p);
-  const pos = await p.evaluate(() => {
-    const item = document.querySelector('#phone-carousel .phone-item:not(.clone)');
-    return getComputedStyle(item).position;
-  });
-  expect(pos).toBe('static');
-});
-
-test('mobile: item width ~75% of container', async ({ page: p }) => {
-  test.skip(test.info().project.name !== 'mobile');
-  await setup(p);
-  const ratio = await p.evaluate(() => {
-    const container = document.getElementById('phone-carousel');
-    const item = container.querySelector('.phone-item:not(.clone)');
-    return item.offsetWidth / container.offsetWidth;
-  });
-  expect(ratio).toBeGreaterThan(0.5);
-  expect(ratio).toBeLessThan(0.9);
-});
+// --- Mobile tests (viewport < 1024) ---
 
 test('mobile: image border-radius is 20px', async ({ page: p }) => {
   test.skip(test.info().project.name !== 'mobile');
   await setup(p);
   const radius = await p.evaluate(() => {
-    const img = document.querySelector('#phone-carousel .phone-item:not(.clone) img');
+    const img = document.querySelector('#phone-carousel .phone-item img');
     return getComputedStyle(img).borderRadius;
   });
   expect(radius).toBe('20px');
-});
-
-test('mobile: scroll-behavior is smooth', async ({ page: p }) => {
-  test.skip(test.info().project.name !== 'mobile');
-  await setup(p);
-  const behavior = await p.evaluate(() => getComputedStyle(document.getElementById('phone-carousel')).scrollBehavior);
-  expect(behavior).toBe('smooth');
-});
-
-test('mobile: arrows hidden', async ({ page: p }) => {
-  test.skip(test.info().project.name !== 'mobile');
-  await setup(p);
-  const display = await p.evaluate(() => getComputedStyle(document.getElementById('carousel-prev')).display);
-  expect(display).toBe('none');
 });
 
 test('mobile: dots exist and one is active', async ({ page: p }) => {
@@ -76,79 +27,108 @@ test('mobile: dots exist and one is active', async ({ page: p }) => {
   expect(active).toBe(1);
 });
 
-test('mobile: clones exist with aria-hidden', async ({ page: p }) => {
+// --- Scale Center tests (mobile viewport, transform-based) ---
+
+test('scale-center: items are absolute positioned', async ({ page: p }) => {
   test.skip(test.info().project.name !== 'mobile');
   await setup(p);
-  const clones = await p.evaluate(() => {
-    const items = document.querySelectorAll('#phone-carousel .clone');
-    return Array.from(items).map(el => ({
-      ariaHidden: el.getAttribute('aria-hidden'),
-      tabIndex: el.tabIndex
-    }));
+  const pos = await p.evaluate(() => {
+    const item = document.querySelector('#phone-carousel .phone-item');
+    return getComputedStyle(item).position;
   });
-  expect(clones.length).toBe(2);
-  clones.forEach(c => {
-    expect(c.ariaHidden).toBe('true');
-    expect(c.tabIndex).toBe(-1);
+  expect(pos).toBe('absolute');
+});
+
+test('scale-center: no scroll-snap', async ({ page: p }) => {
+  test.skip(test.info().project.name !== 'mobile');
+  await setup(p);
+  const snapType = await p.evaluate(() => getComputedStyle(document.getElementById('phone-carousel')).scrollSnapType);
+  expect(snapType === 'none' || snapType === '').toBeTruthy();
+});
+
+test('scale-center: 3 visible items (center + 2 sides)', async ({ page: p }) => {
+  test.skip(test.info().project.name !== 'mobile');
+  await setup(p);
+  const visible = await p.evaluate(() => {
+    return Array.from(document.querySelectorAll('#phone-carousel .phone-item'))
+      .filter(el => parseFloat(el.style.opacity || getComputedStyle(el).opacity || '0') > 0).length;
+  });
+  expect(visible).toBeGreaterThanOrEqual(3);
+});
+
+test('scale-center: center item has scale 1.0', async ({ page: p }) => {
+  test.skip(test.info().project.name !== 'mobile');
+  await setup(p);
+  const scale = await p.evaluate(() => {
+    const items = Array.from(document.querySelectorAll('#phone-carousel .phone-item'));
+    const centerItem = items[2];
+    if (!centerItem) return null;
+    const transform = centerItem.style.transform || getComputedStyle(centerItem).transform;
+    const scaleMatch = transform.match(/scale\(([^)]+)\)/);
+    return scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+  });
+  expect(scale).toBeGreaterThan(0.95);
+});
+
+test('scale-center: side items have reduced scale', async ({ page: p }) => {
+  test.skip(test.info().project.name !== 'mobile');
+  await setup(p);
+  const scales = await p.evaluate(() => {
+    const items = Array.from(document.querySelectorAll('#phone-carousel .phone-item'));
+    return [1, 3].map(i => {
+      const item = items[i];
+      if (!item) return null;
+      const transform = item.style.transform || getComputedStyle(item).transform;
+      const scaleMatch = transform.match(/scale\(([^)]+)\)/);
+      return scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+    });
+  });
+  scales.forEach(s => {
+    if (s !== null) expect(s).toBeLessThan(1.0);
   });
 });
 
-test('mobile: center item has scale ~1.0 after load', async ({ page: p }) => {
+test('scale-center: no rotateY', async ({ page: p }) => {
   test.skip(test.info().project.name !== 'mobile');
   await setup(p);
-  // Wait for interpolation to apply
-  await p.waitForTimeout(500);
-  const result = await p.evaluate(() => {
-    const carousel = document.getElementById('phone-carousel');
-    const scrollLeft = carousel.scrollLeft;
-    const containerCenter = scrollLeft + carousel.offsetWidth / 2;
-    const items = Array.from(carousel.querySelectorAll('.phone-item:not(.clone)'));
-    let closestItem = items[0];
-    let closestDist = Infinity;
-    items.forEach(item => {
-      const itemCenter = item.offsetLeft + item.offsetWidth / 2;
-      const dist = Math.abs(itemCenter - containerCenter);
-      if (dist < closestDist) { closestDist = dist; closestItem = item; }
+  const hasRotateY = await p.evaluate(() => {
+    const items = Array.from(document.querySelectorAll('#phone-carousel .phone-item'));
+    return items.some(item => {
+      const transform = item.style.transform || getComputedStyle(item).transform;
+      return /rotateY\s*\(\s*(?!0deg|0rad|0turn|0grad)/.test(transform);
     });
-    const transform = closestItem.style.transform || getComputedStyle(closestItem).transform;
-    const opacity = parseFloat(closestItem.style.opacity || getComputedStyle(closestItem).opacity);
-    // Extract scale value
-    const scaleMatch = transform.match(/scale\(([^)]+)\)/);
-    const scale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
-    return { scale, opacity };
   });
-  expect(result.scale).toBeGreaterThan(0.95);
-  expect(result.opacity).toBeGreaterThan(0.9);
+  expect(hasRotateY).toBe(false);
 });
 
-test('mobile: side items have reduced scale and opacity', async ({ page: p }) => {
+test('scale-center: viewport mode is scale-center', async ({ page: p }) => {
   test.skip(test.info().project.name !== 'mobile');
   await setup(p);
-  await p.waitForTimeout(500);
-  const result = await p.evaluate(() => {
-    const carousel = document.getElementById('phone-carousel');
-    const scrollLeft = carousel.scrollLeft;
-    const containerCenter = scrollLeft + carousel.offsetWidth / 2;
-    const items = Array.from(carousel.querySelectorAll('.phone-item:not(.clone)'));
-    // Find the item farthest from center (but still visible)
-    let farthestItem = items[0];
-    let farthestDist = 0;
-    items.forEach(item => {
-      const itemCenter = item.offsetLeft + item.offsetWidth / 2;
-      const dist = Math.abs(itemCenter - containerCenter);
-      if (dist > farthestDist && dist < carousel.offsetWidth) {
-        farthestDist = dist;
-        farthestItem = item;
-      }
-    });
-    const transform = farthestItem.style.transform || getComputedStyle(farthestItem).transform;
-    const opacity = parseFloat(farthestItem.style.opacity || getComputedStyle(farthestItem).opacity);
-    const scaleMatch = transform.match(/scale\(([^)]+)\)/);
-    const scale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
-    return { scale, opacity };
+  await expect(p.locator('#phone-carousel')).toHaveAttribute('data-viewport-mode', 'scale-center');
+});
+
+test('scale-center: prev/next buttons visible', async ({ page: p }) => {
+  test.skip(test.info().project.name !== 'mobile');
+  await setup(p);
+  const display = await p.evaluate(() => getComputedStyle(document.getElementById('carousel-prev')).display);
+  expect(display).not.toBe('none');
+});
+
+test('scale-center: dots clickable', async ({ page: p }) => {
+  test.skip(test.info().project.name !== 'mobile');
+  await setup(p);
+  const pointerEvents = await p.evaluate(() => {
+    const dot = document.querySelector('#carousel-dots .carousel-dot');
+    return dot ? getComputedStyle(dot).pointerEvents : null;
   });
-  expect(result.scale).toBeLessThan(0.95);
-  expect(result.opacity).toBeLessThan(0.8);
+  expect(pointerEvents).not.toBe('none');
+});
+
+test('scale-center: perspective is none', async ({ page: p }) => {
+  test.skip(test.info().project.name !== 'mobile');
+  await setup(p);
+  const perspective = await p.evaluate(() => getComputedStyle(document.getElementById('phone-carousel')).perspective);
+  expect(perspective === 'none' || perspective === '').toBeTruthy();
 });
 
 // --- Desktop tests ---
@@ -181,8 +161,38 @@ test('desktop: 5 visible phones', async ({ page: p }) => {
   expect(visible).toBe(5);
 });
 
-test('desktop: viewport mode is desktop', async ({ page: p }) => {
+test('desktop: viewport mode is coverflow', async ({ page: p }) => {
   test.skip(test.info().project.name !== 'desktop');
   await setup(p);
-  await expect(p.locator('#phone-carousel')).toHaveAttribute('data-viewport-mode', 'desktop');
+  await expect(p.locator('#phone-carousel')).toHaveAttribute('data-viewport-mode', 'coverflow');
+});
+
+test('desktop: perspective is set', async ({ page: p }) => {
+  test.skip(test.info().project.name !== 'desktop');
+  await setup(p);
+  const perspective = await p.evaluate(() => getComputedStyle(document.getElementById('phone-carousel')).perspective);
+  expect(perspective !== 'none' && perspective !== '').toBeTruthy();
+});
+
+// --- Image order tests ---
+
+test('images: correct order', async ({ page: p }) => {
+  await setup(p);
+  const srcs = await p.evaluate(() => {
+    return Array.from(document.querySelectorAll('#phone-carousel .phone-item img'))
+      .map(img => img.src || img.getAttribute('src'));
+  });
+  const expected = [
+    'venue-detail',
+    'newsfeed',
+    'user-profile',
+    'share-review',
+    'AI-review',
+    'create-post',
+    'weekend-plan',
+    'plan-list',
+  ];
+  expected.forEach((name, i) => {
+    expect(srcs[i]).toContain(name);
+  });
 });
