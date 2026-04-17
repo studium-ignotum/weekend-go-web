@@ -21,18 +21,18 @@ const HIDDEN = { scale: 0.5, rotateY: 0, txRatio: 0, opacity: 0, zIndex: 0 };
 // POSITIONS arrays — indexed by DOM slot 0..4 = positions -2, -1, 0, +1, +2
 // txRatio = translateX as fraction of carousel.offsetWidth (responsive)
 const POSITIONS_DESKTOP = [
-  { scale: 0.55, rotateY: 55,  txRatio: -0.37, opacity: 0.4, zIndex: 2  },
-  { scale: 0.75, rotateY: 40,  txRatio: -0.20, opacity: 0.7, zIndex: 5  },
+  { scale: 0.55, rotateY: 50,  txRatio: -0.38, opacity: 0.4, zIndex: 2  },
+  { scale: 0.75, rotateY: 45,  txRatio: -0.30, opacity: 0.7, zIndex: 5  },
   { scale: 1.0,  rotateY: 0,   txRatio: 0,     opacity: 1.0, zIndex: 10 },
-  { scale: 0.75, rotateY: -40, txRatio: 0.20,  opacity: 0.7, zIndex: 5  },
-  { scale: 0.55, rotateY: -55, txRatio: 0.37,  opacity: 0.4, zIndex: 2  },
+  { scale: 0.75, rotateY: -45, txRatio: 0.30,  opacity: 0.7, zIndex: 5  },
+  { scale: 0.55, rotateY: -50, txRatio: 0.38,  opacity: 0.4, zIndex: 2  },
 ];
 
 const POSITIONS_SCALE_CENTER = [
   { scale: 0.5,  rotateY: 0, txRatio: 0,     opacity: 0,   zIndex: 0  },
-  { scale: 0.72, rotateY: 0, txRatio: -0.18, opacity: 0.6, zIndex: 5  },
+  { scale: 0.72, rotateY: 0, txRatio: -0.30, opacity: 0.6, zIndex: 5  },
   { scale: 1.0,  rotateY: 0, txRatio: 0,     opacity: 1.0, zIndex: 10 },
-  { scale: 0.72, rotateY: 0, txRatio: 0.18,  opacity: 0.6, zIndex: 5  },
+  { scale: 0.72, rotateY: 0, txRatio: 0.30,  opacity: 0.6, zIndex: 5  },
   { scale: 0.5,  rotateY: 0, txRatio: 0,     opacity: 0,   zIndex: 0  },
 ];
 
