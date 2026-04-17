@@ -8,12 +8,6 @@ const BREAKPOINT_LG = 1024;
 const ANIMATION_DURATION_MS = 600;
 const AUTOPLAY_INTERVAL_MS = 3000;
 
-// Mobile interpolation config
-const MOBILE_SCALE_CENTER = 1.0;
-const MOBILE_SCALE_SIDE = 0.85;
-const MOBILE_OPACITY_CENTER = 1.0;
-const MOBILE_OPACITY_SIDE = 0.5;
-
 // Swipe tuning
 const SWIPE_DISTANCE_MIN_PX = 25;
 const SWIPE_DISTANCE_RATIO  = 0.15;   // 15% of carousel width
@@ -34,20 +28,12 @@ const POSITIONS_DESKTOP = [
   { scale: 0.55, rotateY: -55, txRatio: 0.37,  opacity: 0.4, zIndex: 2  },
 ];
 
-const POSITIONS_TABLET = [
-  HIDDEN,
-  { scale: 0.88, rotateY: 15,  txRatio: -0.25, opacity: 0.7, zIndex: 5  },
-  { scale: 1.0,  rotateY: 0,   txRatio: 0,     opacity: 1.0, zIndex: 10 },
-  { scale: 0.88, rotateY: -15, txRatio: 0.25,  opacity: 0.7, zIndex: 5  },
-  HIDDEN,
-];
-
-const POSITIONS_MOBILE = [
-  HIDDEN,
-  { scale: 0.82, rotateY: 0,   txRatio: -0.30, opacity: 0.55, zIndex: 5  },
-  { scale: 1.0,  rotateY: 0,   txRatio: 0,     opacity: 1.0,  zIndex: 10 },
-  { scale: 0.82, rotateY: 0,   txRatio: 0.30,  opacity: 0.55, zIndex: 5  },
-  HIDDEN,
+const POSITIONS_SCALE_CENTER = [
+  { scale: 0.5,  rotateY: 0, txRatio: 0,     opacity: 0,   zIndex: 0  },
+  { scale: 0.72, rotateY: 0, txRatio: -0.18, opacity: 0.6, zIndex: 5  },
+  { scale: 1.0,  rotateY: 0, txRatio: 0,     opacity: 1.0, zIndex: 10 },
+  { scale: 0.72, rotateY: 0, txRatio: 0.18,  opacity: 0.6, zIndex: 5  },
+  { scale: 0.5,  rotateY: 0, txRatio: 0,     opacity: 0,   zIndex: 0  },
 ];
 
 const carousel = document.getElementById("phone-carousel");
@@ -57,24 +43,13 @@ const total = phones.length;
 let centerIndex = 0;
 let animating = false;
 let autoTimer;
-let isScrollMode = false;
-let cloneFirst = null;
-let cloneLast = null;
-let rafId = null;
 
 function getViewportMode() {
-  const w = window.innerWidth;
-  if (w < BREAKPOINT_XS) return 'mobile';
-  if (w < BREAKPOINT_MD) return 'tablet';
-  return 'desktop';
+  return window.innerWidth >= BREAKPOINT_LG ? 'coverflow' : 'scale-center';
 }
 
 function getPositions() {
-  switch (getViewportMode()) {
-    case 'mobile':  return POSITIONS_MOBILE;
-    case 'tablet':  return POSITIONS_TABLET;
-    default:        return POSITIONS_DESKTOP;
-  }
+  return getViewportMode() === 'coverflow' ? POSITIONS_DESKTOP : POSITIONS_SCALE_CENTER;
 }
 
 function getPosition(domIndex) {
@@ -94,7 +69,6 @@ function buildDots() {
     dot.setAttribute('aria-label', `Ảnh ${i + 1}`);
     dot.setAttribute('role', 'tab');
     dot.addEventListener('click', () => {
-      if (getViewportMode() === 'mobile') return;  // decorative on mobile
       if (i === centerIndex) return;
       const direction = i > centerIndex ? 1 : -1;
       goTo(i, direction);
@@ -109,144 +83,6 @@ function updateDots(active) {
     dot.classList.toggle('active', i === active);
     dot.setAttribute('aria-selected', i === active ? 'true' : 'false');
   });
-}
-
-function interpolateItems() {
-  if (!isScrollMode) return;
-  const containerCenter = carousel.scrollLeft + carousel.offsetWidth / 2;
-  const items = Array.from(carousel.children);
-
-  items.forEach(item => {
-    const itemCenter = item.offsetLeft + item.offsetWidth / 2;
-    const distance = Math.abs(itemCenter - containerCenter);
-    const itemWidth = item.offsetWidth;
-
-    // ratio: 0 = at center, 1 = one item width away or more
-    const ratio = Math.min(distance / itemWidth, 1);
-
-    // Linear interpolation
-    const scale = MOBILE_SCALE_CENTER - ratio * (MOBILE_SCALE_CENTER - MOBILE_SCALE_SIDE);
-    const opacity = MOBILE_OPACITY_CENTER - ratio * (MOBILE_OPACITY_CENTER - MOBILE_OPACITY_SIDE);
-
-    item.style.transform = `scale(${scale})`;
-    item.style.opacity = opacity;
-  });
-}
-
-function handleScrollInterpolation() {
-  if (rafId) cancelAnimationFrame(rafId);
-  rafId = requestAnimationFrame(interpolateItems);
-}
-
-function initScrollMode() {
-  if (isScrollMode) return;
-  isScrollMode = true;
-
-  phones.forEach(phone => { phone.style.cssText = ''; });
-
-  cloneLast = phones[phones.length - 1].cloneNode(true);
-  cloneFirst = phones[0].cloneNode(true);
-  cloneLast.classList.add('clone');
-  cloneFirst.classList.add('clone');
-  cloneLast.setAttribute('aria-hidden', 'true');
-  cloneFirst.setAttribute('aria-hidden', 'true');
-  cloneLast.tabIndex = -1;
-  cloneFirst.tabIndex = -1;
-  carousel.prepend(cloneLast);
-  carousel.append(cloneFirst);
-
-  requestAnimationFrame(() => {
-    scrollToIndex(centerIndex, 'instant');
-    interpolateItems();
-  });
-
-  carousel.addEventListener('scroll', handleScrollInterpolation, { passive: true });
-
-  if ('onscrollend' in carousel) {
-    carousel.addEventListener('scrollend', handleScrollEnd);
-  } else {
-    carousel.addEventListener('scroll', debounceScrollEnd, { passive: true });
-  }
-}
-
-function destroyScrollMode() {
-  if (!isScrollMode) return;
-  isScrollMode = false;
-
-  carousel.removeEventListener('scroll', handleScrollInterpolation);
-  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-
-  if (cloneLast?.parentNode) cloneLast.remove();
-  if (cloneFirst?.parentNode) cloneFirst.remove();
-  cloneLast = null;
-  cloneFirst = null;
-
-  carousel.removeEventListener('scrollend', handleScrollEnd);
-  carousel.removeEventListener('scroll', debounceScrollEnd);
-
-  // Reset inline styles set by interpolation on all items
-  Array.from(carousel.children).forEach(item => {
-    item.style.transform = '';
-    item.style.opacity = '';
-  });
-
-  reorderDOM();
-  applyPositions(false);
-}
-
-function scrollToIndex(idx, behavior) {
-  const items = Array.from(carousel.children);
-  // offset by 1 because clone-of-last is prepended at index 0
-  const targetDomIdx = idx + 1;
-  const target = items[targetDomIdx];
-  if (!target) return;
-  const containerWidth = carousel.offsetWidth;
-  const scrollTarget = target.offsetLeft - (containerWidth - target.offsetWidth) / 2;
-  carousel.scrollTo({ left: scrollTarget, behavior: behavior || 'smooth' });
-}
-
-function handleScrollEnd() {
-  const scrollLeft = carousel.scrollLeft;
-  const containerWidth = carousel.offsetWidth;
-  const items = Array.from(carousel.children);
-
-  let closestIdx = 0;
-  let closestDist = Infinity;
-  items.forEach((item, i) => {
-    const itemCenter = item.offsetLeft + item.offsetWidth / 2;
-    const dist = Math.abs(itemCenter - (scrollLeft + containerWidth / 2));
-    if (dist < closestDist) { closestDist = dist; closestIdx = i; }
-  });
-
-  const item = items[closestIdx];
-
-  if (item.classList.contains('clone')) {
-    if (item === cloneLast) {
-      centerIndex = phones.length - 1;
-    } else {
-      centerIndex = 0;
-    }
-    scrollToIndex(centerIndex, 'instant');
-  } else {
-    centerIndex = phones.indexOf(item);
-    if (centerIndex === -1) centerIndex = 0;
-  }
-
-  updateDots(centerIndex);
-  carousel.dataset.centerIndex = String(centerIndex);
-}
-
-function updateCenterClass() {
-  if (!isScrollMode) return;
-  const items = Array.from(carousel.children);
-  const targetDomIdx = centerIndex + 1; // offset for prepended clone
-  items.forEach((el, i) => el.classList.toggle('is-center', i === targetDomIdx));
-}
-
-let scrollEndTimer = null;
-function debounceScrollEnd() {
-  clearTimeout(scrollEndTimer);
-  scrollEndTimer = setTimeout(handleScrollEnd, 100);
 }
 
 function reorderDOM() {
@@ -267,12 +103,6 @@ function reorderDOM() {
 }
 
 function applyPositions(transition) {
-  if (isScrollMode) {
-    updateDots(centerIndex);
-    carousel.dataset.centerIndex = String(centerIndex);
-    carousel.dataset.viewportMode = getViewportMode();
-    return;
-  }
   const items = carousel.querySelectorAll(".phone-item");
   items.forEach((phone, domIndex) => {
     const pos = getPosition(domIndex);
@@ -291,14 +121,6 @@ function applyPositions(transition) {
 }
 
 function goTo(newCenter, direction) {
-  if (isScrollMode) {
-    centerIndex = ((newCenter % total) + total) % total;
-    scrollToIndex(centerIndex, 'smooth');
-    updateDots(centerIndex);
-    interpolateItems();
-    carousel.dataset.centerIndex = String(centerIndex);
-    return;
-  }
   if (animating || newCenter === centerIndex) return;
   animating = true;
   centerIndex = newCenter;
@@ -340,10 +162,6 @@ applyPositions(false);
 buildDots();
 updateDots(centerIndex);
 
-if (getViewportMode() !== 'desktop') {
-  initScrollMode();
-}
-
 // Next / Prev buttons
 document.getElementById("carousel-next")?.addEventListener("click", () => {
   goNext();
@@ -359,7 +177,6 @@ let touchStart = null;
 let touchLock = 'none';
 
 function handleTouchStart(e) {
-  if (isScrollMode) return;
   touchStart = {
     x: e.touches[0].clientX,
     y: e.touches[0].clientY,
@@ -369,7 +186,6 @@ function handleTouchStart(e) {
 }
 
 function handleTouchMove(e) {
-  if (isScrollMode) return;
   if (!touchStart || touchLock !== 'none') return;
   const dx = Math.abs(e.touches[0].clientX - touchStart.x);
   const dy = Math.abs(e.touches[0].clientY - touchStart.y);
@@ -380,7 +196,6 @@ function handleTouchMove(e) {
 }
 
 function handleTouchEnd(e) {
-  if (isScrollMode) return;
   if (!touchStart) return;
   if (touchLock !== 'horizontal') {
     touchStart = null;
@@ -413,11 +228,8 @@ function handleResize() {
     const current = getViewportMode();
     if (current !== lastViewportMode) {
       lastViewportMode = current;
-      if (current === 'desktop') {
-        destroyScrollMode();
-      } else {
-        initScrollMode();
-      }
+      reorderDOM();
+      applyPositions(false);
     }
   }, 150);
 }
