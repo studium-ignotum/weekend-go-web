@@ -1,17 +1,13 @@
 #phone-carousel {
-  height: 360px;            /* mobile default */
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  overflow: visible;
+  min-height: 50vh;
   touch-action: pan-y;
 }
-@media (min-width: 480px)  { #phone-carousel { height: 440px; } }
-@media (min-width: 640px)  { #phone-carousel { height: 500px; } }
-@media (min-width: 1024px) { #phone-carousel { height: 580px; perspective: 3000px; transform-style: preserve-3d; } }
-
-@media (max-width: 1023px) {
-  #phone-carousel {
-    perspective: none;
-    transform-style: flat;
-  }
-}
+@media (min-width: 480px)  { #phone-carousel { min-height: 55vh; } }
+@media (min-width: 640px)  { #phone-carousel { min-height: 55vh; } }
+@media (min-width: 1024px) { #phone-carousel { min-height: 60vh; } }
 
 .phone-item {
   position: absolute;
