@@ -2,12 +2,12 @@
   perspective: 1200px;
   transform-style: preserve-3d;
   overflow: visible;
-  min-height: 50vh;
+  height: 360px;
   touch-action: pan-y;
 }
-@media (min-width: 480px)  { #phone-carousel { min-height: 55vh; } }
-@media (min-width: 640px)  { #phone-carousel { min-height: 55vh; } }
-@media (min-width: 1024px) { #phone-carousel { min-height: 60vh; } }
+@media (min-width: 480px)  { #phone-carousel { height: 440px; } }
+@media (min-width: 640px)  { #phone-carousel { height: 500px; } }
+@media (min-width: 1024px) { #phone-carousel { height: 580px; } }
 
 .phone-item {
   position: absolute;
@@ -51,28 +51,6 @@
   }
 }
 
-
-/* Dots indicator */
-#carousel-dots {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  margin-top: 1rem;
-}
-.carousel-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 9999px;
-  background: #d1d5db;
-  border: 0;
-  padding: 0;
-  transition: background 200ms, transform 200ms;
-  cursor: pointer;
-}
-.carousel-dot.active {
-  background: var(--color-primary, #10b981);
-  transform: scale(1.3);
-}
 
 @media (prefers-reduced-motion: reduce) {
   .phone-item {
