@@ -29,9 +29,9 @@
   // Desktop: 5 visible slots (-2, -1, center, +1, +2)
   const POSITIONS_DESKTOP = [
     { scale: 0.5, rotateY: 80, txRatio: -0.4, translateZ: 0, opacity: 0.3, zIndex: 2 },
-    { scale: 0.7, rotateY: 40, txRatio: -0.23, translateZ: 0, opacity: 0.6, zIndex: 5 },
-    { scale: 0.9, rotateY: 0, txRatio: 0, translateZ: 0, opacity: 1.0, zIndex: 10 },
-    { scale: 0.7, rotateY: -40, txRatio: 0.23, translateZ: 0, opacity: 0.6, zIndex: 5 },
+    { scale: 0.7, rotateY: 60, txRatio: -0.23, translateZ: 0, opacity: 0.6, zIndex: 5 },
+    { scale: 1.0, rotateY: 0, txRatio: 0, translateZ: 0, opacity: 1.0, zIndex: 10 },
+    { scale: 0.7, rotateY: -60, txRatio: 0.23, translateZ: 0, opacity: 0.6, zIndex: 5 },
     { scale: 0.5, rotateY: -80, txRatio: 0.4, translateZ: 0, opacity: 0.3, zIndex: 2 },
   ];
 
