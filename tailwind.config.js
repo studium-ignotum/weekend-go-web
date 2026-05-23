@@ -5,6 +5,7 @@ module.exports = {
     "./src/**/*.src.html",
     "./partials/**/*.html",
     "./partials/**/*.svg",
+    "./assets/js/**/*.js",
   ],
   theme: {
     extend: {
