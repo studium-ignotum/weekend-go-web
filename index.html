@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com; style-src 'self'; font-src 'self'; script-src 'self' https://www.googletagmanager.com; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self';" />
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5BJB8F6W1D"></script>
+    <script src="/assets/js/ga.js"></script>
     <title>Cuối Tuần Đi Đâu? - Gợi ý cuối tuần cho gia đình</title>
     <meta
       name="description"
@@ -208,8 +210,9 @@
                 class="mt-8 flex flex-row flex-wrap gap-3 items-center justify-center lg:justify-start"
               >
                 <a
-                  data-app-link="ios"
                   href="https://apps.apple.com/vn/app/cu%E1%BB%91i-tu%E1%BA%A7n-%C4%91i-%C4%91%C3%A2u/id6765682490"
+                  data-app-link="ios"
+                  data-app-link-placement="hero"
                   rel="noopener noreferrer"
                   class="inline-block hover:opacity-80 transition-opacity"
                 >
@@ -221,8 +224,9 @@
                   />
                 </a>
                 <a
+                  href="https://github.com/unknown-studio-dev/weekend-go-android-distribution/releases/download/v1.0.35/release.apk"
                   data-app-link="android"
-                  href="https://github.com/unknown-studio-dev/weekend-go-android-distribution/releases/download/v1.0.3/cuoituandidauv1.0.3.apk"
+                  data-app-link-placement="hero"
                   rel="noopener noreferrer"
                   class="inline-block hover:opacity-80 transition-opacity"
                 >
@@ -714,28 +718,52 @@
               class="relative w-full max-w-lg sm:max-w-2xl lg:max-w-5xl mx-auto"
             >
               <div class="phone-item absolute">
-                <img src="assets/images/preview-venue-detail.png" alt="Chi tiết địa điểm" width="1170" height="2532" loading="lazy" />
+                <picture>
+                  <source srcset="assets/images/preview-venue-detail.webp" type="image/webp" />
+                  <img src="assets/images/preview-venue-detail.png" alt="Chi tiết địa điểm" width="1170" height="2532" loading="lazy" />
+                </picture>
               </div>
               <div class="phone-item absolute">
-                <img src="assets/images/preview-newsfeed.png" alt="Giao diện ứng dụng" width="1170" height="2532" loading="lazy" />
+                <picture>
+                  <source srcset="assets/images/preview-newsfeed.webp" type="image/webp" />
+                  <img src="assets/images/preview-newsfeed.png" alt="Giao diện ứng dụng" width="1170" height="2532" loading="lazy" />
+                </picture>
               </div>
               <div class="phone-item absolute">
-                <img src="assets/images/preview-user-profile.png" alt="Hồ sơ người dùng" width="750" height="1624" loading="lazy" />
+                <picture>
+                  <source srcset="assets/images/preview-user-profile.webp" type="image/webp" />
+                  <img src="assets/images/preview-user-profile.png" alt="Hồ sơ người dùng" width="750" height="1624" loading="lazy" />
+                </picture>
               </div>
               <div class="phone-item absolute">
-                <img src="assets/images/preview-share-review.jpeg" alt="Chia sẻ trải nghiệm" width="1170" height="2532" loading="lazy" />
+                <picture>
+                  <source srcset="assets/images/preview-share-review.webp" type="image/webp" />
+                  <img src="assets/images/preview-share-review.jpeg" alt="Chia sẻ trải nghiệm" width="1170" height="2532" loading="lazy" />
+                </picture>
               </div>
               <div class="phone-item absolute">
-                <img src="assets/images/preview-AI-review.png" alt="Tổng hợp mẹo từ AI" width="1170" height="2532" loading="lazy" />
+                <picture>
+                  <source srcset="assets/images/preview-AI-review.webp" type="image/webp" />
+                  <img src="assets/images/preview-AI-review.png" alt="Tổng hợp mẹo từ AI" width="1170" height="2532" loading="lazy" />
+                </picture>
               </div>
               <div class="phone-item absolute">
-                <img src="assets/images/preview-create-post.png" alt="Tạo bài đăng" width="1500" height="3248" loading="lazy" />
+                <picture>
+                  <source srcset="assets/images/preview-create-post.webp" type="image/webp" />
+                  <img src="assets/images/preview-create-post.png" alt="Tạo bài đăng" width="1500" height="3248" loading="lazy" />
+                </picture>
               </div>
               <div class="phone-item absolute">
-                <img src="assets/images/preview-weekend-plan.png" alt="Lập kế hoạch cuối tuần" width="1170" height="2532" loading="lazy" />
+                <picture>
+                  <source srcset="assets/images/preview-weekend-plan.webp" type="image/webp" />
+                  <img src="assets/images/preview-weekend-plan.png" alt="Lập kế hoạch cuối tuần" width="1170" height="2532" loading="lazy" />
+                </picture>
               </div>
               <div class="phone-item absolute">
-                <img src="assets/images/preview-plan-list.png" alt="Bộ sưu tập kế hoạch" width="1170" height="2532" loading="lazy" />
+                <picture>
+                  <source srcset="assets/images/preview-plan-list.webp" type="image/webp" />
+                  <img src="assets/images/preview-plan-list.png" alt="Bộ sưu tập kế hoạch" width="1170" height="2532" loading="lazy" />
+                </picture>
               </div>
             </div>
             <button
@@ -871,8 +899,9 @@
           </p>
           <div class="mt-8 flex flex-row flex-wrap items-center gap-3 justify-center">
             <a
-              data-app-link="ios"
               href="https://apps.apple.com/vn/app/cu%E1%BB%91i-tu%E1%BA%A7n-%C4%91i-%C4%91%C3%A2u/id6765682490"
+              data-app-link="ios"
+              data-app-link-placement="final_cta"
               rel="noopener noreferrer"
               class="inline-block hover:opacity-90 transition-opacity"
             >
@@ -885,8 +914,9 @@
               />
             </a>
             <a
+              href="https://github.com/unknown-studio-dev/weekend-go-android-distribution/releases/download/v1.0.35/release.apk"
               data-app-link="android"
-              href="https://github.com/unknown-studio-dev/weekend-go-android-distribution/releases/download/v1.0.3/cuoituandidauv1.0.3.apk"
+              data-app-link-placement="final_cta"
               rel="noopener noreferrer"
               class="inline-block hover:opacity-90 transition-opacity"
             >
