@@ -11,6 +11,12 @@ module.exports = {
     extend: {
       fontFamily: {
         inter: ["Inter", "system-ui", "sans-serif"],
+        heading: ["Nunito", "system-ui", "sans-serif"],
+      },
+      fontSize: {
+        "3xs": "10px",
+        "2xs": "11px",
+        md: "15px",
       },
       colors: {
         primary: {
