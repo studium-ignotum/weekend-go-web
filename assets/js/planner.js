@@ -5,6 +5,59 @@
   const groupSelections = {};
   const groupDefaults = {};
 
+  const MOBILE_MQ = window.matchMedia('(max-width: 1023px)');
+  let mobileView = 'filters';
+  const LOADING_MS = 700;
+  let loadingTimer = null;
+
+  function applyMobileView() {
+    const filters = document.getElementById('planner-panel-filters');
+    const results = document.getElementById('planner-panel-results');
+    const loading = document.getElementById('planner-loading');
+    const content = document.getElementById('planner-results-content');
+    if (!filters || !results) return;
+    if (!MOBILE_MQ.matches) {
+      filters.classList.remove('hidden');
+      results.classList.remove('hidden');
+      if (loading) loading.classList.add('hidden');
+      if (content) content.classList.remove('hidden');
+      return;
+    }
+    if (mobileView === 'filters') {
+      filters.classList.remove('hidden');
+      results.classList.add('hidden');
+    } else {
+      filters.classList.add('hidden');
+      results.classList.remove('hidden');
+    }
+  }
+
+  function handleSubmit() {
+    renderPlanner();
+    mobileView = 'results';
+    applyMobileView();
+    const loading = document.getElementById('planner-loading');
+    const content = document.getElementById('planner-results-content');
+    const section = document.getElementById('planner');
+    if (loading) loading.classList.remove('hidden');
+    if (content) content.classList.add('hidden');
+    if (section && typeof section.scrollIntoView === 'function') {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    clearTimeout(loadingTimer);
+    loadingTimer = setTimeout(() => {
+      if (loading) loading.classList.add('hidden');
+      if (content) content.classList.remove('hidden');
+      if (window.lucide) window.lucide.createIcons();
+    }, LOADING_MS);
+  }
+
+  function handleBack() {
+    mobileView = 'filters';
+    clearTimeout(loadingTimer);
+    applyMobileView();
+  }
+
   function onGroupChange(group) {
     if (group === 'age' || group === 'vibe' || group === 'weather') renderPlanner();
   }
@@ -39,6 +92,15 @@
         renderPlanner();
       });
     }
+
+    const submitBtn = document.getElementById('planner-submit');
+    if (submitBtn) submitBtn.addEventListener('click', handleSubmit);
+    const backBtn = document.getElementById('planner-back');
+    if (backBtn) backBtn.addEventListener('click', handleBack);
+    MOBILE_MQ.addEventListener('change', () => {
+      mobileView = 'filters';
+      applyMobileView();
+    });
   }
 
   const PLANNER_VENUES = [
@@ -315,6 +377,7 @@
     if (!document.getElementById('planner')) return;
     initToggles();
     renderPlanner();
+    applyMobileView();
   }
 
   if (document.readyState === 'loading') {
