@@ -4,6 +4,19 @@
  */
 
 
+      /* Clip horizontal overflow at 360 px viewport.
+       * #experience: belt-and-suspenders clip for coverflow side phones.
+       *   Uses overflow-x: clip (not hidden) to avoid flattening the 3D
+       *   perspective context on .phone-carousel.
+       * #problem: the decorative blur circle (-right-10 absolute) extends
+       *   24 px past the viewport edge; clip it here.
+       */
+      #experience,
+      #problem {
+        overflow-x: clip;
+      }
+
+
       /* Phone carousel */
       .phone-carousel {
         position: relative;
