@@ -1,1 +1,20 @@
 npx lint-staged
+
+# Enforce build idempotency: rebuild HTML/CSS and fail if working tree drifts from
+# what's staged. Catches two anti-patterns:
+#   1. Direct edits to root *.html files (per README: edit src/*.src.html instead)
+#   2. Forgetting to rebuild after changing src/ — staged old built file
+npm run build --silent
+
+BUILT_FILES="index.html privacy.html terms.html community-standards.html assets/css/styles.css"
+if ! git diff --quiet -- $BUILT_FILES; then
+  echo ""
+  echo "❌ Built files are out of sync with what you staged."
+  echo "   Either you edited a root *.html file directly (don't — edit src/*.src.html),"
+  echo "   or you changed src/ but forgot to stage the rebuilt output. Run:"
+  echo ""
+  echo "     npm run build && git add $BUILT_FILES"
+  echo ""
+  git diff --stat -- $BUILT_FILES
+  exit 1
+fi
