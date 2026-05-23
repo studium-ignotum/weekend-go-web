@@ -132,6 +132,17 @@ nav a.is-active::after {
   transform: none;
 }
 
+/* FAQ accordion: show only one icon per <details> state (plus when closed, minus when open) */
+.faq-minus {
+  display: none;
+}
+details[open] .faq-plus {
+  display: none;
+}
+details[open] .faq-minus {
+  display: inline-block;
+}
+
 /* Reduce motion */
 @media (prefers-reduced-motion: reduce) {
   *,
