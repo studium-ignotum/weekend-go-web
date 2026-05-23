@@ -469,6 +469,7 @@
             class="grid grid-cols-1 lg:grid-cols-12 gap-10 bg-white border border-[#E5E7EB] rounded-3xl p-6 sm:p-8 lg:p-10 shadow-lg shadow-[#34C759]/10"
           >
             <div
+              id="planner-panel-filters"
               class="lg:col-span-5 space-y-8 border-b lg:border-b-0 lg:border-r border-[#E5E7EB] pb-8 lg:pb-0 lg:pr-8"
             >
               <div class="flex justify-between items-center">
@@ -662,34 +663,60 @@
                   </button>
                 </div>
               </div>
+              <button
+                id="planner-submit"
+                type="button"
+                class="lg:hidden w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-[#34C759] text-white font-heading font-bold text-sm shadow-md shadow-[#34C759]/30 active:scale-[0.99] transition-transform"
+              >
+                <i data-lucide="search" class="w-4 h-4"></i>
+                Tìm địa điểm cho nhà mình
+              </button>
             </div>
-            <div class="lg:col-span-7 flex flex-col justify-start">
-              <div class="flex items-center justify-between mb-6">
-                <h4
-                  class="text-sm font-heading font-extrabold text-[#6B7280] tracking-wider uppercase"
+            <div id="planner-panel-results" class="lg:col-span-7 flex flex-col justify-start">
+              <button
+                id="planner-back"
+                type="button"
+                class="lg:hidden inline-flex items-center gap-1.5 mb-4 text-sm font-heading font-bold text-[#4B5563] hover:text-[#34C759]"
+              >
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Quay lại chỉnh bộ lọc
+              </button>
+              <div
+                id="planner-loading"
+                class="hidden lg:hidden flex-col items-center justify-center py-16 text-center"
+                aria-live="polite"
+              >
+                <i data-lucide="loader-2" class="w-8 h-8 text-[#34C759] animate-spin mb-3"></i>
+                <p class="text-sm text-[#4B5563] font-medium">Đang tìm chỗ chơi...</p>
+              </div>
+              <div id="planner-results-content">
+                <div class="flex items-center justify-between mb-6">
+                  <h4
+                    class="text-sm font-heading font-extrabold text-[#6B7280] tracking-wider uppercase"
+                  >
+                    Gợi ý cho nhà mình (<span id="planner-count">2</span>)
+                  </h4>
+                  <span class="hidden lg:inline text-xs text-gray-400">Tự động làm mới</span>
+                </div>
+                <div
+                  id="planner-fallback"
+                  class="hidden mb-4 flex items-start gap-2.5 bg-[#FFF8E6] border border-[#F5D88A] rounded-xl px-4 py-3"
                 >
-                  Gợi ý cho nhà mình (<span id="planner-count">2</span>)
-                </h4>
-                <span class="text-xs text-gray-400">Tự động làm mới</span>
-              </div>
-              <div
-                id="planner-fallback"
-                class="hidden mb-4 flex items-start gap-2.5 bg-[#FFF8E6] border border-[#F5D88A] rounded-xl px-4 py-3"
-              >
-                <i data-lucide="info" class="w-4 h-4 text-[#B7791F] mt-0.5 shrink-0"></i>
-                <p class="text-xs sm:text-sm text-[#7A5A1A] leading-relaxed">
-                  Không có gợi ý cho thời tiết này — đang hiển thị các nơi gần đúng (theo tuổi & gu chơi của bé).
-                </p>
-              </div>
-              <div id="planner-results" class="space-y-6"></div>
-              <div
-                id="planner-empty"
-                class="hidden bg-white border border-dashed border-[#E5E7EB] rounded-2xl p-8 text-center"
-              >
-                <i data-lucide="search-x" class="w-8 h-8 text-gray-300 mx-auto mb-2"></i>
-                <p class="text-sm text-[#4B5563]">
-                  Chưa có địa điểm khớp. Thử đổi gu chơi hoặc thời tiết nhé!
-                </p>
+                  <i data-lucide="info" class="w-4 h-4 text-[#B7791F] mt-0.5 shrink-0"></i>
+                  <p class="text-xs sm:text-sm text-[#7A5A1A] leading-relaxed">
+                    Không có gợi ý cho thời tiết này — đang hiển thị các nơi gần đúng (theo tuổi & gu chơi của bé).
+                  </p>
+                </div>
+                <div id="planner-results" class="space-y-6"></div>
+                <div
+                  id="planner-empty"
+                  class="hidden bg-white border border-dashed border-[#E5E7EB] rounded-2xl p-8 text-center"
+                >
+                  <i data-lucide="search-x" class="w-8 h-8 text-gray-300 mx-auto mb-2"></i>
+                  <p class="text-sm text-[#4B5563]">
+                    Chưa có địa điểm khớp. Thử đổi gu chơi hoặc thời tiết nhé!
+                  </p>
+                </div>
               </div>
             </div>
           </div>
