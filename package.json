@@ -10,6 +10,7 @@
     "dev:css": "tailwindcss -i ./src/input.css -o ./assets/css/styles.css --watch",
     "dev": "concurrently \"npm run dev:css\" \"npx serve -l 3000 .\"",
     "test:visual": "playwright test",
+    "test:analytics": "node --test tests/app-links.test.js",
     "test:visual:update": "playwright test --update-snapshots",
     "lint": "eslint assets/js/**/*.js scripts/**/*.js",
     "format": "prettier --write \"assets/js/**/*.js\" \"scripts/**/*.js\" \"src/**/*.css\"",
