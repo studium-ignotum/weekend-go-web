@@ -910,7 +910,7 @@
               aria-label="Các màn hình chính của app"
             >
               <article
-                class="phone-item"
+                class="phone-slide"
                 data-index="0"
                 data-title="Thông tin chi tiết"
                 data-desc="Xem đầy đủ thông tin địa điểm: độ tuổi phù hợp, thời tiết, giá vé, địa chỉ và kinh nghiệm thực tế từ phụ huynh."
@@ -977,7 +977,7 @@
               </article>
 
               <article
-                class="phone-item"
+                class="phone-slide"
                 data-index="1"
                 data-title="Nhật ký & chia sẻ"
                 data-desc="Nơi ba mẹ kể lại chuyến đi của con."
@@ -1040,7 +1040,7 @@
               </article>
 
               <article
-                class="phone-item"
+                class="phone-slide"
                 data-index="2"
                 data-title="Lên lịch tự động"
                 data-desc="Lịch sáng — chiều — tối tự xếp theo độ tuổi và thể lực của bé."
@@ -1106,7 +1106,7 @@
               </article>
 
               <article
-                class="phone-item"
+                class="phone-slide"
                 data-index="3"
                 data-title="Mẹo từ AI"
                 data-desc="AI tổng hợp mẹo từ ba mẹ đã đưa con đến — trả lời nhanh khi ba mẹ thắc mắc."
@@ -1169,7 +1169,7 @@
               </article>
 
               <article
-                class="phone-item"
+                class="phone-slide"
                 data-index="4"
                 data-title="Đăng bài nhanh gọn"
                 data-desc="Chia sẻ hành trình cuối tuần chỉ trong vài thao tác, kèm ảnh và cảm xúc."
@@ -1235,7 +1235,7 @@
               </article>
 
               <article
-                class="phone-item"
+                class="phone-slide"
                 data-index="5"
                 data-title="Danh sách đã lưu"
                 data-desc="Lưu lại các kế hoạch yêu thích để giở lại bất cứ lúc nào, mọi nơi."
@@ -1298,7 +1298,7 @@
               </article>
 
               <article
-                class="phone-item"
+                class="phone-slide"
                 data-index="6"
                 data-title="Hồ sơ gia đình"
                 data-desc="Quản lý thông tin các bé, sở thích và lịch sử chuyến đi của cả nhà."
@@ -1364,7 +1364,7 @@
               </article>
 
               <article
-                class="phone-item"
+                class="phone-slide"
                 data-index="7"
                 data-title="Chia sẻ đánh giá"
                 data-desc="Đánh giá để giúp gia đình khác chọn đúng chỗ và giúp địa điểm phục vụ tốt hơn."
@@ -2176,12 +2176,24 @@
     <script src="assets/js/app-links.js" defer></script>
     <script src="assets/js/sticky.js" defer></script>
 
-    <!-- Lucide icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Lucide icons (with retry if CDN slow) -->
+    <script src="https://unpkg.com/lucide@latest" defer></script>
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        if (window.lucide) window.lucide.createIcons();
-      });
+      (function initLucide() {
+        let tries = 0;
+        function go() {
+          if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+            return;
+          }
+          if (++tries < 20) setTimeout(go, 150);
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', go);
+        } else {
+          go();
+        }
+      })();
     </script>
   </body>
 </html>
