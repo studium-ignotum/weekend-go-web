@@ -280,29 +280,29 @@
         els.results.innerHTML = matches
           .map(
             (v) => `
-        <div class="venue-card bg-white rounded-2xl border border-[#E5E7EB] hover:border-[#34C759]/40 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <div class="venue-card bg-white rounded-2xl border border-border-default hover:border-primary/40 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
           <div class="flex flex-col sm:flex-row">
             <div class="sm:w-[38%] relative h-44 sm:h-auto min-h-[160px] overflow-hidden">
               <img loading="lazy" decoding="async" src="${v.img}" alt="Ảnh ${v.name}" class="absolute inset-0 w-full h-full object-cover" referrerpolicy="no-referrer" />
-              <div class="absolute bottom-2.5 right-2.5 flex items-center gap-1 px-2 py-0.5 bg-white/95 backdrop-blur-sm text-[#111827] rounded-md text-xs font-bold shadow-sm">
-                <i data-lucide="star" class="w-3 h-3 fill-[#F5B400] text-[#F5B400]"></i> <span>${v.rating}</span>
+              <div class="absolute bottom-2.5 right-2.5 flex items-center gap-1 px-2 py-0.5 bg-white/95 backdrop-blur-sm text-text-primary rounded-md text-xs font-bold shadow-sm">
+                <i data-lucide="star" class="w-3 h-3 fill-amber text-amber"></i> <span>${v.rating}</span>
               </div>
             </div>
             <div class="p-5 flex-1 flex flex-col gap-2.5 text-left">
-              <h4 class="text-[17px] font-heading font-extrabold text-[#111827] leading-snug">${v.name}</h4>
-              <div class="inline-flex items-center gap-1 text-xs text-[#6B7280]">
+              <h4 class="text-[17px] font-heading font-extrabold text-text-primary leading-snug">${v.name}</h4>
+              <div class="inline-flex items-center gap-1 text-xs text-text-tertiary">
                 <i data-lucide="map-pin" class="w-3.5 h-3.5"></i><span>${v.district}</span>
               </div>
               <div class="flex flex-wrap gap-1.5">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-[#FEF3C7] text-[#92400E] rounded-full text-[11px] font-semibold">👶 ${v.ageLabel}</span>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-light text-[#92400E] rounded-full text-[11px] font-semibold">👶 ${v.ageLabel}</span>
                 <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-[#F3E8FF] text-[#7C3AED] rounded-full text-[11px] font-semibold">💰 ${v.meta.price}</span>
                 <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-[#FFF4D6] text-[#A16207] rounded-full text-[11px] font-semibold">🎡 ${v.meta.type}</span>
               </div>
-              <div class="px-3 py-2 bg-[#F0FAF3] border border-[#CFF5DA] rounded-lg">
-                <p class="text-xs sm:text-sm text-[#24A94B] font-medium leading-relaxed">${v.tip}</p>
+              <div class="px-3 py-2 bg-[#F0FAF3] border border-primary-light rounded-lg">
+                <p class="text-xs sm:text-sm text-primary-dark font-medium leading-relaxed">${v.tip}</p>
               </div>
               <div class="mt-auto pt-1">
-                ${v.url ? `<a href="${v.url}" target="_blank" rel="noopener" data-plan-web-link data-plan-web-placement="planner" class="inline-flex items-center gap-1 text-xs font-bold text-[#24A94B] hover:text-[#111827]">Xem chi tiết <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i></a>` : `<button class="inline-flex items-center gap-1 text-xs font-bold text-[#24A94B] hover:text-[#111827]">Xem chi tiết <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i></button>`}
+                ${v.url ? `<a href="${v.url}" target="_blank" rel="noopener" data-plan-web-link data-plan-web-placement="planner" class="inline-flex items-center gap-1 text-xs font-bold text-primary-dark hover:text-text-primary">Xem chi tiết <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i></a>` : `<button class="inline-flex items-center gap-1 text-xs font-bold text-primary-dark hover:text-text-primary">Xem chi tiết <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i></button>`}
               </div>
             </div>
           </div>

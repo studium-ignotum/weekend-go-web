@@ -51,7 +51,7 @@ html {
 [data-toggle][data-active='true'] {
   border-color: #34c759 !important;
   background: #fff !important;
-  color: #111827 !important;
+  color: #18181b !important;
   box-shadow:
     0 4px 6px -1px rgba(52, 199, 89, 0.12),
     0 0 0 2px rgba(52, 199, 89, 0.1);
@@ -150,7 +150,7 @@ nav a.is-active::after {
   display: none;
 }
 .faq-item summary:hover {
-  background-color: #f9fafb;
+  background-color: #fafafa;
 }
 
 /* Emphasise the open card */

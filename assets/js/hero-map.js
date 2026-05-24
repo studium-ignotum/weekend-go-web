@@ -71,7 +71,7 @@
         </div>
       </div>
       <div class="${chip} rounded-lg shadow px-2 py-1 mt-1.5 text-center leading-tight whitespace-nowrap">
-        <span class="flex items-center justify-center gap-1 text-[10px] font-bold"><i data-lucide="${v.icon}" class="w-3 h-3 text-[#34C759]"></i>${v.name}</span>
+        <span class="flex items-center justify-center gap-1 text-[10px] font-bold"><i data-lucide="${v.icon}" class="w-3 h-3 text-primary"></i>${v.name}</span>
         <span class="block text-[9px] font-medium opacity-70">${v.addr}</span>
       </div>
     </div>`;
@@ -132,7 +132,7 @@
     const mx = (you.x + t.x) / 2;
     const my = (you.y + t.y) / 2 + 16;
     place(
-      `<div style="transform:${billC}"><span class="bg-[#2BA64A] text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-lg whitespace-nowrap inline-flex items-center gap-1"><i data-lucide="car" class="w-3.5 h-3.5"></i> ${mins} phút · ${km}km</span></div>`,
+      `<div style="transform:${billC}"><span class="bg-primary-dark text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-lg whitespace-nowrap inline-flex items-center gap-1"><i data-lucide="car" class="w-3.5 h-3.5"></i> ${mins} phút · ${km}km</span></div>`,
       mx,
       my,
       50,
