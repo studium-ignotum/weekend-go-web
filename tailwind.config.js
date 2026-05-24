@@ -12,6 +12,7 @@ module.exports = {
       fontFamily: {
         inter: ["Inter", "system-ui", "sans-serif"],
         heading: ["Nunito", "system-ui", "sans-serif"],
+        hand: ["Dancing Script", "cursive"],
       },
       fontSize: {
         "3xs": "10px",
