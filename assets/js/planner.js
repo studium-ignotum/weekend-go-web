@@ -10,98 +10,7 @@
   const LOADING_MS = 700;
   let loadingTimer = null;
 
-  function applyMobileView() {
-    const filters = document.getElementById('planner-panel-filters');
-    const results = document.getElementById('planner-panel-results');
-    const loading = document.getElementById('planner-loading');
-    const content = document.getElementById('planner-results-content');
-    if (!filters || !results) return;
-    if (!MOBILE_MQ.matches) {
-      filters.classList.remove('hidden');
-      results.classList.remove('hidden');
-      if (loading) loading.classList.add('hidden');
-      if (content) content.classList.remove('hidden');
-      return;
-    }
-    if (mobileView === 'filters') {
-      filters.classList.remove('hidden');
-      results.classList.add('hidden');
-    } else {
-      filters.classList.add('hidden');
-      results.classList.remove('hidden');
-    }
-  }
-
-  function handleSubmit() {
-    renderPlanner();
-    mobileView = 'results';
-    applyMobileView();
-    const loading = document.getElementById('planner-loading');
-    const content = document.getElementById('planner-results-content');
-    const section = document.getElementById('planner');
-    if (loading) loading.classList.remove('hidden');
-    if (content) content.classList.add('hidden');
-    if (section && typeof section.scrollIntoView === 'function') {
-      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    clearTimeout(loadingTimer);
-    loadingTimer = setTimeout(() => {
-      if (loading) loading.classList.add('hidden');
-      if (content) content.classList.remove('hidden');
-      if (window.lucide) window.lucide.createIcons();
-    }, LOADING_MS);
-  }
-
-  function handleBack() {
-    mobileView = 'filters';
-    clearTimeout(loadingTimer);
-    applyMobileView();
-  }
-
-  function onGroupChange(group) {
-    if (group === 'age' || group === 'vibe' || group === 'weather') renderPlanner();
-  }
-
-  function initToggles() {
-    document.querySelectorAll('[data-toggle]').forEach((btn) => {
-      const g = btn.dataset.group;
-      if (btn.dataset.active === 'true') {
-        groupSelections[g] = btn.dataset.value;
-        groupDefaults[g] = btn.dataset.value;
-      }
-      btn.addEventListener('click', () => {
-        const group = btn.dataset.group;
-        const value = btn.dataset.value;
-        document.querySelectorAll(`[data-toggle][data-group="${group}"]`).forEach((b) => {
-          b.dataset.active = b === btn ? 'true' : 'false';
-        });
-        groupSelections[group] = value;
-        onGroupChange(group, value);
-      });
-    });
-
-    const plannerReset = document.getElementById('planner-reset');
-    if (plannerReset) {
-      plannerReset.addEventListener('click', () => {
-        Object.entries(groupDefaults).forEach(([group, defaultValue]) => {
-          document.querySelectorAll(`[data-toggle][data-group="${group}"]`).forEach((b) => {
-            b.dataset.active = b.dataset.value === defaultValue ? 'true' : 'false';
-          });
-          groupSelections[group] = defaultValue;
-        });
-        renderPlanner();
-      });
-    }
-
-    const submitBtn = document.getElementById('planner-submit');
-    if (submitBtn) submitBtn.addEventListener('click', handleSubmit);
-    const backBtn = document.getElementById('planner-back');
-    if (backBtn) backBtn.addEventListener('click', handleBack);
-    MOBILE_MQ.addEventListener('change', () => {
-      mobileView = 'filters';
-      applyMobileView();
-    });
-  }
+  const LIVE_GROUPS = new Set(['age', 'vibe', 'weather']);
 
   const PLANNER_VENUES = [
     {
@@ -306,37 +215,71 @@
     },
   ];
 
-  function renderPlanner() {
-    const age = groupSelections.age;
-    const vibe = groupSelections.vibe;
-    const weather = groupSelections.weather;
-    const strictMatches = PLANNER_VENUES.filter(
-      (v) =>
-        v.tags.age.includes(age) && v.tags.vibe.includes(vibe) && v.tags.weather.includes(weather),
-    );
-    let matches = strictMatches;
-    let fallback = false;
-    if (strictMatches.length === 0 && age && vibe) {
-      matches = PLANNER_VENUES.filter(
-        (v) => v.tags.age.includes(age) && v.tags.vibe.includes(vibe),
-      );
-      fallback = matches.length > 0;
+  function boot() {
+    if (!document.getElementById('planner')) return;
+
+    const els = {
+      section: document.getElementById('planner'),
+      panelFilters: document.getElementById('planner-panel-filters'),
+      panelResults: document.getElementById('planner-panel-results'),
+      loading: document.getElementById('planner-loading'),
+      content: document.getElementById('planner-results-content'),
+      results: document.getElementById('planner-results'),
+      empty: document.getElementById('planner-empty'),
+      fallback: document.getElementById('planner-fallback'),
+      count: document.getElementById('planner-count'),
+      submit: document.getElementById('planner-submit'),
+      back: document.getElementById('planner-back'),
+      reset: document.getElementById('planner-reset'),
+    };
+
+    function applyMobileView() {
+      if (!els.panelFilters || !els.panelResults) return;
+      if (!MOBILE_MQ.matches) {
+        els.panelFilters.classList.remove('hidden');
+        els.panelResults.classList.remove('hidden');
+        if (els.loading) els.loading.classList.add('hidden');
+        if (els.content) els.content.classList.remove('hidden');
+        return;
+      }
+      if (mobileView === 'filters') {
+        els.panelFilters.classList.remove('hidden');
+        els.panelResults.classList.add('hidden');
+      } else {
+        els.panelFilters.classList.add('hidden');
+        els.panelResults.classList.remove('hidden');
+      }
     }
-    const container = document.getElementById('planner-results');
-    const empty = document.getElementById('planner-empty');
-    const banner = document.getElementById('planner-fallback');
-    const countEl = document.getElementById('planner-count');
-    if (!container || !empty || !countEl) return;
-    countEl.textContent = matches.length;
-    if (banner) banner.classList.toggle('hidden', !fallback);
-    if (matches.length === 0) {
-      container.innerHTML = '';
-      empty.classList.remove('hidden');
-    } else {
-      empty.classList.add('hidden');
-      container.innerHTML = matches
-        .map(
-          (v) => `
+
+    function renderPlanner() {
+      const age = groupSelections.age;
+      const vibe = groupSelections.vibe;
+      const weather = groupSelections.weather;
+      const strictMatches = PLANNER_VENUES.filter(
+        (v) =>
+          v.tags.age.includes(age) &&
+          v.tags.vibe.includes(vibe) &&
+          v.tags.weather.includes(weather),
+      );
+      let matches = strictMatches;
+      let fallback = false;
+      if (strictMatches.length === 0 && age && vibe) {
+        matches = PLANNER_VENUES.filter(
+          (v) => v.tags.age.includes(age) && v.tags.vibe.includes(vibe),
+        );
+        fallback = matches.length > 0;
+      }
+      if (!els.results || !els.empty || !els.count) return;
+      els.count.textContent = matches.length;
+      if (els.fallback) els.fallback.classList.toggle('hidden', !fallback);
+      if (matches.length === 0) {
+        els.results.innerHTML = '';
+        els.empty.classList.remove('hidden');
+      } else {
+        els.empty.classList.add('hidden');
+        els.results.innerHTML = matches
+          .map(
+            (v) => `
         <div class="venue-card bg-white rounded-2xl border border-[#E5E7EB] hover:border-[#34C759]/40 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
           <div class="flex flex-col sm:flex-row">
             <div class="sm:w-[38%] relative h-44 sm:h-auto min-h-[160px] overflow-hidden">
@@ -365,16 +308,79 @@
           </div>
         </div>
       `,
-        )
-        .join('');
+          )
+          .join('');
+      }
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
     }
-    if (window.lucide && typeof window.lucide.createIcons === 'function') {
-      window.lucide.createIcons();
-    }
-  }
 
-  function boot() {
-    if (!document.getElementById('planner')) return;
+    function handleSubmit() {
+      renderPlanner();
+      mobileView = 'results';
+      applyMobileView();
+      if (els.loading) els.loading.classList.remove('hidden');
+      if (els.content) els.content.classList.add('hidden');
+      if (els.section && typeof els.section.scrollIntoView === 'function') {
+        els.section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      clearTimeout(loadingTimer);
+      loadingTimer = setTimeout(() => {
+        if (els.loading) els.loading.classList.add('hidden');
+        if (els.content) els.content.classList.remove('hidden');
+        if (window.lucide) window.lucide.createIcons();
+      }, LOADING_MS);
+    }
+
+    function handleBack() {
+      mobileView = 'filters';
+      clearTimeout(loadingTimer);
+      applyMobileView();
+    }
+
+    function onGroupChange(group) {
+      if (LIVE_GROUPS.has(group)) renderPlanner();
+    }
+
+    function initToggles() {
+      document.querySelectorAll('[data-toggle]').forEach((btn) => {
+        const g = btn.dataset.group;
+        if (btn.dataset.active === 'true') {
+          groupSelections[g] = btn.dataset.value;
+          groupDefaults[g] = btn.dataset.value;
+        }
+        btn.addEventListener('click', () => {
+          const group = btn.dataset.group;
+          const value = btn.dataset.value;
+          document.querySelectorAll(`[data-toggle][data-group="${group}"]`).forEach((b) => {
+            b.dataset.active = b === btn ? 'true' : 'false';
+          });
+          groupSelections[group] = value;
+          onGroupChange(group);
+        });
+      });
+
+      if (els.reset) {
+        els.reset.addEventListener('click', () => {
+          Object.entries(groupDefaults).forEach(([group, defaultValue]) => {
+            document.querySelectorAll(`[data-toggle][data-group="${group}"]`).forEach((b) => {
+              b.dataset.active = b.dataset.value === defaultValue ? 'true' : 'false';
+            });
+            groupSelections[group] = defaultValue;
+          });
+          renderPlanner();
+        });
+      }
+
+      if (els.submit) els.submit.addEventListener('click', handleSubmit);
+      if (els.back) els.back.addEventListener('click', handleBack);
+      MOBILE_MQ.addEventListener('change', () => {
+        mobileView = 'filters';
+        applyMobileView();
+      });
+    }
+
     initToggles();
     renderPlanner();
     applyMobileView();
