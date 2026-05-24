@@ -2,6 +2,9 @@
   "name": "weekend-go-web",
   "version": "1.0.0",
   "appVersion": "1.0.35",
+  "gaId": "G-5BJB8F6W1D",
+  "iosUrl": "https://apps.apple.com/vn/app/cu%E1%BB%91i-tu%E1%BA%A7n-%C4%91i-%C4%91%C3%A2u/id6765682490",
+  "androidUrl": "https://github.com/unknown-studio-dev/weekend-go-android-distribution/releases/download/v1.0.3/cuoituandidauv1.0.3.apk",
   "description": "Landing page for Cuối Tuần Đi Đâu — mobile app helping Vietnamese parents in Hanoi and Ho Chi Minh City discover weekend activities for their families.",
   "scripts": {
     "build:css": "tailwindcss -i ./src/input.css -o ./assets/css/styles.css --minify",
