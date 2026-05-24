@@ -70,6 +70,7 @@ function runAppLinks(anchors) {
 
 test('tracks app download CTA taps', () => {
   const anchor = createAnchor({
+    href: 'https://apps.apple.com/vn/app/cu%E1%BB%91i-tu%E1%BA%A7n-%C4%91i-%C4%91%C3%A2u/id6765682490',
     dataset: { appLink: 'ios', appLinkPlacement: 'hero' },
   });
   const events = runAppLinks([anchor]);
