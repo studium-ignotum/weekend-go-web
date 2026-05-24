@@ -9,3 +9,7 @@ test-results/
 playwright-report/
 .husky/_/
 .hoangsa/
+
+# Temp screenshot/artifact files
+_*.png
+_*.js
