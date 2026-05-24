@@ -30,7 +30,8 @@
     if (descEl) descEl.textContent = cur.dataset.desc || '';
     dots.forEach((d, i) => {
       d.classList.toggle('active', i === active);
-      d.setAttribute('aria-selected', String(i === active));
+      if (i === active) d.setAttribute('aria-current', 'true');
+      else d.removeAttribute('aria-current');
     });
   }
 
