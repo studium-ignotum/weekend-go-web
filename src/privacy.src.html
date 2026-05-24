@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com; style-src 'self'; font-src 'self'; script-src 'self' https://www.googletagmanager.com; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self';">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5BJB8F6W1D"></script>
-  <script src="/assets/js/ga.js"></script>
+<!-- @include partials/head-top.html -->
   <title>Chính sách Bảo mật - Cuối Tuần Đi Đâu?</title>
   <meta name="description" content="Chính sách bảo mật của Cuối Tuần Đi Đâu — tìm hiểu cách chúng tôi thu thập, sử dụng và bảo vệ dữ liệu cá nhân của bạn và gia đình khi sử dụng ứng dụng gợi ý cuối tuần.">
   <link rel="canonical" href="https://cuoituandidau.vn/privacy.html" />
@@ -24,11 +20,7 @@
   <meta name="twitter:description" content="Tìm hiểu cách chúng tôi thu thập, sử dụng và bảo vệ dữ liệu cá nhân của bạn và gia đình khi sử dụng ứng dụng gợi ý cuối tuần." />
   <meta name="twitter:image" content="https://cuoituandidau.vn/assets/images/og-cover.jpg" />
 
-  <link rel="icon" type="image/png" href="assets/images/favicon.png">
-  <link rel="apple-touch-icon" href="assets/images/app-icon-160.png">
-  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-latin.woff2" crossorigin>
-  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-vietnamese.woff2" crossorigin>
-  <link rel="stylesheet" href="assets/css/styles.css" />
+<!-- @include partials/head-assets.html -->
   <!-- JSON-LD -->
   <script type="application/ld+json">
     {
@@ -64,28 +56,7 @@
 </head>
 <body class="bg-white text-text-primary antialiased">
   <!-- @include partials/icons.svg -->
-  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded">Bỏ qua đến nội dung</a>
-
-  <!-- Navigation -->
-  <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border-default">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <a href="index.html" class="flex items-center gap-2.5">
-          <picture>
-            <source srcset="assets/images/app-icon-72.webp" type="image/webp">
-            <img src="assets/images/app-icon-72.png" alt="Cuối Tuần Đi Đâu" width="72" height="72" class="w-9 h-9 rounded-xl">
-          </picture>
-          <span class="text-lg font-bold text-text-primary">Cuối Tuần Đi Đâu?</span>
-        </a>
-        <a href="index.html" class="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1">
-          <svg class="w-4 h-4" aria-hidden="true">
-            <use href="#icon-carousel-prev"/>
-          </svg>
-          Trang chủ
-        </a>
-      </div>
-    </div>
-  </nav>
+<!-- @include partials/nav-legal.html -->
 
   <!-- Content -->
   <main id="main" class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
