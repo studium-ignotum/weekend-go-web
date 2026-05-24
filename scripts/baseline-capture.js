@@ -4,8 +4,7 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 
-const OUT_DIR =
-  '/Users/thuylenguyenmai/Desktop/01_Work/Unknown Studio/Cutadida/.hoangsa/sessions/design/index-responsive/baseline';
+const OUT_DIR = process.env.BASELINE_OUT_DIR || path.join(__dirname, '../test-results/baseline');
 const URL = 'http://localhost:3030/index.html';
 
 const viewports = [
