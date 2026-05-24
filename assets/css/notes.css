@@ -86,7 +86,8 @@
   transform: rotate(5deg);
   background: #ffe680;
   padding: 1px 10px;
-  font-family: 'Caveat', cursive;
+  font-family: 'Dancing Script', cursive;
+  font-weight: 600;
   font-size: 16px;
   line-height: 1.25;
   color: #92400e;

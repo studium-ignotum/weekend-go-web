@@ -1,6 +1,6 @@
 /* Polaroid section ("How It Works · Polaroid loop")
  * Ported from docs/legacy/index-2026-05-23.html inline <style> block.
- * Requires Google Fonts: Nunito (800, 900), Caveat (500, 700).
+ * Requires Google Fonts: Nunito (800, 900), Dancing Script (600, 700).
  */
 
 .how-polaroid-bg {
@@ -60,7 +60,8 @@
   margin-top: 4px;
 }
 .how-pol-caption {
-  font-family: 'Caveat', cursive;
+  font-family: 'Dancing Script', cursive;
+  font-weight: 600;
   font-size: 22px;
   color: #157a36;
   text-align: center;
@@ -85,7 +86,8 @@
   transform: translateX(-50%) rotate(-3deg);
   background: #ffe680;
   padding: 4px 16px;
-  font-family: 'Caveat', cursive;
+  font-family: 'Dancing Script', cursive;
+  font-weight: 600;
   font-size: 18px;
   color: #92400e;
   border-radius: 2px;
