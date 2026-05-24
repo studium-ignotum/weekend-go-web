@@ -39,20 +39,24 @@
     render();
   }
 
-  prevBtn &&
+  function navigateTo(i) {
+    autoOn = false;
+    go(i);
+  }
+
+  if (prevBtn) {
     prevBtn.addEventListener('click', () => {
-      autoOn = false;
-      go(active - 1);
+      navigateTo(active - 1);
     });
-  nextBtn &&
+  }
+  if (nextBtn) {
     nextBtn.addEventListener('click', () => {
-      autoOn = false;
-      go(active + 1);
+      navigateTo(active + 1);
     });
+  }
   dots.forEach((d, i) =>
     d.addEventListener('click', () => {
-      autoOn = false;
-      go(i);
+      navigateTo(i);
     }),
   );
 
@@ -60,8 +64,7 @@
   slides.forEach((slide, i) => {
     slide.addEventListener('click', () => {
       if (i !== active) {
-        autoOn = false;
-        go(i);
+        navigateTo(i);
       }
     });
   });
@@ -71,20 +74,16 @@
   carousel.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight') {
       e.preventDefault();
-      autoOn = false;
-      go(active + 1);
+      navigateTo(active + 1);
     } else if (e.key === 'ArrowLeft') {
       e.preventDefault();
-      autoOn = false;
-      go(active - 1);
+      navigateTo(active - 1);
     } else if (e.key === 'Home') {
       e.preventDefault();
-      autoOn = false;
-      go(0);
+      navigateTo(0);
     } else if (e.key === 'End') {
       e.preventDefault();
-      autoOn = false;
-      go(total - 1);
+      navigateTo(total - 1);
     }
   });
 
@@ -98,11 +97,10 @@
     { passive: true },
   );
   carousel.addEventListener('touchend', (e) => {
-    if (touchStartX == null) return;
+    if (touchStartX === null) return;
     const dx = e.changedTouches[0].clientX - touchStartX;
     if (Math.abs(dx) > 40) {
-      autoOn = false;
-      go(active + (dx < 0 ? 1 : -1));
+      navigateTo(active + (dx < 0 ? 1 : -1));
     }
     touchStartX = null;
   });
