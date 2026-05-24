@@ -25,5 +25,11 @@
     <symbol id="icon-hamburger" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="currentColor" fill="none" d="M4 6h16M4 12h16M4 18h16"/>
     </symbol>
+    <symbol id="icon-download" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="currentColor" fill="none" d="M12 17V3M6 11l6 6 6-6M19 21H5"/>
+    </symbol>
+    <symbol id="icon-close" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="currentColor" fill="none" d="M18 6L6 18M6 6l12 12"/>
+    </symbol>
   </defs>
 </svg>

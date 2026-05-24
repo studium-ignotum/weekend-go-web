@@ -1,17 +1,23 @@
   <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded">Bỏ qua đến nội dung</a>
 
   <!-- Navigation -->
-  <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border-default">
+  <header
+    class="sticky top-0 z-50 bg-bg-warm/90 backdrop-blur-md border-b border-border-default/80"
+    role="banner"
+  >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <a href="index.html" class="flex items-center gap-2.5">
-          <picture>
-            <source srcset="assets/images/app-icon-72.webp" type="image/webp">
-            <img src="assets/images/app-icon-72.png" alt="Cuối Tuần Đi Đâu" width="72" height="72" class="w-9 h-9 rounded-xl">
-          </picture>
-          <span class="text-lg font-bold text-text-primary">Cuối Tuần Đi Đâu?</span>
+      <div class="flex items-center justify-between h-20">
+        <a href="index.html" class="flex items-center gap-3 group">
+          <img
+            src="assets/images/logo.jpg"
+            alt="Cuối Tuần Đi Đâu"
+            class="w-11 h-11 rounded-xl object-cover shadow-md shadow-primary/10"
+          />
+          <span class="text-xl font-heading font-extrabold tracking-tight text-text-primary"
+            >Cuối Tuần <span class="text-primary">Đi Đâu?</span></span
+          >
         </a>
-        <a href="index.html" class="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1">
+        <a href="index.html" class="text-sm font-medium text-text-secondary hover:text-primary-dark transition-colors flex items-center gap-1">
           <svg class="w-4 h-4" aria-hidden="true">
             <use href="#icon-carousel-prev"/>
           </svg>
@@ -19,4 +25,4 @@
         </a>
       </div>
     </div>
-  </nav>
+  </header>
