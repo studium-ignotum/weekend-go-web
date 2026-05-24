@@ -73,6 +73,19 @@ html {
   border-color: #24a94b !important;
 }
 
+/* Hero map pins: mặc định hiện chấm nhỏ; active (xoay 3s) hoặc hover thì bung ảnh */
+.pin-photo {
+  display: none;
+}
+.pin.is-active .pin-photo,
+.pin:hover .pin-photo {
+  display: flex;
+}
+.pin.is-active .pin-dot,
+.pin:hover .pin-dot {
+  display: none;
+}
+
 /* Venue card fade when filtered out */
 .venue-card {
   transition:
@@ -132,15 +145,65 @@ nav a.is-active::after {
   transform: none;
 }
 
-/* FAQ accordion: show only one icon per <details> state (plus when closed, minus when open) */
-.faq-minus {
+/* FAQ accordion */
+.faq-item {
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.faq-item summary {
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 0.2s ease;
+}
+.faq-item summary::-webkit-details-marker {
   display: none;
 }
-details[open] .faq-plus {
-  display: none;
+.faq-item summary:hover {
+  background-color: #f9fafb;
 }
-details[open] .faq-minus {
-  display: inline-block;
+
+/* Emphasise the open card */
+.faq-item[open] {
+  border-color: #34c759;
+  box-shadow: 0 10px 30px -14px rgba(52, 199, 89, 0.3);
+}
+
+/* Icon wrap: colour shift on open */
+.faq-icon-wrap {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+.faq-item[open] .faq-icon-wrap {
+  background-color: #cff5da;
+  color: #24a94b;
+}
+
+/* Chevron: points up when closed, rotates down when open */
+.faq-chevron {
+  transform: rotate(180deg);
+  transition: transform 0.25s ease;
+}
+.faq-item[open] .faq-chevron {
+  transform: rotate(360deg);
+}
+
+/* Smooth expand / collapse on supporting browsers (graceful instant fallback) */
+@supports (interpolate-size: allow-keywords) {
+  :root {
+    interpolate-size: allow-keywords;
+  }
+  .faq-item::details-content {
+    height: 0;
+    overflow: hidden;
+    transition:
+      height 0.3s ease,
+      content-visibility 0.3s allow-discrete;
+  }
+  .faq-item[open]::details-content {
+    height: auto;
+  }
 }
 
 /* Reduce motion */
