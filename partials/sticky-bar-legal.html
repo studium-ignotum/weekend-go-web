@@ -1,0 +1,38 @@
+  <!-- ====== Mobile Sticky Bar (legal pages — inline-SVG icons, CSP-safe) ====== -->
+  <div
+    id="sticky-bar"
+    class="sticky-bar fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 py-3 px-4 shadow-[0_-4px_12px_-2px_rgba(0,0,0,0.06)] flex items-center justify-between lg:hidden"
+  >
+    <div class="flex items-center gap-3">
+      <img
+        loading="lazy"
+        decoding="async"
+        src="assets/images/logo.jpg"
+        alt=""
+        aria-hidden="true"
+        class="w-10 h-10 rounded-xl object-cover shadow-md shadow-primary/10"
+      />
+      <div class="text-left">
+        <h5 class="font-heading font-extrabold text-xs text-text-primary leading-tight">
+          Cuối Tuần Đi Đâu?
+        </h5>
+        <p class="text-3xs text-gray-500 font-semibold">Gợi ý lộ trình trong 3 phút</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a
+        href="index.html#download"
+        class="px-4 py-2 bg-primary hover:bg-primary-deep text-white text-xs font-heading font-extrabold rounded-lg shadow-sm flex items-center gap-1"
+      >
+        <svg class="w-3.5 h-3.5 shrink-0" aria-hidden="true"><use href="#icon-download"/></svg>
+        Tải ứng dụng
+      </a>
+      <button
+        id="dismiss-sticky"
+        class="w-8 h-8 inline-flex items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 shrink-0"
+        aria-label="Đóng"
+      >
+        <svg class="w-4 h-4 block" aria-hidden="true"><use href="#icon-close"/></svg>
+      </button>
+    </div>
+  </div>
