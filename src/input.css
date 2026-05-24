@@ -67,12 +67,6 @@ html {
   background: #fff !important;
   border-color: #cff5da !important;
 }
-[data-toggle][data-group='city'][data-active='true'] {
-  background: #34c759 !important;
-  color: #fff !important;
-  border-color: #24a94b !important;
-}
-
 /* Hero map pins: mặc định hiện chấm nhỏ; active (xoay 3s) hoặc hover thì bung ảnh */
 .pin-photo {
   display: none;
@@ -92,10 +86,6 @@ html {
     opacity 0.25s ease,
     transform 0.25s ease;
 }
-.venue-card.is-hidden {
-  display: none;
-}
-
 /* Scroll progress bar */
 #scroll-progress {
   position: fixed;
