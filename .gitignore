@@ -7,5 +7,9 @@ node_modules/
 **/.claude/
 test-results/
 playwright-report/
-.husky/
+.husky/_/
 .hoangsa/
+
+# Temp screenshot/artifact files
+_*.png
+_*.js

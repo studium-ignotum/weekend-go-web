@@ -53,11 +53,17 @@ The build script (`scripts/build-html.js`) processes `src/*.src.html` templates:
 ## Testing
 
 ```bash
+npm run test:analytics        # Run app-link analytics behavior tests
 npm run test:visual          # Run visual regression tests
 npm run test:visual:update   # Update screenshot baselines
 ```
 
 Tests run across 4 viewports: mobile (375px), tablet (768px), desktop (1280px), wide (1440px).
+
+Landing-page download links use `data-app-link` plus `data-app-link-placement`
+and emit `app_download_cta_tapped`. Planner detail links use
+`data-plan-web-link` plus `data-plan-web-placement` and emit
+`plan_web_view_opened`.
 
 ## Contributing
 

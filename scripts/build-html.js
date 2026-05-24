@@ -29,6 +29,9 @@ function render(html, file) {
   });
   return out
     .replace(/\{\{APK_VERSION\}\}/g, APK_VERSION)
+    .replace(/\{\{GA_ID\}\}/g, pkg.gaId || '')
+    .replace(/\{\{IOS_URL\}\}/g, pkg.iosUrl || '')
+    .replace(/\{\{ANDROID_URL\}\}/g, pkg.androidUrl || '')
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/^\s*[\r\n]/gm, '');
 }

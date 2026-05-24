@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self';">
+<!-- @include partials/head-top.html -->
   <title>Chính sách Bảo mật - Cuối Tuần Đi Đâu?</title>
   <meta name="description" content="Chính sách bảo mật của Cuối Tuần Đi Đâu — tìm hiểu cách chúng tôi thu thập, sử dụng và bảo vệ dữ liệu cá nhân của bạn và gia đình khi sử dụng ứng dụng gợi ý cuối tuần.">
   <link rel="canonical" href="https://cuoituandidau.vn/privacy.html" />
@@ -22,10 +20,7 @@
   <meta name="twitter:description" content="Tìm hiểu cách chúng tôi thu thập, sử dụng và bảo vệ dữ liệu cá nhân của bạn và gia đình khi sử dụng ứng dụng gợi ý cuối tuần." />
   <meta name="twitter:image" content="https://cuoituandidau.vn/assets/images/og-cover.jpg" />
 
-  <link rel="icon" type="image/png" href="assets/images/favicon.png">
-  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-latin.woff2" crossorigin>
-  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-vietnamese.woff2" crossorigin>
-  <link rel="stylesheet" href="assets/css/styles.css" />
+<!-- @include partials/head-assets.html -->
   <!-- JSON-LD -->
   <script type="application/ld+json">
     {
@@ -61,32 +56,11 @@
 </head>
 <body class="bg-white text-text-primary antialiased">
   <!-- @include partials/icons.svg -->
-  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded">Bỏ qua đến nội dung</a>
-
-  <!-- Navigation -->
-  <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border-default">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <a href="index.html" class="flex items-center gap-2.5">
-          <picture>
-            <source srcset="assets/images/app-icon-72.webp" type="image/webp">
-            <img src="assets/images/app-icon-72.png" alt="Cuối Tuần Đi Đâu" width="72" height="72" class="w-9 h-9 rounded-xl">
-          </picture>
-          <span class="text-lg font-bold text-text-primary">Cuối Tuần Đi Đâu?</span>
-        </a>
-        <a href="index.html" class="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1">
-          <svg class="w-4 h-4" aria-hidden="true">
-            <use href="#icon-carousel-prev"/>
-          </svg>
-          Trang chủ
-        </a>
-      </div>
-    </div>
-  </nav>
+<!-- @include partials/nav-legal.html -->
 
   <!-- Content -->
   <main id="main" class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-    <p class="text-sm text-text-tertiary mb-2">Cập nhật lần cuối: 27 tháng 1, 2025</p>
+    <p class="text-sm text-text-tertiary mb-2">Cập nhật lần cuối: 23 tháng 5, 2026</p>
     <h1 class="text-3xl lg:text-4xl font-bold text-text-primary mb-8">Chính sách Bảo mật</h1>
 
     <div class="prose prose-gray max-w-none space-y-8">
@@ -100,6 +74,7 @@
           <li><strong>Dữ liệu sử dụng:</strong> Lịch sử xem địa điểm, địa điểm đã lưu, đánh giá và bình luận.</li>
           <li><strong>Dữ liệu vị trí:</strong> Vị trí tương đối (cấp thành phố) để gợi ý địa điểm phù hợp. Chúng tôi không theo dõi vị trí chính xác liên tục.</li>
           <li><strong>Dữ liệu thiết bị:</strong> Loại thiết bị, hệ điều hành, phiên bản ứng dụng để hỗ trợ kỹ thuật.</li>
+          <li><strong>Dữ liệu phân tích website:</strong> Khi bạn truy cập website cuoituandidau.vn, chúng tôi sử dụng Google Analytics 4 để thu thập số liệu thống kê ẩn danh về lượt truy cập, trang đã xem, thời gian trên trang, nguồn truy cập, loại trình duyệt và vị trí ở cấp thành phố (xem chi tiết tại mục 7).</li>
         </ul>
       </section>
 
@@ -164,15 +139,30 @@
         </ul>
       </section>
 
-      <!-- 7. Dữ liệu trẻ em -->
+      <!-- 7. Dịch vụ bên thứ ba: Google Analytics -->
       <section>
-        <h2 class="text-xl font-bold text-text-primary mb-3">7. Dữ liệu trẻ em</h2>
+        <h2 class="text-xl font-bold text-text-primary mb-3">7. Dịch vụ bên thứ ba: Google Analytics</h2>
+        <p class="text-text-secondary leading-relaxed">Website của chúng tôi sử dụng <strong>Google Analytics 4</strong> (cung cấp bởi Google LLC) để hiểu cách người dùng tương tác với trang. Dịch vụ này sử dụng cookie và mã định danh tương tự để thu thập dữ liệu sau:</p>
+        <ul class="list-disc list-inside text-text-secondary mt-3 space-y-2">
+          <li>Địa chỉ IP (được Google ẩn danh hoá trước khi lưu trữ).</li>
+          <li>Các trang đã xem, thời gian trên trang, đường dẫn điều hướng.</li>
+          <li>Nguồn truy cập (search, social, direct, referral).</li>
+          <li>Loại thiết bị, trình duyệt, hệ điều hành, độ phân giải màn hình.</li>
+          <li>Vị trí địa lý ở cấp thành phố/quốc gia (suy ra từ IP, không phải GPS).</li>
+        </ul>
+        <p class="text-text-secondary leading-relaxed mt-3">Dữ liệu này được gửi tới máy chủ của Google và xử lý theo <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="text-primary hover:text-primary-dark underline">Chính sách Bảo mật của Google</a>. Chúng tôi chỉ dùng dữ liệu ở dạng tổng hợp, ẩn danh để cải thiện nội dung và trải nghiệm — không kết hợp với dữ liệu tài khoản trong ứng dụng để nhận dạng cá nhân bạn.</p>
+        <p class="text-text-secondary leading-relaxed mt-3"><strong>Cách từ chối:</strong> Bạn có thể tắt theo dõi bằng cách (1) cài tiện ích <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer" class="text-primary hover:text-primary-dark underline">Google Analytics Opt-out Browser Add-on</a>, (2) bật chế độ "Do Not Track" trong trình duyệt, hoặc (3) chặn cookie của trang.</p>
+      </section>
+
+      <!-- 8. Dữ liệu trẻ em -->
+      <section>
+        <h2 class="text-xl font-bold text-text-primary mb-3">8. Dữ liệu trẻ em</h2>
         <p class="text-text-secondary leading-relaxed">Ứng dụng được thiết kế cho phụ huynh, không phải cho trẻ em trực tiếp sử dụng. Chúng tôi chỉ thu thập thông tin cơ bản về trẻ em (độ tuổi) do phụ huynh cung cấp, nhằm mục đích cá nhân hoá gợi ý. Chúng tôi không thu thập tên, hình ảnh hoặc bất kỳ thông tin nhận dạng cá nhân nào khác của trẻ em.</p>
       </section>
 
-      <!-- 8. Thay đổi chính sách -->
+      <!-- 9. Thay đổi chính sách -->
       <section>
-        <h2 class="text-xl font-bold text-text-primary mb-3">8. Thay đổi chính sách</h2>
+        <h2 class="text-xl font-bold text-text-primary mb-3">9. Thay đổi chính sách</h2>
         <p class="text-text-secondary leading-relaxed">Chúng tôi có thể cập nhật Chính sách Bảo mật này theo thời gian. Khi có thay đổi quan trọng, chúng tôi sẽ:</p>
         <ul class="list-disc list-inside text-text-secondary mt-3 space-y-2">
           <li>Thông báo cho bạn qua email hoặc thông báo trong ứng dụng.</li>
@@ -181,9 +171,9 @@
         </ul>
       </section>
 
-      <!-- 9. Liên hệ -->
+      <!-- 10. Liên hệ -->
       <section>
-        <h2 class="text-xl font-bold text-text-primary mb-3">9. Liên hệ</h2>
+        <h2 class="text-xl font-bold text-text-primary mb-3">10. Liên hệ</h2>
         <p class="text-text-secondary leading-relaxed">Nếu bạn có bất kỳ câu hỏi nào về Chính sách Bảo mật này hoặc muốn thực hiện quyền riêng tư của mình, vui lòng liên hệ:</p>
         <p class="text-text-secondary leading-relaxed mt-3">
           <a href="mailto:hello@cuoituandidau.vn" class="text-primary hover:text-primary-dark font-medium underline">hello@cuoituandidau.vn</a>

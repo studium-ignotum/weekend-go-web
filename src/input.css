@@ -42,3 +42,168 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* Planner toggle button states */
+[data-toggle] {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+[data-toggle][data-active='true'] {
+  border-color: #34c759 !important;
+  background: #fff !important;
+  color: #18181b !important;
+  box-shadow:
+    0 4px 6px -1px rgba(52, 199, 89, 0.12),
+    0 0 0 2px rgba(52, 199, 89, 0.1);
+}
+[data-toggle][data-active='true'] .toggle-icon-wrap {
+  background: #34c759 !important;
+  color: #fff !important;
+}
+[data-toggle][data-active='true'] .toggle-icon {
+  color: #34c759 !important;
+}
+[data-toggle][data-active='false']:hover {
+  background: #fff !important;
+  border-color: #cff5da !important;
+}
+/* Hero map pins: mặc định hiện chấm nhỏ; active (xoay 3s) hoặc hover thì bung ảnh */
+.pin-photo {
+  display: none;
+}
+.pin.is-active .pin-photo,
+.pin:hover .pin-photo {
+  display: flex;
+}
+.pin.is-active .pin-dot,
+.pin:hover .pin-dot {
+  display: none;
+}
+
+/* Venue card fade when filtered out */
+.venue-card {
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+/* Scroll progress bar */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, #34c759, #24a94b);
+  z-index: 60;
+  pointer-events: none;
+  transition: width 80ms linear;
+}
+
+/* Nav active section underline */
+nav a.is-active {
+  color: #24a94b;
+}
+nav a.is-active::after {
+  content: '';
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: #34c759;
+  border-radius: 2px;
+  margin-top: 2px;
+}
+
+/* Sticky bar slide-in */
+.sticky-bar {
+  transform: translateY(100%);
+  transition: transform 0.35s ease;
+}
+.sticky-bar.show {
+  transform: translateY(0);
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* FAQ accordion */
+.faq-item {
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.faq-item summary {
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 0.2s ease;
+}
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+.faq-item summary:hover {
+  background-color: #fafafa;
+}
+
+/* Emphasise the open card */
+.faq-item[open] {
+  border-color: #34c759;
+  box-shadow: 0 10px 30px -14px rgba(52, 199, 89, 0.3);
+}
+
+/* Icon wrap: colour shift on open */
+.faq-icon-wrap {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+.faq-item[open] .faq-icon-wrap {
+  background-color: #cff5da;
+  color: #24a94b;
+}
+
+/* Chevron: points up when closed, rotates down when open */
+.faq-chevron {
+  transform: rotate(180deg);
+  transition: transform 0.25s ease;
+}
+.faq-item[open] .faq-chevron {
+  transform: rotate(360deg);
+}
+
+/* Smooth expand / collapse on supporting browsers (graceful instant fallback) */
+@supports (interpolate-size: allow-keywords) {
+  :root {
+    interpolate-size: allow-keywords;
+  }
+  .faq-item::details-content {
+    height: 0;
+    overflow: hidden;
+    transition:
+      height 0.3s ease,
+      content-visibility 0.3s allow-discrete;
+  }
+  .faq-item[open]::details-content {
+    height: auto;
+  }
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
