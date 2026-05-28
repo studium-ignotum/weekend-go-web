@@ -6,20 +6,21 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https://media.cuoituandidau.vn https://randomuser.me https://www.google-analytics.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://unpkg.com; connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self';" />
     <script async src="https://www.googletagmanager.com/gtag/js?id={{GA_ID}}"></script>
     <script src="/assets/js/ga.js"></script>
-    <title>Cuối Tuần Đi Đâu? - Gợi ý cuối tuần cho gia đình</title>
+    <title>Cuối Tuần Đi Đâu? - App gợi ý cuối tuần cho gia đình Việt</title>
     <meta
       name="description"
-      content="Lên kế hoạch cuối tuần trong 3 phút. Gợi ý được chọn lọc theo tuổi con — không phải lướt Facebook hay hỏi group."
+      content="App Cuối Tuần Đi Đâu giúp ba mẹ ở Hà Nội & TP.HCM lên kế hoạch cuối tuần cho gia đình trong 3 phút — gợi ý điểm vui chơi, review địa điểm chọn lọc theo tuổi con."
     />
 
     <!-- Open Graph -->
+    <meta property="og:site_name" content="Cuối Tuần Đi Đâu" />
     <meta
       property="og:title"
-      content="Cuối Tuần Đi Đâu? - Lên kế hoạch cuối tuần trong 3 phút"
+      content="Cuối Tuần Đi Đâu? - App gợi ý cuối tuần cho gia đình Việt"
     />
     <meta
       property="og:description"
-      content="Gợi ý được chọn lọc theo tuổi con — không phải lướt Facebook hay hỏi group."
+      content="Lên kế hoạch cuối tuần cho gia đình trong 3 phút. Gợi ý điểm vui chơi, review địa điểm chọn lọc theo tuổi con — không phải lướt Facebook hay hỏi group."
     />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="vi_VN" />
@@ -28,18 +29,59 @@
       property="og:image"
       content="https://cuoituandidau.vn/assets/images/og-cover.jpg"
     />
+    <meta property="og:image:secure_url" content="https://cuoituandidau.vn/assets/images/og-cover.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Cuối Tuần Đi Đâu - App gợi ý hoạt động cuối tuần cho gia đình Việt" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="Cuối Tuần Đi Đâu? - Lên kế hoạch cuối tuần trong 3 phút"
+      content="Cuối Tuần Đi Đâu? - App gợi ý cuối tuần cho gia đình Việt"
     />
     <meta
       name="twitter:description"
-      content="Gợi ý được chọn lọc theo tuổi con — không phải lướt Facebook hay hỏi group."
+      content="Lên kế hoạch cuối tuần cho gia đình trong 3 phút. Gợi ý điểm vui chơi, review địa điểm chọn lọc theo tuổi con."
     />
     <meta name="twitter:image" content="https://cuoituandidau.vn/assets/images/og-cover.jpg" />
+    <meta name="twitter:image:alt" content="Cuối Tuần Đi Đâu - App gợi ý hoạt động cuối tuần cho gia đình Việt" />
+
+    <!-- Structured data: declare this is a WebSite + MobileApplication so scrapers don't mistake it for a place -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://cuoituandidau.vn/#website",
+          "url": "https://cuoituandidau.vn/",
+          "name": "Cuối Tuần Đi Đâu",
+          "description": "App gợi ý điểm vui chơi cuối tuần cho gia đình Việt — lên kế hoạch trong 3 phút.",
+          "inLanguage": "vi-VN",
+          "publisher": { "@id": "https://cuoituandidau.vn/#organization" }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://cuoituandidau.vn/#organization",
+          "name": "Cuối Tuần Đi Đâu",
+          "url": "https://cuoituandidau.vn/",
+          "logo": "https://cuoituandidau.vn/assets/images/logo.jpg"
+        },
+        {
+          "@type": "MobileApplication",
+          "name": "Cuối Tuần Đi Đâu",
+          "operatingSystem": "iOS, Android",
+          "applicationCategory": "LifestyleApplication",
+          "inLanguage": "vi-VN",
+          "url": "https://cuoituandidau.vn/",
+          "description": "App giúp ba mẹ Việt lên kế hoạch cuối tuần cho gia đình trong 3 phút.",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "VND" }
+        }
+      ]
+    }
+    </script>
 
     <link rel="canonical" href="https://cuoituandidau.vn/" />
     <link rel="icon" type="image/png" href="assets/images/favicon.png" />
@@ -262,7 +304,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                   <i data-lucide="map-pin" class="w-4 h-4 text-primary-deep shrink-0"></i>
-                  <span>Hà Nội &amp; TP.HCM</span>
+                  <span>Hơn 1000 địa điểm</span>
                 </div>
               </div>
             </div>
